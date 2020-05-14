@@ -38,6 +38,3 @@ yad --form --width=420 --text-align=center --center --title="Pat Menu" --text-al
 --field="My Call - $MYCALLSIGN":LBL \
 --button=gtk-quit
 BUT=$?
-if [ $BUT = 0 ] && [ "$AMRRON" = 'no' ]; then
-sudo killall piardopc direwolf kissattach rigctld piARDOP_GUI > /dev/null 2>&1
-fi
