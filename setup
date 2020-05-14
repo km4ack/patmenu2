@@ -5,7 +5,7 @@
 
 
 MYPATH=$HOME/patmenu2
-BKDIR=$HOME/Desktop/pat-bkups
+BKDIR=$HOME/Desktop/config-bkups
 NEWCONFIG=$HOME/Desktop/test.txt
 
 if [ -f $HOME/patmenu/config ]; then
