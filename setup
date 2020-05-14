@@ -17,7 +17,7 @@ MAP=$MAP
 RIGCONTROL=$RIGCONTROL
 ARDOP=$ARDOP
 ARDOPGUI=$ARDOPGUI
-DIREWOLF=DIREWOLF
+DIREWOLF=$DIREWOLF
 KISS=$KISS
 AXP=$AXP
 RIG=$RIG
@@ -30,7 +30,7 @@ EOF
 
 mv $NEWCONFIG $MYPATH/config
 
-#create backup folder and copy any user config files
+#create backup folder and copy any user config files from patmenu1
 mkdir -p $BKDIR
 cp $HOME/patmenu/*config* $BKDIR
 #remove restore script that gets copied with above command
@@ -38,6 +38,11 @@ rm $BKDIR/restore-config
 
 #remove old patmenu
 rm -rf $HOME/patmenu
+
+	#remove old shortcut if exist
+	if [ -f $HOME/Desktop/Pat-Menu ]; then
+	rm $HOME/Desktop/Pat-Menu
+	fi
 
 fi
 
