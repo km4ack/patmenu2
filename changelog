@@ -1,9 +1,10 @@
 
 
-release=0.74
+release=0.75
 
 
 Changelog
+0.75	fix ardop from closing unexpectedly
 	add FLRIG check to auto pat
 0.74	add option to install ruby if needed
 	add gps grid update to manage pat winlink section
