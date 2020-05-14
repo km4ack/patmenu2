@@ -28,6 +28,8 @@ LOG=$LOG
 AMRRON=$AMRRON
 EOF
 
+mv $NEWCONFIG $MYPATH/config
+
 #create backup folder and copy any user config files
 mkdir -p $BKDIR
 cp $HOME/patmenu/*config* $BKDIR
