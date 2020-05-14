@@ -1,0 +1,118 @@
+#!/bin/bash
+
+#This script will download the ardop list to the path set below
+#It is intended to be run by cron daily
+#to keep the list current. km4ack 20181214
+#Hint: create a cron job that reads
+#30 23 * * * /usr/local/bin/getardoplist
+#This script is provided AS IS
+#Feel free to mod for your use
+
+#Two versions of this script exist. One for manual downloads and
+#one for cron downloads. The one for cron has no YAD interface.
+#Cron wouldn't run correctly with YAD in the code. The other file
+#is .getardoplist-cron
+
+TODAY=$(date)
+
+#path where files are located
+#must match path in findardop script
+MYPATH=$HOME/patmenu2/ardop-list/
+
+#my log file
+LOG=$HOME/Documents/mylog.txt
+
+GRIDCK=$(jq .locator $HOME/.wl2k/config.json)
+if [ ${#GRIDCK} -lt 3 ]
+then
+echo "Grid square not set in Pat Configure" | tee -a $LOG
+echo "Distances/Bearings will not be accurate"
+exit
+fi
+
+#make directory if it doesn't exist
+mkdir -p $MYPATH
+
+#set variables for each list
+FILE=$MYPATH'ardoplist.txt'
+EIGHTY=$MYPATH'80mardoplist.txt'
+FORTY=$MYPATH'40mardoplist.txt'
+TWENTY=$MYPATH'20mardoplist.txt'
+THIRTY=$MYPATH'30mardoplist.txt'
+PACKET=$MYPATH'packet.txt'
+
+#check internet connection
+echo "Please wait while we check your internet connection"
+echo "This may take up to a minute"
+wget -q --tries=5 --timeout=10 --spider http://google.com
+if [[ $? -eq 0 ]]; then
+	echo
+
+	echo
+        echo "Please wait while files are download"
+	echo "This may take several minutes"
+	echo "Depending on your internet speed"
+else
+
+	exit
+fi
+#remove old files before downloading new ones
+if	[ -f $THIRTY ]; then
+	rm $THIRTY
+fi
+
+if 	[ -f $FILE ]; then
+	rm $FILE
+fi
+
+if      [ -f $EIGHTY ]; then
+        rm $EIGHTY
+fi
+
+if      [ -f $FORTY ]; then
+        rm $FORTY
+fi
+
+if 	[ -f $TWENTY ]; then
+	rm $TWENTY
+fi
+
+if	[ -f $PACKET ]; then
+	rm $PACKET
+fi
+
+#put date on top line of each file
+echo "List Last Downloaded $(date)" >> $FILE
+echo "List Last Downloaded $(date)" >> $FORTY
+echo "List Last Downloaded $(date)" >> $EIGHTY
+echo "List Last Downloaded $(date)" >> $TWENTY
+echo "List Last Downloaded $(date)" >> $THIRTY
+echo "List Last Downloaded $(date)" >> $PACKET
+
+#download list to individual files.
+DL(){
+pat rmslist -s --mode ardop --force-download >> $FILE 
+pat rmslist -s --band 80m --mode ardop --force-download >> $EIGHTY 
+pat rmslist -s --band 40m --mode ardop --force-download >> $FORTY 
+pat rmslist -s --band 20m --mode ardop --force-download >> $TWENTY 
+pat rmslist -s --band 30m --mode ardop --force-download >> $THIRTY 
+pat rmslist -s --mode packet --force-download >> $PACKET
+}
+DL
+
+if [ -f "$FILE" ]
+then
+echo $TODAY" RMS Gateway list download Success" >> $LOG
+echo;echo "RMS gateway list download success"
+else
+echo $TODAY" RMS Gateway list download FAIL" >> $LOG
+echo;echo "RMS gateway list failed to download"
+fi
+
+
+
+
+
+
+
+
