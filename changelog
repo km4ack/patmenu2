@@ -1,9 +1,15 @@
 
 
-release=0.75
+release=2.0.0
 
 
 Changelog
+2.0.0	Hey!! Where is version 1? Here's the scoop,
+	there is no version 1. We never made it to 
+	version 1 before I did a major overhaul of the
+	code and added a GUI. I needed a way to 
+	differentiate it from the original and announce 
+	the major changes. Hence, Pat Menu 2 :-)
 0.75	fix ardop from closing unexpectedly
 	fix stop modems on exit
 	add FLRIG check to auto pat
