@@ -36,5 +36,9 @@ yad --form --width=420 --text-align=center --center --title="Pat Menu" --text-al
 --field="Manage Pat Winlink":fbtn 'bash -c "kill -USR1 $YAD_PID; /home/pi/patmenu2/manage-pat"' \
 --field="Settings/Config":fbtn 'bash -c "kill -USR1 $YAD_PID; /home/pi/patmenu2/manage-menu"' \
 --field="My Call - $MYCALLSIGN":LBL \
---button=gtk-quit
+--button="QUIT":1
+
 BUT=$?
+if [ $BUT = 1 ] && [ "$AMRRON" = 'no' ]; then
+sudo killall piardopc kissattach direwolf piARDOP_GUI rigctld > /dev/null 2>&1
+fi
