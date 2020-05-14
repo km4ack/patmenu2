@@ -10,25 +10,7 @@ NEWCONFIG=$HOME/Desktop/test.txt
 
 if [ -f $HOME/patmenu/config ]; then
 #get patmenu config file and copy to patmenu2
-source $HOME/patmenu/config
-cat << EOF > $NEWCONFIG 
-MYCALLSIGN=$MYCALLSIGN
-MAP=$MAP
-RIGCONTROL=$RIGCONTROL
-ARDOP=$ARDOP
-ARDOPGUI=$ARDOPGUI
-DIREWOLF=$DIREWOLF
-KISS=$KISS
-AXP=$AXP
-RIG=$RIG
-MODEHF=$MODEHF
-MODE2M=$MODE2M
-PORT=$PORT
-LOG=$LOG
-AMRRON=$AMRRON
-EOF
-
-mv $NEWCONFIG $MYPATH/config
+cp $HOME/patmenu/config $HOME/patmenu2/config
 
 #create backup folder and copy any user config files from patmenu1
 mkdir -p $BKDIR
@@ -40,7 +22,7 @@ rm $BKDIR/restore-config
 rm -rf $HOME/patmenu
 
 	#remove old shortcut if exist
-	if [ -f $HOME/Desktop/Pat-Menu ]; then
+	if [ -L $HOME/Desktop/Pat-Menu ]; then
 	rm $HOME/Desktop/Pat-Menu
 	fi
 
