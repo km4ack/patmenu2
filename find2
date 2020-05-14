@@ -1,0 +1,37 @@
+#!/bin/bash
+
+#FIND-ARDOP
+#20200425 KM4ACK
+#side note: written during covid-19 outbreak of 2020
+
+#######DEV NOTES#############
+#############################
+
+
+#############################
+
+MYPATH=$HOME/patmenu2
+PATMENU=$MYPATH/patmenu
+LOGO=$MYPATH/pmlogo.png
+CURRENT=$(crontab -l | grep getardoplist | awk '{print $2":"$1}')
+
+source $MYPATH/FA-functions
+
+yad --form --width=420 --text="<b>Find Gateways</b> by KM4ACK" --text-align=center --center --title="Find Gateways" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top \
+--text="<b>Find Gateways</b> by KM4ACK" \
+--field="Search for Gateway":fbtn 'bash -c "kill -USR1 $YAD_PID; source /home/pi/patmenu2/FA-functions; GRIDSEARCH"' \
+--field="View Grid Map":fbtn 'bash -c "source /home/pi/patmenu2/FA-functions; MAP"' \
+--field="Download Gateway List":fbtn 'bash -c "kill -USR1 $YAD_PID; source /home/pi/patmenu2/FA-functions; DOWNLIST"' \
+--field="Auto List Download <b>$CURRENT</b>":fbtn 'bash -c "kill -USR1 $YAD_PID; source /home/pi/patmenu2/FA-functions; AUTODOWN"' \
+--field="$LASTDL":LBL \
+--button="Main Menu":1
+
+QUIT=$?
+
+if [ $QUIT = 1 ]; then
+$PATMENU &
+exit
+elif [ $QUIT = 252 ]; then
+exit
+fi

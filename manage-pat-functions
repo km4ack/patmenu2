@@ -1,0 +1,357 @@
+
+MYPATH=$HOME/patmenu2
+MAIN=$MYPATH/./manage-pat
+LOGO=$MYPATH/pmlogo.png
+
+DELETEALIAS(){
+
+PATCONFIG=$HOME/.wl2k/config.json
+OUTFILE=/run/user/1000/currentlist.txt
+TEMP=/run/user/1000/patconfig.txt
+WHO=$(whoami)
+
+jq .connect_aliases $PATCONFIG | sed '/^}/d' | sed '/^{/d' | sed 's/^ *//g' > $OUTFILE
+
+cat $OUTFILE
+
+sed -i 's/"//g' $OUTFILE
+sed -i 's/,//g' $OUTFILE
+sed -i 's/://' $OUTFILE
+echo;echo
+cat $OUTFILE | awk 'OFS="\n" {print $1, $2}'
+
+
+
+REMOVE=$(PARSER='OFS="\n" {print $1, $2}'
+
+tail -10 $OUTFILE | awk "$PARSER" | \
+yad --title="Current Alias List" --width=1100 --height=500 \
+    --image $LOGO --window-icon=$LOGO --image-on-top \
+    --center --list --text="<b>Select Alias to Delete</b>" \
+    --column Call --column INFO \
+    --button="Delete Alias":2 \
+    --button="Cancel":1)
+BUT=$?
+if [ $BUT = 1 ]; then
+$MAIN &
+exit
+elif [ $BUT = 252 ]; then
+exit
+fi
+RCALL=$(echo $REMOVE | awk -F "|" '{print $1}')
+RCALL1=$(echo "\"$RCALL\"")
+	#check something was selected
+	if [ -z "$RCALL" ]; then
+	yad --title="No Selection" --width=300 --height=100 \
+    	--image $LOGO --window-icon=$LOGO --image-on-top \
+    	--center --form --text="No station was selected\r Please try again" \
+    	--button=gtk-ok 
+	$MAIN &
+	exit
+	fi
+jq 'del(.connect_aliases.'$RCALL1')' $PATCONFIG > $TEMP
+cp $TEMP $PATCONFIG
+rm $TEMP $OUTFILE
+sudo killall pat
+sudo systemctl start pat@$WHO
+yad --title="Alias Deleted" --width=400 --height=200 \
+--image $LOGO --window-icon=$LOGO --image-on-top \
+--center --text="$RCALL1 Alias DELETED" \
+--button=gtk-ok
+$MAIN &
+exit
+}
+
+LOGIN(){
+CONFIG=$HOME/.wl2k/config.json
+WHO=$(whoami)
+
+
+USER=$(yad --form --width=420 --text-align=center --center --title="Pat Log In/Out" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Pat Log In/Out</b> by KM4ACK" \
+--field="Call Sign" "" \
+--field="Winlink Password" "" \
+--field="Six Character Grid Square" "EM65TV" \
+--button="Log In":2 \
+--button="Log Out":3 \
+--button="Cancel":1)
+BUT=$?
+
+if [ $BUT = 252 ]; then
+echo "true exit"
+exit
+elif [ $BUT = 1 ]; then
+echo "cancel"
+elif [ $BUT = 2 ]; then
+echo "Log IN"
+CALLSIGN=$(echo $USER | awk -F "|" '{print $1}')
+CALLSIGN=$(echo "${CALLSIGN^^}")
+PASS=$(echo $USER | awk -F "|" '{print $2}')
+GRID=$(echo $USER | awk -F "|" '{print $3}')
+GRID=$(echo "${GRID^^}")
+echo "$CALLSIGN $PASS $GRID"
+#set callsign
+sed -i "s/\"mycall\": \".*\",/\"mycall\": \"$CALLSIGN\",/" $CONFIG
+#set password
+sed -i "s/\"secure_login_password\": \".*\",/\"secure_login_password\": \"$PASS\",/" $CONFIG
+#set locator
+sed -i "s/\"locator\": \".*\",/\"locator\": \"$GRID\",/" $CONFIG
+sudo killall pat
+sudo systemctl start pat@$WHO
+elif [ $BUT = 3 ]; then
+echo "Log OUT"
+CALLSIGN=N0CALL
+PASS=""
+GRID=""
+#set callsign
+sed -i "s/\"mycall\": \".*\",/\"mycall\": \"$CALLSIGN\",/" $CONFIG
+#set password
+sed -i "s/\"secure_login_password\": \".*\",/\"secure_login_password\": \"$PASS\",/" $CONFIG
+#set locator
+sed -i "s/\"locator\": \".*\",/\"locator\": \"$GRID\",/" $CONFIG
+sudo killall pat
+sudo systemctl start pat@$WHO
+fi
+
+}
+
+GPSGRID(){
+CONFIG=$HOME/.wl2k/config.json
+
+if ! hash ruby2.3 2>/dev/null; then
+echo "Ruby Not found on system"
+yad --form --width=300 --text-align=center --center --title="Ruby not Found" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="Ruby is needed to read GPS data but not found installed on your system. Would you like to install it now?" \
+--button="Install Ruby":2 \
+--button="Cancel":1
+BUT=$?
+	if [ $BUT = 1 ]; then
+	$MAIN &
+	exit
+	elif [ $BUT = 2 ]; then
+	INSTALLRUBY(){
+	sudo apt-get update
+	sudo apt-get install -y ruby2.3
+	sudo gem install gpsd_client
+	sudo gem install maidenhead
+	}
+	INSTALLRUBY | yad --center --progress --pulsate --auto-close --no-buttons --text-align=center \
+--text="Installing Ruby. This will take several minutes\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the install."
+	fi
+fi
+
+yad --center --timeout=5 --timeout-indicator=top \
+--auto-close --no-buttons --text="Getting grid from GPS" &
+
+NEWGRID=$($MYPATH/getgrid | cut -b 1-6)
+
+if [ "$NEWGRID" = 'JJ00aa' ]; then
+NEWGRID="GPS READ ERROR or NO LOCK"
+yad --form --width=400 --text-align=center --center --title="GPS ERROR" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Update Pat Grid</b> by KM4ACK\r\rGPS ERROR" \
+--field="Grid read from GPS":RO "$NEWGRID" \
+--button=gtk-quit
+$MAIN &
+exit
+fi
+
+yad --form --width=200 --text-align=center --center --title="Update Grid" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Update Pat Grid</b> by KM4ACK" \
+--field="Grid read from GPS":RO "$NEWGRID" \
+--button="Update Pat":2 \
+--button="Cancel":1
+BUT=$?
+if [ $BUT = 1 ]; then
+$MAIN &
+exit
+elif [ $BUT = 2 ]; then
+sed -i "s/\"locator\": \".*\",/\"locator\": \"$NEWGRID\",/" $CONFIG
+yad --center --timeout=2 --timeout-indicator=top \
+--auto-close --no-buttons --text="Grid Square Updated"
+$MAIN &
+exit
+fi
+}
+
+
+
+
+EMAILBKUP(){
+CONFIG=$HOME/.wl2k/config.json
+WHO=$(whoami)
+CALL=$(cat $HOME/.wl2k/config.json | grep -m 1 mycall | sed 's/\"mycall\": \"//' | sed 's/\",//' | sed -e 's/^\s*//' | tr '[:lower:]' '[:upper:]')
+BKUPTIME=$(date +%Y%d%m-%H%M)
+
+BACKUP=$(yad --form --width=420 --text-align=center --center --title="Email Backup" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Email Backup</b> by KM4ACK" \
+--field="Backup Directory":DIR \
+--button="Backup Emails":2 \
+--button="Cancel":1)
+BUT=$?
+
+if [ $BUT = 252 ]; then
+exit
+elif [ $BUT = 1 ]; then
+$MAIN
+exit
+fi
+
+DIR=$(echo $BACKUP | awk -F "|" '{print $1}')
+
+cp -r $HOME/.wl2k/mailbox/$CALL $DIR/email.bkup.$BKUPTIME
+
+if [ -d $DIR/email.bkup.$BKUPTIME ]; then
+yad --center --text="Backup Complete" \
+--button=gtk-ok
+$MAIN &
+exit
+fi
+}
+
+
+EMAILRESTORE(){
+MYPATH=$HOME/dev/patmenu2
+CONFIG=$HOME/.wl2k/config.json
+WHO=$(whoami)
+CALL=$(cat $HOME/.wl2k/config.json | grep -m 1 mycall | sed 's/\"mycall\": \"//' | sed 's/\",//' | sed -e 's/^\s*//' | tr '[:lower:]' '[:upper:]')
+
+RESTORE=$(yad --form --width=420 --text-align=center --center --title="Email Restore" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Email Restore</b> by KM4ACK" \
+--field="Restore Directory":DIR \
+--button="Restore Emails":2 \
+--button="Cancel":1)
+BUT=$?
+
+if [ $BUT = 252 ]; then
+exit
+elif [ $BUT = 1 ]; then
+$MAIN
+exit
+fi
+
+DIR=$(echo $RESTORE | awk -F "|" '{print $1}')
+DIRCHECK=$(ls $DIR)
+COUNT=${#DIRCHECK}
+if [ "$COUNT" = 19 ]; then
+cp $DIR/archive/* $HOME/.wl2k/mailbox/$CALL/archive/
+cp $DIR/in/* $HOME/.wl2k/mailbox/$CALL/in/
+cp $DIR/out/* $HOME/.wl2k/mailbox/$CALL/out/
+cp $DIR/sent/* $HOME/.wl2k/mailbox/$CALL/sent/
+yad --form --width=420 --text-align=center --center --title="Email Restore" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Email Restore</b> by KM4ACK\r\r<b>RESTORE COMPLETE</b>" \
+--button=gtk-ok
+else
+yad --form --width=420 --text-align=center --center --title="Email Restore" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Email Restore</b> by KM4ACK\r\r<b>Not a valid restore directory</b>" \
+--button=gtk-ok
+fi
+exit
+
+}
+
+
+
+
+RESTORECONFIG(){
+CONFIG=$HOME/.wl2k/config.json
+OUTFILE=/run/user/1000/config.list
+WHO=$(whoami)
+
+ls $HOME/.wl2k/ | grep .bkup > $OUTFILE
+
+INFO=$(PARSER='OFS="\n" {print $1}'
+
+tail -10 $OUTFILE | awk "$PARSER" | \
+yad --title="Restore Config" --width=1100 --height=500 \
+    --image $LOGO --window-icon=$LOGO --image-on-top \
+    --center --list --text="Choose File to Restore" \
+    --column File-to-Restore \
+    --button="Cancel":1 \
+    --button="Restore File":2)
+BUT=$?
+
+if [ $BUT = 252 ]; then
+exit
+elif [ $BUT = 1 ]; then
+$MAIN
+exit
+fi
+FILE=$(echo $INFO | awk -F "|" '{print $1}')
+cp $HOME/.wl2k/$FILE $CONFIG
+sudo killall pat
+sudo systemctl start pat@$WHO
+yad --form --width=420 --text-align=center --center --title="Config Restore" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Config Restore</b> by KM4ACK\r\r<b>RESTROE COMPLETE</b>" \
+--button=gtk-ok
+$MAIN
+
+}
+
+BKUPCONFIG(){
+CONFIG=$HOME/.wl2k/config.json
+WHO=$(whoami)
+DATE=$(date +%d%b%Y-%H%M)
+
+yad --form --width=420 --text-align=center --center --title="Backup Config" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Backup Pat Config</b> by KM4ACK" \
+--button="Backup Config":2 \
+--button="Main Menu":1
+BUT=$?
+if [ $BUT = 1 ]; then
+$MAIN &
+exit
+elif [ $BUT = 252 ]; then
+exit
+elif [ $BUT = 2 ]; then
+echo "Backing up file"
+BKUPCONFIG=config.$DATE.bkup
+cp $CONFIG $HOME/.wl2k/$BKUPCONFIG
+yad --form --width=420 --text-align=center --center --title="Config Backup" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Config File Backup</b> by KM4ACK\r\r<b>Backup COMPLETE</b>" \
+--button=gtk-ok
+fi
+$MAIN
+}
+
+SPEED(){
+CONFIG=$HOME/.wl2k/config.json
+CURRENT=$(cat $CONFIG | grep -i max | sed 's/"Max":\ //' | tr -d "[:blank:]")
+WHO=$(whoami)
+NEW=$(yad --form --width=320 --text-align=center --center --title="Speed" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Current ARDOP Speed is $CURRENT</b>" \
+--field="Set ARDOP Speed to":CB "200|500|1000|2000" \
+--button="Cancel":1 \
+--button="Set Speed":2)
+BUT=$?
+if [ $BUT = 1 ]; then
+$MAIN &
+exit
+elif [ $BUT = 252 ]; then
+exit
+fi
+NEW=$(echo $NEW | awk -F "|" '{print $1}')
+
+sed -i "s/\"Max\":.*/ \"Max\": $NEW/" $CONFIG
+sudo killall pat
+sudo systemctl start pat@$WHO
+yad --form --width=320 --text-align=center --center --title="Speed" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>ARDOP Speed set to $NEW</b>" \
+--button=gtk-ok
+$MAIN &
+exit
+}
+
+

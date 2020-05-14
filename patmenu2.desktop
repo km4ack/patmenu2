@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Pat Menu
+GenericName=Amateur Radio Digital Modem
+Comment=Amateur Radio Sound Card Communications
+Exec=/home/pi/patmenu2/patmenu
+Icon=/home/pi/patmenu2/pmlogo.png
+Terminal=false
+Type=Application
+Categories=Network;HamRadio;

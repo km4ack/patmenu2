@@ -1,0 +1,146 @@
+
+
+MYPATH=$HOME/patmenu2
+LOGO=$MYPATH/pmlogo.png
+MAIN=$MYPATH/./patmenu
+
+AUTOPAT(){
+
+source $MYPATH/config
+if [ $RIGCONTROL == 'no' ]
+then
+
+yad --title="NO RIG CONTROL" --width=400 --height=100 \
+    --image $LOGO --window-icon=$LOGO --image-on-top --text-align=center \
+    --center --form --text="\r\r\r\rRig Control is needed for auto pat.\rPlease configure rig control and try again. \
+    \rRig control can be configured using\r<b>Manage Pat Menu</b>"
+    --button=gtk-ok
+$MAIN &
+exit
+fi
+
+
+MIN="50|100|150|200|250|300|350|400|450|500|550|600|650|700|750|800|850|900|950|1000"
+MAX="500|550|600|650|700|750|800|850|900|950|1000|1500|2000|2500|3000"
+INFO=$(yad --form --width=420 --text-align=center --center --title="Pat Auto" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Pat Auto Connect</b> by KM4ACK" \
+--field="Band":CB "20|30|40|80" \
+--field="Minimum Distance":CBE "$MIN" \
+--field="Maximum Distance":CBE "$MAX" \
+--button="Start Connection":2 \
+--button="Cancel":1)
+BUT=$?
+if [ "$BUT" = 1 ]; then
+$MAIN
+exit
+fi
+
+BAND=$(echo $INFO | awk -F "|" '{print $1}')
+MIN=$(echo $INFO | awk -F "|" '{print $2}')
+MAX=$(echo $INFO | awk -F "|" '{print $3}')
+
+if [ -z "$MIN" ]; then
+MIN=0
+fi
+
+if [ -z "$MAX" ]; then
+MAX=0
+fi
+
+
+if [ "$MIN" -gt "$MAX" ]; then
+yad --form --width=420 --text-align=center --center --title="Pat Auto" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Pat Auto Connect</b> by KM4ACK \r\rMinimum distance can't be greater\rthan maximum distance.\rTry again" \
+--button=gtk-ok
+AUTOPAT
+fi 
+echo "Band = $BAND"
+echo "MIN = $MIN"
+echo "MAX = $MAX"
+
+lxterminal -e $MYPATH/autopat $MAX $BAND $MIN
+$MAIN
+}
+
+
+SETTINGS(){
+source $MYPATH/config
+CONFIGTMP=$MYPATH/config.temp
+CONFIG=$MYPATH/config
+
+SETTINGS=$(yad --form --width=600 --text-align=center --center --title="Pat Menu Settings" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Pat Menu Settings</b> by KM4ACK" \
+--field="Call Sign" "$MYCALLSIGN" \
+--field="MAP":CB "usa|world" \
+--field="Rig Control":CB "no|yes" \
+--field="ARDOP Command" "$ARDOP" \
+--field="ARDOP GUI Command" "$ARDOPGUI" \
+--field="Direwolf Command" "$DIREWOLF" \
+--field="KISS Command" "$KISS" \
+--field="AX25 Port" "$AXP" \
+--field="Rig Control Command" "$RIG" \
+--field="HF Mode for Radio" "$MODEHF" \
+--field="2M Mode for Radio" "$MODE2M" \
+--field="Pat Port" "$PORT" \
+--field="Log File Location" "$LOG" \
+--field="AmRRON":CB "no|yes" \
+--button="Update":2 \
+--button="Cancel":1)
+BUT=$?
+if [ $BUT = 1 ]; then
+$MAIN
+elif [ $BUT = 252 ]; then
+exit
+elif [ $BUT = 2 ]; then
+MYCALLSIGN=$(echo $SETTINGS | awk -F "|" '{print $1}')
+MAP=$(echo $SETTINGS | awk -F "|" '{print $2}')
+RIGCONTROL=$(echo $SETTINGS | awk -F "|" '{print $3}')
+ARDOP=$(echo $SETTINGS | awk -F "|" '{print $4}')
+ARDOPGUI=$(echo $SETTINGS | awk -F "|" '{print $5}')
+DIREWOLF=$(echo $SETTINGS | awk -F "|" '{print $6}')
+KISS=$(echo $SETTINGS | awk -F "|" '{print $7}')
+AXP=$(echo $SETTINGS | awk -F "|" '{print $8}')
+RIG=$(echo $SETTINGS | awk -F "|" '{print $9}')
+MODEHF=$(echo $SETTINGS | awk -F "|" '{print $10}')
+MODE2M=$(echo $SETTINGS | awk -F "|" '{print $11}')
+PORT=$(echo $SETTINGS | awk -F "|" '{print $12}')
+LOG=$(echo $SETTINGS | awk -F "|" '{print $13}')
+AMRRON=$(echo $SETTINGS | awk -F "|" '{print $14}')
+
+echo "#Config file for Pat Menu" > $CONFIGTMP
+echo "#20200429 KM4ACK" >> $CONFIGTMP
+echo "MYCALLSIGN=$MYCALLSIGN" >> $CONFIGTMP
+echo "MAP=$MAP" >> $CONFIGTMP
+echo "RIGCONTROL=$RIGCONTROL" >> $CONFIGTMP
+echo "ARDOP=\"$ARDOP\"" >> $CONFIGTMP
+echo "ARDOPGUI=\"$ARDOPGUI\"" >> $CONFIGTMP
+echo "DIREWOLF=\"$DIREWOLF\"" >> $CONFIGTMP
+echo "KISS=\"$KISS\"" >> $CONFIGTMP
+echo "AXP=$AXP" >> $CONFIGTMP
+echo "RIG=\"$RIG\"" >> $CONFIGTMP
+echo "MODEHF=$MODEHF" >> $CONFIGTMP
+echo "MODE2M=$MODE2M" >> $CONFIGTMP
+echo "PORT=$PORT" >> $CONFIGTMP
+echo "LOG=$LOG" >> $CONFIGTMP
+echo "AMRRON=$AMRRON" >> $CONFIGTMP
+cp $CONFIGTMP $CONFIG
+rm $CONFIGTMP
+$MAIN &
+exit
+fi
+}
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,249 @@
+
+
+MYPATH=$HOME/patmenu2
+MAIN=$MYPATH/./manage-menu
+LOGO=$MYPATH/pmlogo.png
+
+NEWCONFIG(){
+source $MYPATH/config
+CONFIGTMP=$MYPATH/config.temp
+
+SETTINGS=$(yad --form --width=600 --text-align=center --center --title="Pat Menu Settings" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Pat Menu Settings</b> by KM4ACK" \
+--field="Call Sign" "$MYCALLSIGN" \
+--field="MAP":CB "usa|world" \
+--field="Rig Control":CB "no|yes" \
+--field="ARDOP Command" "$ARDOP" \
+--field="ARDOP GUI Command" "$ARDOPGUI" \
+--field="Direwolf Command" "$DIREWOLF" \
+--field="KISS Command" "$KISS" \
+--field="AX25 Port" "$AXP" \
+--field="Rig Control Command" "$RIG" \
+--field="HF Mode for Radio" "$MODEHF" \
+--field="2M Mode for Radio" "$MODE2M" \
+--field="Pat Port" "$PORT" \
+--field="Log File Location" "$LOG" \
+--field="AmRRON":CB "no|yes" \
+--button="Create":2 \
+--button="Cancel":1)
+BUT=$?
+if [ $BUT = 1 ]; then
+$MAIN
+elif [ $BUT = 252 ]; then
+exit
+elif [ $BUT = 2 ]; then
+MYCALLSIGN=$(echo $SETTINGS | awk -F "|" '{print $1}')
+MAP=$(echo $SETTINGS | awk -F "|" '{print $2}')
+RIGCONTROL=$(echo $SETTINGS | awk -F "|" '{print $3}')
+ARDOP=$(echo $SETTINGS | awk -F "|" '{print $4}')
+ARDOPGUI=$(echo $SETTINGS | awk -F "|" '{print $5}')
+DIREWOLF=$(echo $SETTINGS | awk -F "|" '{print $6}')
+KISS=$(echo $SETTINGS | awk -F "|" '{print $7}')
+AXP=$(echo $SETTINGS | awk -F "|" '{print $8}')
+RIG=$(echo $SETTINGS | awk -F "|" '{print $9}')
+MODEHF=$(echo $SETTINGS | awk -F "|" '{print $10}')
+MODE2M=$(echo $SETTINGS | awk -F "|" '{print $11}')
+PORT=$(echo $SETTINGS | awk -F "|" '{print $12}')
+LOG=$(echo $SETTINGS | awk -F "|" '{print $13}')
+AMRRON=$(echo $SETTINGS | awk -F "|" '{print $14}')
+
+NAME=$(yad --form --width=600 --text-align=center --center --title="Name?" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Pat Menu Settings</b> by KM4ACK" \
+--field="New Config Name")
+BUT=$?
+if [ $BUT = 1 ]; then
+$MAIN &
+exit
+else
+NEWCONFIG=$(echo $NAME | awk -F "|" '{print $1}')
+fi
+
+#NEWCONFIG=$(echo $SETTINGS | awk -F "|" '{print $15}')
+#NEWCONFIG=$(echo $NEWCONFIG | tr -d "[:blank:]")
+NEWCONFIG=$(echo $NEWCONFIG | sed 's/ /./g')
+NEWCONFIG=$NEWCONFIG.config
+
+echo "#Config file for Pat Menu" > $CONFIGTMP
+echo "#20200429 KM4ACK" >> $CONFIGTMP
+echo "MYCALLSIGN=$MYCALLSIGN" >> $CONFIGTMP
+echo "MAP=$MAP" >> $CONFIGTMP
+echo "RIGCONTROL=$RIGCONTROL" >> $CONFIGTMP
+echo "ARDOP=\"$ARDOP\"" >> $CONFIGTMP
+echo "ARDOPGUI=\"$ARDOPGUI\"" >> $CONFIGTMP
+echo "DIREWOLF=\"$DIREWOLF\"" >> $CONFIGTMP
+echo "KISS=\"$KISS\"" >> $CONFIGTMP
+echo "AXP=$AXP" >> $CONFIGTMP
+echo "RIG=\"$RIG\"" >> $CONFIGTMP
+echo "MODEHF=$MODEHF" >> $CONFIGTMP
+echo "MODE2M=$MODE2M" >> $CONFIGTMP
+echo "PORT=$PORT" >> $CONFIGTMP
+echo "LOG=$LOG" >> $CONFIGTMP
+echo "AMRRON=$AMRRON" >> $CONFIGTMP
+CHECKFILE=$(ls $MYPATH | grep $NEWCONFIG)
+if [ -z "$CHECKFILE" ];then
+cp $CONFIGTMP $MYPATH/$NEWCONFIG
+rm $CONFIGTMP
+else
+echo "FILE ALREADY EXISTS"					######################
+yad --form --width=600 --text-align=center --center --title="Pat Menu Settings" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="\r\rFile already exist!\rOverwrite existing config file?" \
+--button="Yes":2 \
+--button="No":1
+BUT=$?
+	if [ $BUT = 1 ]; then
+	$MAIN &
+	exit
+	elif [ $BUT = 2 ]; then
+	cp $CONFIGTMP $MYPATH/$NEWCONFIG
+	rm $CONFIGTMP	
+	fi
+
+fi
+yad --title="Config Created" --width=400 --height=200 \
+--image $LOGO --window-icon=$LOGO --image-on-top \
+--center --text="$NEWCONFIG created\r\r<b>Don't forget to load the new config file</b>" \
+--button=gtk-ok
+$MAIN &
+exit
+fi
+}
+
+LOADCONFIG(){
+OUTFILE=/run/user/1000/configlist.tmp
+
+ls $MYPATH/ | grep .config > $OUTFILE
+
+INFO=$(PARSER='OFS="\n" {print $1}'
+
+tail -10 $OUTFILE | awk "$PARSER" | \
+yad --title="Load Config" --width=400 --height=500 \
+    --image $LOGO --window-icon=$LOGO --image-on-top \
+    --center --list --text="Choose Config File to load" \
+    --column Config-files \
+    --button="Cancel":1 \
+    --button="Load Config File":2)
+BUT=$?
+NEWCONFIG=$(echo $INFO | awk -F "|" '{print $1}')
+echo $NEWCONFIG
+echo $BUT
+
+if [ $BUT = 252 ]; then
+exit
+elif [ $BUT = 1 ]; then
+$MAIN
+exit
+elif [ $BUT = 2 ]; then
+	if [ -z $NEWCONFIG ]; then
+	$MAIN &
+	exit
+	else
+	cp $MYPATH/$NEWCONFIG $MYPATH/config
+	rm $OUTFILE
+	yad --title="Config Loaded" --width=400 --height=200 \
+        --image $LOGO --window-icon=$LOGO --image-on-top \
+	--center --text="$NEWCONFIG loaded" \
+	--button=gtk-ok
+	$MAIN &
+	exit
+	fi
+fi
+}
+
+CURRENTCONFIG(){
+source $MYPATH/config
+CONFIGTMP=$MYPATH/config.temp
+CONFIG=$MYPATH/config
+
+if [ "$MAP" = 'usa' ]; then
+MAP="usa|world"
+else
+MAP="world|usa"
+fi
+
+if [ "$RIGCONTROL" = 'yes' ]; then
+RIGCONTROL="yes|no"
+else
+RIGCONTROL="no|yes"
+fi
+
+if [ "$AMRRON" = 'yes' ]; then
+AMRRON="yes|no"
+else
+AMRRON="no|yes"
+fi
+
+SETTINGS=$(yad --form --width=600 --text-align=center --center --title="Pat Menu Settings" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Pat Menu Settings</b> by KM4ACK" \
+--field="Call Sign" "$MYCALLSIGN" \
+--field="MAP":CB "$MAP" \
+--field="Rig Control":CB "$RIGCONTROL" \
+--field="ARDOP Command" "$ARDOP" \
+--field="ARDOP GUI Command" "$ARDOPGUI" \
+--field="Direwolf Command" "$DIREWOLF" \
+--field="KISS Command" "$KISS" \
+--field="AX25 Port" "$AXP" \
+--field="Rig Control Command" "$RIG" \
+--field="HF Mode for Radio" "$MODEHF" \
+--field="2M Mode for Radio" "$MODE2M" \
+--field="Pat Port" "$PORT" \
+--field="Log File Location" "$LOG" \
+--field="AmRRON":CB "$AMRRON" \
+--button="Update":2 \
+--button="Cancel":1)
+BUT=$?
+if [ $BUT = 1 ]; then
+$MAIN
+elif [ $BUT = 252 ]; then
+exit
+elif [ $BUT = 2 ]; then
+MYCALLSIGN=$(echo $SETTINGS | awk -F "|" '{print $1}')
+MAP=$(echo $SETTINGS | awk -F "|" '{print $2}')
+RIGCONTROL=$(echo $SETTINGS | awk -F "|" '{print $3}')
+ARDOP=$(echo $SETTINGS | awk -F "|" '{print $4}')
+ARDOPGUI=$(echo $SETTINGS | awk -F "|" '{print $5}')
+DIREWOLF=$(echo $SETTINGS | awk -F "|" '{print $6}')
+KISS=$(echo $SETTINGS | awk -F "|" '{print $7}')
+AXP=$(echo $SETTINGS | awk -F "|" '{print $8}')
+RIG=$(echo $SETTINGS | awk -F "|" '{print $9}')
+MODEHF=$(echo $SETTINGS | awk -F "|" '{print $10}')
+MODE2M=$(echo $SETTINGS | awk -F "|" '{print $11}')
+PORT=$(echo $SETTINGS | awk -F "|" '{print $12}')
+LOG=$(echo $SETTINGS | awk -F "|" '{print $13}')
+AMRRON=$(echo $SETTINGS | awk -F "|" '{print $14}')
+
+echo "#Config file for Pat Menu" > $CONFIGTMP
+echo "#20200429 KM4ACK" >> $CONFIGTMP
+echo "MYCALLSIGN=$MYCALLSIGN" >> $CONFIGTMP
+echo "MAP=$MAP" >> $CONFIGTMP
+echo "RIGCONTROL=$RIGCONTROL" >> $CONFIGTMP
+echo "ARDOP=\"$ARDOP\"" >> $CONFIGTMP
+echo "ARDOPGUI=\"$ARDOPGUI\"" >> $CONFIGTMP
+echo "DIREWOLF=\"$DIREWOLF\"" >> $CONFIGTMP
+echo "KISS=\"$KISS\"" >> $CONFIGTMP
+echo "AXP=$AXP" >> $CONFIGTMP
+echo "RIG=\"$RIG\"" >> $CONFIGTMP
+echo "MODEHF=$MODEHF" >> $CONFIGTMP
+echo "MODE2M=$MODE2M" >> $CONFIGTMP
+echo "PORT=$PORT" >> $CONFIGTMP
+echo "LOG=$LOG" >> $CONFIGTMP
+echo "AMRRON=$AMRRON" >> $CONFIGTMP
+cp $CONFIGTMP $CONFIG
+rm $CONFIGTMP
+$MAIN &
+exit
+fi
+}
+
+
+
+
+
+
+
+
+
+

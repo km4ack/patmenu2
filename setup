@@ -1,0 +1,51 @@
+#!/bin/bash
+
+#install script patmenu2
+#20200511 km4ack
+
+
+MYPATH=$HOME/patmenu2
+BKDIR=$HOME/Desktop/pat-bkups
+NEWCONFIG=$HOME/Desktop/test.txt
+
+if [ -f $HOME/patmenu/config ]; then
+#get patmenu config file and copy to patmenu2
+source $HOME/patmenu/config
+cat << EOF > $NEWCONFIG 
+MYCALLSIGN=$MYCALLSIGN
+MAP=$MAP
+RIGCONTROL=$RIGCONTROL
+ARDOP=$ARDOP
+ARDOPGUI=$ARDOPGUI
+DIREWOLF=DIREWOLF
+KISS=$KISS
+AXP=$AXP
+RIG=$RIG
+MODEHF=$MODEHF
+MODE2M=$MODE2M
+PORT=$PORT
+LOG=$LOG
+AMRRON=$AMRRON
+EOF
+
+#create backup folder and copy any user config files
+mkdir -p $BKDIR
+cp $HOME/patmenu/*config* $BKDIR
+#remove restore script that gets copied with above command
+rm $BKDIR/restore-config
+
+#remove old patmenu
+rm -rf $HOME/patmenu
+
+fi
+
+
+#copy new desktop link 
+sudo cp $MYPATH/patmenu2.desktop /usr/share/applications/patmenu.desktop
+
+#download RMS List
+$MYPATH/getardoplist
+
+#remove this script
+rm $MYPATH/setup
+

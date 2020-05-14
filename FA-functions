@@ -1,0 +1,273 @@
+#functions file for find ardop
+#20200425 km4ack
+
+MYPATH=$HOME/patmenu2
+MAIN=$MYPATH/./find2
+CONFIG=$HOME/.wl2k/config.json
+TEMP=$HOME/patmenu2/tempconfig.txt
+TODAY=$(date +%Y%m%d-%R)
+WHO=$(whoami)
+LASTDL=$(cat $MYPATH/ardop-list/ardoplist.txt | head -1)
+LOGO=$MYPATH/pmlogo.png
+
+source $MYPATH/config
+
+
+
+#--------------------------------
+#	MANUAL Download List
+#--------------------------------
+DOWNLIST(){
+$MYPATH/getardoplist
+$MAIN &
+exit
+}
+
+
+#--------------------------------
+#	AUTO Download List
+#--------------------------------
+AUTODOWN(){
+FILE=/run/user/1000/cronbkup.txt
+crontab -l > $FILE
+HOURS=00,01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,17,18,19,20,21,22,23
+MINS=00,15,30,45
+
+TEST=$(yad --center --wrap --width=350 --title="Auto Download" --text-align=center \
+--text="Please choose the time you would like to download the gateway list everyday" \
+--image $LOGO --window-icon=$LOGO --image-on-top \
+--button="Update:2" \
+--button="Cancel:1" \
+--form --separator="," --item-separator="," \
+--field="Choose the hour":CB $HOURS \
+--field="Choose the minutes":CB $MINS \ 
+)
+
+rc=$?
+if [[ $rc -eq 2 ]]; then
+echo "Updating Cron"
+HOUR=$(echo $TEST | awk -F ',' '{print $1}')
+MIN=$(echo $TEST | awk -F ',' '{print $2}')
+sed -i '/getardoplist/d' $FILE
+echo $MIN" "$HOUR" * * * $MYPATH/.getardoplist-cron" >> $FILE
+crontab $FILE
+echo
+echo "Your crontab has been updated. The gateway list"
+echo "will be downloaded daily at "$HOUR":"$MIN" hours"
+yad --center --timeout=3 --timeout-indicator=top --no-buttons --text="Auto Download set for $HOUR:$MIN daily" \
+--image $LOGO --window-icon=$LOGO --image-on-top
+$MAIN &
+rm $FILE
+exit
+elif [[ $rc -eq 1 ]]; then
+echo "BYE"
+$MAIN &
+exit
+fi
+}
+
+#--------------------------------
+#	GRID SEARCH
+#--------------------------------
+GRIDSEARCH(){
+OUTFILE=/run/user/1000/tempardoplist.txt
+CONFIG=$HOME/.wl2k/config.json
+TEMP=/run/user/1000/tempconfig.txt
+ARDOPLIST=$MYPATH/ardop-list
+WHO=$(whoami)
+source $MYPATH/config	#patmenu config file
+#check to make sure user has downloaded
+if [ ! -d "$MYPATH/ardop-list/" ]; then
+yad --title="No List" --width=400 --height=100 \
+    --image $LOGO --window-icon=$LOGO --image-on-top --text-align=center \
+    --center --form --text="\r\rGateway list has NOT been downloaded.\rPlease download now\rRecommend setting auto download time" \
+    --button="Download":2
+BUT=$?
+	if [ $BUT = 2 ]; then
+	$MYPATH/getardoplist
+	$MAIN &
+	exit
+	elif [ $BUT = 252 ]; then
+	exit
+	fi
+fi
+SEARCHMENU(){
+#MENU
+BANDS="20|30|40|80|2M-70CM"
+SEARCH=$(yad --form --width=400 --text="<b>Find ARDOP</b> by KM4ACK" --text-align=center --center --title="Find ARDOP" --text-align=center \
+--separator="|" --item-separator="|" \
+--image=$LOGO --window-icon=$LOGO --image-on-top \
+--field="Grid to Search" "EM" \
+--field="Band to Search":CB "$BANDS" \
+--button="Search Packet":3 \
+--button="Search ARDOP":2 \
+--button="Cancel":1)
+QUIT=$?
+GRID=$(echo $SEARCH | awk -F "|" '{print $1}')
+GRID=$(echo "${GRID^^}")
+BAND=$(echo $SEARCH | awk -F "|" '{print $2}')
+
+if [ $QUIT = 1 ]; then
+$MAIN &
+exit
+elif [ $QUIT = 252 ]; then
+exit
+fi
+
+##############PACKET SEARCH######################
+if [ $QUIT = 3 ]; then
+FILE=$MYPATH/ardop-list/packet.txt
+TEMP=/run/user/1000/temppacket.txt
+TEMP1=/run/user/1000/templist.txt
+TEMP2=/run/user/1000/tempalias.txt
+cat $FILE | tail -n +5 | grep '[^[:blank:]]' > $TEMP
+MAX=200
+rm $TEMP1
+echo "Search Packet"
+while read LINE
+    do DISTANCE=$(echo $LINE | awk '{ print $3 }')
+	CALL=$(echo $LINE | awk '{ print $1 }')
+	#echo $DISTANCE
+	if [ $DISTANCE -lt "$MAX" ]
+	then
+	echo $LINE | sed 's/packet:/ax25:/' >> $TEMP1
+	fi
+done < $TEMP | yad --center --progress --pulsate --auto-close --no-buttons --text-align=center \
+--text="Please wait while the list is searched.\rThis takes about 30 seconds.\r<b>DON'T CLOSE THIS WINDOW</b>"
+INFO=$(PARSER='OFS="\n" {print $1, $2, $3, $4, $5, $6, $7, $9, $11}'
+
+tail -50 $TEMP1 | awk "$PARSER" | \
+yad --title="Search Results" --width=1100 --height=500 \
+    --image $LOGO --window-icon=$LOGO --image-on-top \
+    --center --list --text="Search Results" \
+    --column Call --column Grid --column Dist \
+    --column Azm --column Mode --column Speed \
+    --column Dial-Freq \
+    --column Center-Freq --column Shortcut \
+    --button=gtk-close \
+    --button="Add Alias":2)
+BUT=$?
+if [ $BUT = 0 ]; then
+$MAIN &
+exit
+elif [ "$BUT" = 2 ];then
+CALL=$(echo $INFO | awk -F "|" '{print $1}')
+SC=$(echo $INFO | awk -F "|" '{print $9}')
+FREQ=$(echo $SC | sed 's/.*=//')
+	if [ $RIGCONTROL = 'no' ]; then
+	SC=$(echo $SC | sed 's/[?].*$//')
+	fi
+	#check something was selected
+	if [ -z "$CALL" ]; then
+	yad --title="No Selection" --width=300 --height=100 \
+    	--image $LOGO --window-icon=$LOGO --image-on-top \
+    	--center --form --text="No station was selected\r Please try again" \
+    	--button=gtk-ok 
+	$MAIN &
+	exit
+	fi
+jq '.connect_aliases += {'\""$CALL-$FREQ"\"' : '\"$SC\"'}' $CONFIG > $TEMP
+cp $TEMP $CONFIG
+rm $TEMP
+sudo killall pat
+sudo systemctl start pat@$WHO
+yad --title="ADDED" --width=300 --height=100 \
+    --image $LOGO --window-icon=$LOGO --image-on-top \
+    --center --form --text="$CALL-$FREQ added to Pat Winlink\rRefresh Pat Mailbox Window\rto view changes" \
+    --button=gtk-ok 
+SEARCHMENU
+fi
+exit
+fi
+
+#############ARDOP SEARCH####################
+
+OUTFILE2=/run/user/1000/tempardop2.txt
+
+if [ $BAND = 20 ];then
+FILE=$ARDOPLIST/20mardoplist.txt
+cat $FILE | egrep -i $GRID[[:digit:]]{2} | tee "$OUTFILE" > /dev/null 2>&1
+#cat $OUTFILE  | tr -s '[:space:]' | sed 's/ /|/g'| sed 's/[A-Za-z]*$/|/g' > $OUTFILE2
+elif [ $BAND = 30 ];then
+FILE=$ARDOPLIST/30mardoplist.txt
+cat $FILE | egrep -i $GRID[[:digit:]]{2} | tee "$OUTFILE" > /dev/null 2>&1
+elif [ $BAND = 40 ];then
+FILE=$ARDOPLIST/40mardoplist.txt
+cat $FILE | egrep -i $GRID[[:digit:]]{2} | tee "$OUTFILE" > /dev/null 2>&1
+elif [ $BAND = 80 ];then
+FILE=$ARDOPLIST/80mardoplist.txt
+cat $FILE | egrep -i $GRID[[:digit:]]{2} | tee "$OUTFILE" > /dev/null 2>&1
+echo "80 done"
+fi
+
+INFO=$(PARSER='OFS="\n" {print $1, $2, $3, $4, $5, $6, $7, $9, $11}'
+
+tail -50 $OUTFILE | awk "$PARSER" | \
+yad --title="Search Results" --width=1100 --height=500 \
+    --image $LOGO --window-icon=$LOGO --image-on-top \
+    --center --list --text="Search Results" \
+    --column Call --column Grid --column Dist \
+    --column Azm --column Mode --column Speed \
+    --column Dial-Freq \
+    --column Center-Freq --column Shortcut \
+    --button=gtk-close \
+    --button="Add Alias":2)
+BUT=$?
+
+if [ "$BUT" = 2 ];then
+CALL=$(echo $INFO | awk -F "|" '{print $1}')
+SC=$(echo $INFO | awk -F "|" '{print $9}')
+FREQ=$(echo $SC | sed 's/.*=//')
+	if [ $RIGCONTROL = 'no' ]; then
+	SC=$(echo $SC | sed 's/[?].*$//')
+	fi
+	
+	#check something was selected
+	if [ -z "$CALL" ]; then
+	yad --title="No Selection" --width=300 --height=100 \
+    	--image $LOGO --window-icon=$LOGO --image-on-top \
+    	--center --form --text="No station was selected\r Please try again" \
+    	--button=gtk-ok 
+	$MAIN &
+	exit
+	fi
+jq '.connect_aliases += {'\""$CALL-$BAND"M"-$FREQ"\"' : '\"$SC\"'}' $CONFIG > $TEMP
+cp $TEMP $CONFIG
+rm $TEMP
+sudo killall pat
+sudo systemctl start pat@$WHO
+yad --title="ADDED" --width=300 --height=100 \
+    --image $LOGO --window-icon=$LOGO --image-on-top \
+    --center --form --text="Alias added to Pat Winlink\rRefresh Pat Mailbox Window\rto view changes" \
+    --button=gtk-ok 
+SEARCHMENU
+fi
+
+SEARCHMENU
+}
+SEARCHMENU
+}
+#--------------------------------
+#	Open Map
+#--------------------------------
+MAP(){
+
+if [ "$MAP" = "usa" ]; then
+MAP=$MYPATH/grid-map.pdf
+elif [ "$MAP" = "world" ]; then
+MAP=$MYPATH/worldgridmap.pdf
+fi
+xdg-open $MAP
+}
+
+
+
+
+
+
+
+
+
+
+
+

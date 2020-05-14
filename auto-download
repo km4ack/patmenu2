@@ -1,0 +1,42 @@
+#!/bin/bash
+
+#update cron to download ardop list
+#20191126 km4ack
+
+MYPATH=$HOME/patmenu2
+FILE=/run/user/1000/cronbkup.txt
+
+crontab -l > $FILE
+
+HOURS=00,01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,17,18,19,20,21,22,23
+MINS=00,15,30,45
+
+TEST=$(yad --center --wrap --width=250 --title="ARDOP Auto Download Setup" \
+--text="Please choose the time you would like to download the gateway list everyday" \
+--button="UPDATE:2" \
+--button="Exit:1" \
+--form --separator="," --item-separator="," \
+--field="Choose the hour":CB $HOURS \
+--field="Choose the minutes":CB $MINS \ 
+)
+
+rc=$?
+if [[ $rc -eq 2 ]]; then
+echo "Updating Cron"
+HOUR=$(echo $TEST | awk -F ',' '{print $1}')
+MIN=$(echo $TEST | awk -F ',' '{print $2}')
+sed -i '/getardoplist/d' $FILE
+echo $MIN" "$HOUR" * * * $MYPATH/getardoplist" >> $FILE
+crontab $FILE
+echo
+echo "Your crontab has been updated. The gateway list"
+echo "will be downloaded daily at "$HOUR":"$MIN" hours"
+sleep 5
+rm $FILE
+elif [[ $rc -eq 1 ]]; then
+echo "BYE"
+exit 0
+fi
+
+
+

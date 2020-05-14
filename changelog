@@ -1,0 +1,188 @@
+
+
+release=0.74
+
+
+Changelog
+	add FLRIG check to auto pat
+0.74	add option to install ruby if needed
+	add gps grid update to manage pat winlink section
+	bump version #
+0.73	attempt to fix success notice for auto pat
+	update path in main menu for new changelog file name
+	rename release to changelog
+	add alert if auto pat has no data to work with
+	disallow starting modems multiple times
+	check if FLRIG is running when starting modems
+	bump version #
+0.72	kill all modems on exit from main menu
+	add notice to auto connect if no connections were successful
+	bump version number
+0.71	COMPLETE RE WRITE TO INCLUDE YAD INTERFACE
+	bump version #
+0.70	add version number to main menu
+	create backup of start-pat2m
+	fix issue 24 https://github.com/km4ack/patmenu/issues/24
+	bum version #
+0.69	fix issue 33 https://github.com/km4ack/patmenu/issues/33
+	bump version #
+0.68 	remove bug warning from README.md
+	reorder release file so latest revs at top
+	fix release display in update script
+	update config.default to match config
+	fix typo in auto pat (Thanks Drudge!)
+	bump version #
+0.67 	write email backup/restore scripts
+     	add email backup/restore to pat manage
+     	fix issue 25 https://github.com/km4ack/patmenu/issues/25
+     	move GRIB files to weather section https://github.com/km4ack/patmenu/issues/26
+     	add email-bkup & email-restore +x to setup file
+     	bump version #
+0.66 	stop modem starts from puking errors if var not found
+     	add extra check before trimode is run
+     	add pulseaudio/pavucontrol install check to trimode
+     	bump version #
+0.65 	add grib request to catalog
+     	bump version #
+0.64 	add amrron/trimode check to both modem start scripts
+     	bump version #
+0.63 	fix catalog typo that caused crash
+     	bump version #
+0.62 	add post position to catalog
+     	prevent stopping modems in autopat for amrron ops
+     	add trimode script for amrron operators
+     	revise trimode in config
+     	bump version # 
+0.61 	update FLRIG rigctl in config (existing users will not see this)
+     	add trimode variable to config (existing users will not see this)
+     	bump version #
+0.60 	revert start-pat2m due to critical flaw
+     	bump version number
+0.59 	improve how direwolf starts on buster
+     	add slight delay after starting ardop mode 
+     	bump version #
+0.58 	add callsign to config file (existing users will not see this)
+     	add config check when menu starts. exit if config not modded
+     	rig control set to no by default in config file
+     	bump version #
+0.57 	fix bug in add packet script
+     	bump version #
+0.56 	add min < max check in auto pat
+     	add answer check at beginning of auto pat
+     	rewrite patauto function in patmenu-new
+     	check running modems & stop if needed when running autopat
+     	add grid square check to getardoplist and warn if not set
+     	fix symlink in setup script
+     	add exit to restore config script
+     	convert callsign to upper case in catalog script
+     	bump version #
+0.55 	add exit option to changeconf script
+     	add symlink to setup for patmenu in /usr/local/bin
+     	open pat inbox in browser when starting packet or ardop modems
+     	change map viewer in findardop to variable	
+     	fix map viewer error from showing in pat menu
+     	update main menu with new manage pat menu feature
+     	check autopat to make sure 20,30,40,80 is entered
+     	provide exit from autopat
+     	bump version #
+0.54 	update gpsdata var in catalog. Thanks K4KDR!
+     	create changeconf script to deal with multiple config files
+     	add menu-mange script for pat menu management
+     	update setup script to +x changeconf & menu-manage
+     	bump version #
+0.53 	add buster check to start-pat2m
+     	bump version #
+0.52 	Fix missing file in alias-add-packet
+     	revert to old style symlink until issue is resolved with new style
+     	move kissattach to variable in config file
+     	update restore-config file
+     	bump version #
+0.51 	Fix variable in autopat
+     	add packet list download to getardoplist
+     	add script alias-add-packet
+     	add script restore-config
+     	update pat-manage menu
+     	update setup script
+     	bump version #
+0.50 	add way to exit alias-del
+     	make desktop shortcut executable
+     	add rigcontrol check to alias-add for right shortcut
+     	complete re write of findardop that includes add alias shortcuts
+     	bump version #
+0.49 	fix bug and add alias-del
+     	update pat-manage
+     	add band/freq to new alias when added from pat manage
+     	bump version #
+0.48 	remove alias-del until major bug can be resolved
+     	bump version #
+0.47 	add alias-add script
+     	add alias-del script
+     	add check/install jq to setup script (needed for new alias scripts)
+     	add new pat manage menu script
+     	update main menu to include pat manage script
+     	bump version #
+0.46 	add last DL to findardop
+     	add log file entry to getardoplist
+     	update readme file 
+     	bump version #
+0.45 	sort getardoplist by distance    
+     	new style desktop link to setup script
+     	bump version #
+0.44 	add set-auto-update to findardop script
+     	add new script auto-download called from findardop
+     	add YAD install to setup script   
+0.43 	start modems in backgound     
+     	verify other modem not running before starting a new modem
+     	stop ardop_gui when stopping modems
+     	fix issue #17-choose correct text editor based on version
+0.42 	give user info on change log before update
+     	add rig control check to auto-pat
+0.41 	add start ARDOP-GUI to start ardop
+     	add start ARDOP-GUI to autopat
+     	remove temp files at start of autopat
+0.40 	change rigctld start in autopat
+     	add backup for config 
+0.39 	add rigctld check & start to autopat
+0.38 	close if/then statement in start-pat2m
+0.37 	add rigctld check & start if needed to  start-pat2m
+0.36 	add rigctld check & start if needed to start-pat-ardop
+0.35 	move log file variable to config file
+0.34 	update uninstall
+0.33 	add mode to config file
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     
+     
+     
+     
