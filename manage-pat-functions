@@ -99,6 +99,8 @@ sed -i "s/\"secure_login_password\": \".*\",/\"secure_login_password\": \"$PASS\
 sed -i "s/\"locator\": \".*\",/\"locator\": \"$GRID\",/" $CONFIG
 sudo killall pat
 sudo systemctl start pat@$WHO
+$MAIN &
+exit
 elif [ $BUT = 3 ]; then
 echo "Log OUT"
 CALLSIGN=N0CALL
@@ -111,7 +113,8 @@ sed -i "s/\"secure_login_password\": \".*\",/\"secure_login_password\": \"$PASS\
 #set locator
 sed -i "s/\"locator\": \".*\",/\"locator\": \"$GRID\",/" $CONFIG
 sudo killall pat
-sudo systemctl start pat@$WHO
+$MAIN &
+exit
 fi
 
 }
