@@ -23,7 +23,7 @@ MYPATH=$HOME/patmenu2/ardop-list/
 LOG=$HOME/Documents/mylog.txt
 
 GRIDCK=$(jq .locator $HOME/.wl2k/config.json)
-if [ ${$GRIDCK} -lt 3 ]
+if [ ${#GRIDCK} -lt 3 ]
 then
 echo "Grid square not set in Pat Configure" | tee -a $LOG
 echo "Distances/Bearings will not be accurate"
