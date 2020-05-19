@@ -8,6 +8,15 @@ MYPATH=$HOME/patmenu2
 BKDIR=$HOME/Desktop/config-bkups
 NEWCONFIG=$HOME/Desktop/test.txt
 
+#get depends if needed.
+sudo apt-get update
+if ! hash yad 2>/dev/null; then
+sudo apt install -y yad
+fi
+if ! hash jq 2>/dev/null; then
+sudo apt install -y jq
+fi
+
 if [ -f $HOME/patmenu/config ]; then
 #get patmenu config file and copy to patmenu2
 cp $HOME/patmenu/config $HOME/patmenu2/config
