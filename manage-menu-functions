@@ -258,12 +258,13 @@ BUT=$?
 
 if [ $BUT = 0 ]; then
 $MAIN &
+rm $TEMPFILE
 exit
 elif [ $BUT = 252 ]; then
+rm $TEMPFILE
 exit
 fi
 FILE=$(echo $CONFIG | awk -F "|" '{print $1}')
-rm $MYPATH/$FILE
 
 rm $TEMPFILE
 
