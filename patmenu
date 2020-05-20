@@ -4,13 +4,8 @@
 #20200427 KM4ACK
 #side note: written during covid-19 outbreak of 2020
 
-#######DEV NOTES#############
-#############################
 
-
-#############################
-
-MYPATH=$HOME/patmenu2
+export MYPATH=$HOME/patmenu2
 LOGO=$MYPATH/pmlogo.png
 MAIN=$MYPATH/./patmenu
 VERSION=$(cat $MYPATH/changelog | grep release | head -1 | sed 's/release=//')
@@ -27,14 +22,14 @@ fi
 yad --form --width=420 --text-align=center --center --title="Pat Menu" --text-align=center \
 --image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
 --text="<b>Pat Menu</b> by KM4ACK\rv$VERSION" \
---field="Start ARDOP Modem":fbtn 'bash -c "/home/pi/patmenu2/start-pat-ardop"' \
---field="Start Packet Modem":fbtn 'bash -c "/home/pi/patmenu2/start-pat2m"' \
---field="Stop Modems":fbtn 'bash -c "/home/pi/patmenu2/stop-modems"' \
---field="Find Winlink Gateways":fbtn 'bash -c "kill -USR1 $YAD_PID; /home/pi/patmenu2/find2"' \
---field="Pat Auto Connect":fbtn 'bash -c "kill -USR1 $YAD_PID; source /home/pi/patmenu2/pat-functions; AUTOPAT"' \
---field="Pat Catalog":fbtn 'bash -c "kill -USR1 $YAD_PID; /home/pi/patmenu2/catalog"' \
---field="Manage Pat Winlink":fbtn 'bash -c "kill -USR1 $YAD_PID; /home/pi/patmenu2/manage-pat"' \
---field="Settings/Config":fbtn 'bash -c "kill -USR1 $YAD_PID; /home/pi/patmenu2/manage-menu"' \
+--field="Start ARDOP Modem":fbtn 'bash -c "$MYPATH/start-pat-ardop"' \
+--field="Start Packet Modem":fbtn 'bash -c "$MYPATH/start-pat2m"' \
+--field="Stop Modems":fbtn 'bash -c "$MYPATH/stop-modems"' \
+--field="Find Winlink Gateways":fbtn 'bash -c "kill -USR1 $YAD_PID; $MYPATH/find2"' \
+--field="Pat Auto Connect":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/pat-functions; AUTOPAT"' \
+--field="Pat Catalog":fbtn 'bash -c "kill -USR1 $YAD_PID; $MYPATH/catalog"' \
+--field="Manage Pat Winlink":fbtn 'bash -c "kill -USR1 $YAD_PID; $MYPATH/manage-pat"' \
+--field="Settings/Config":fbtn 'bash -c "kill -USR1 $YAD_PID; $MYPATH/manage-menu"' \
 --field="My Call - $MYCALLSIGN":LBL \
 --button="QUIT":1
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MYPATH=$HOME/patmenu2
+export MYPATH=$HOME/patmenu2
 LOGO=$MYPATH/pmlogo.png
 source $MYPATH/manage-menu-functions
 MAIN=$MYPATH/patmenu
@@ -9,9 +9,10 @@ MAIN=$MYPATH/patmenu
 yad --form --width=420 --text-align=center --center --title="Settings" --text-align=center \
 --image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
 --text="<b>Pat Menu Settings/Config</b> by KM4ACK" \
---field="Current Config Settings":fbtn 'bash -c "kill -USR1 $YAD_PID; source /home/pi/patmenu2/manage-menu-functions; CURRENTCONFIG"' \
---field="Create New Config File":fbtn 'bash -c "kill -USR1 $YAD_PID; source /home/pi/patmenu2/manage-menu-functions; NEWCONFIG"' \
---field="Load Config File":fbtn 'bash -c "kill -USR1 $YAD_PID; source /home/pi/patmenu2/manage-menu-functions; LOADCONFIG"' \
+--field="Current Config Settings":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/manage-menu-functions; CURRENTCONFIG"' \
+--field="Create New Config File":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/manage-menu-functions; NEWCONFIG"' \
+--field="Load Config File":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/manage-menu-functions; LOADCONFIG"' \
+--field="Delete Config File":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/manage-menu-functions; DELETECONFIG"' \
 --button="Main Menu":1
 BUT=$?
 
