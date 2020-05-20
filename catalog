@@ -4,13 +4,8 @@
 #20200427 KM4ACK
 #side note: written during covid-19 outbreak of 2020
 
-#######DEV NOTES#############
-#############################
 
-
-#############################
-
-MYPATH=$HOME/patmenu2
+export MYPATH=$HOME/patmenu2
 LOGO=$MYPATH/pmlogo.png
 MAIN=$MYPATH/./patmenu
 
@@ -18,11 +13,11 @@ MAIN=$MYPATH/./patmenu
 yad --form --width=420 --text-align=center --center --title="Pat Catalog" --text-align=center \
 --image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
 --text="<b>Pat Catalog</b> by KM4ACK" \
---field="Gateway List":fbtn 'bash -c "kill -USR1 $YAD_PID; source /home/pi/patmenu2/cat-functions; GATEWAY"' \
---field="Weather Reports":fbtn 'bash -c "kill -USR1 $YAD_PID; source /home/pi/patmenu2/cat-functions; WEATHER"' \
---field="Position Reports":fbtn 'bash -c "kill -USR1 $YAD_PID; source /home/pi/patmenu2/cat-functions; POSITION"' \
---field="Propagation Reports":fbtn 'bash -c "kill -USR1 $YAD_PID; source /home/pi/patmenu2/cat-functions; PROPAGATION"' \
---field="News Reports":fbtn 'bash -c "kill -USR1 $YAD_PID; source /home/pi/patmenu2/cat-functions; NEWS"' \
+--field="Gateway List":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/cat-functions; GATEWAY"' \
+--field="Weather Reports":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/cat-functions; WEATHER"' \
+--field="Position Reports":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/cat-functions; POSITION"' \
+--field="Propagation Reports":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/cat-functions; PROPAGATION"' \
+--field="News Reports":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/cat-functions; NEWS"' \
 --button="Main Menu":1
 
 QUIT=$?

@@ -1,9 +1,14 @@
 
 
-release=2.0.0
+release=2.0.1
 
 
 Changelog
+2.0.1	update path in manage-menu
+	update path in patmenu
+	update path in catalog
+	update path in manage-pat
+	various script cleanup to remove notes
 2.0.0	Hey!! Where is version 1? Here's the scoop,
 	there is no version 1. We never made it to 
 	version 1 before I did a major overhaul of the
