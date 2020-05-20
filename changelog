@@ -1,10 +1,11 @@
 
 
-release=2.0.1
+release=2.1.0
 
 
 Changelog
-2.0.1	update path in manage-menu
+2.1.0	add delete config feature
+	update path in manage-menu
 	update path in patmenu
 	update path in catalog
 	update path in manage-pat
