@@ -238,7 +238,44 @@ exit
 fi
 }
 
+DELETECONFIG(){
+TEMPFILE=$MYPATH/config.tmp
 
+FILES=$(ls $MYPATH | grep .config)
+
+echo $FILES | awk 'BEGIN { OFS = "\n" }{ print $1, $2, $3, $4, $5, $6, $7, $8, $9, $10 }' > $TEMPFILE
+
+CONFIG=$(PARSER='OFS="\n" {print $1}'
+
+tail -50 $TEMPFILE | awk "$PARSER" | \
+yad --title="Config Delete" --width=1100 --height=500 --separator=" " --item-separator="|" \
+    --image $LOGO --window-icon=$LOGO --image-on-top \
+    --center --list --text="Config Delete" \
+    --column Config-Files \
+    --button=gtk-close \
+    --button="Delete Config":2)
+BUT=$?
+
+if [ $BUT = 0 ]; then
+$MAIN &
+exit
+elif [ $BUT = 252 ]; then
+exit
+fi
+FILE=$(echo $CONFIG | awk -F "|" '{print $1}')
+rm $MYPATH/$FILE
+
+rm $TEMPFILE
+
+yad --title="Deleted" --width=400 --height=100 \
+    --image $LOGO --window-icon=$LOGO --image-on-top --text-align=center \
+    --center --form --text="$FILE has been deleted" \
+    --button=gtk-ok
+
+$MAIN & 
+exit
+
+}
 
 
 
