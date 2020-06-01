@@ -357,4 +357,59 @@ $MAIN &
 exit
 }
 
+SETPTT(){
+
+CONFIG=$HOME/.wl2k/config.json
+WHO=$(whoami)
+
+CURRENT=$(cat $CONFIG | grep ptt_ctrl | tail -1 | sed 's/"ptt_ctrl":\ //' | sed 's/,//' | tr -d "[:blank:]")
+
+PTT=$(yad --form --width=400 --text="<b>Current Pat ARDOP PTT = $CURRENT</b>" --text-align=center --center --title="Set PTT" --text-align=center \
+--separator="|" --item-separator="|" \
+--image=$LOGO --window-icon=$LOGO --image-on-top \
+--field="ARDOP PTT":CB "true|false" \
+--button="Set PTT":2 \
+--button="Cancel":1)
+QUIT=$?
+if [ $QUIT = 1 ]; then
+$MAIN &
+exit
+elif [ $QUIT = 252 ]; then
+exit
+fi
+
+ANS=$(echo $PTT | awk -F "|" '{print $1}')
+CURRENT=$(cat $CONFIG | grep ptt_ctrl | tail -1 | sed 's/"ptt_ctrl":\ //' | sed 's/,//')
+
+echo "Set $CURRENT to $ANS"
+
+if [ $CURRENT = 'false' ]; then
+sed -i "s/\"ptt_ctrl\":\ false,/\"ptt_ctrl\":\ $ANS,/" $CONFIG
+elif [ $CURRENT = 'true' ]; then
+sed -i "s/\"ptt_ctrl\":\ true,/\"ptt_ctrl\":\ $ANS,/" $CONFIG
+fi
+sudo killall pat
+sudo systemctl start pat@$WHO
+
+
+yad --form --width=400 --text-align=center --center --title="Set PTT" --text-align=center \
+--separator="|" --item-separator="|" \
+--image=$LOGO --window-icon=$LOGO --image-on-top \
+--text="<b>Pat ARDOP PTT now set to $ANS</b>" \
+--button=gtk-ok
+$MAIN &
+exit
+
+}
+
+
+
+
+
+
+
+
+
+
+
 
