@@ -278,6 +278,21 @@ exit
 
 }
 
+SOUND(){
+CARD=$(arecord -l | grep card | awk '{print $2}' | sed 's/://')
+DIRECARD=$(cat $HOME/direwolf.conf | grep ADEVICE | head -1 | awk '{print $2}' | sed 's/plughw://' | sed 's/,.*$//')
+PATCARD=$(cat $HOME/patmenu2/config | grep ARDOP | head -1 | awk '{print $3}' | sed 's/plughw://' | sed 's/,.*$//')
+
+
+sed -i "0,/$DIRECARD,0/{s//$CARD,0/}" $HOME/direwolf.conf
+sed -i "s/$PATCARD,0/$CARD,0/g" $HOME/patmenu2/config
+
+
+yad --title="Sound Card" --width=400 --height=100 \
+    --image $LOGO --window-icon=$LOGO --image-on-top --text-align=center --on-top \
+    --center --form --text="\r\r\r\rSound card data has been updated\rfor both Packet and ARDOP modems." \
+    --button=gtk-ok &
+}
 
 
 
