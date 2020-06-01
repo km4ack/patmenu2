@@ -136,7 +136,7 @@ done < $TEMP | yad --center --progress --pulsate --auto-close --no-buttons --tex
 --text="Please wait while the list is searched.\rThis takes about 30 seconds.\r<b>DON'T CLOSE THIS WINDOW</b>"
 INFO=$(PARSER='OFS="\n" {print $1, $2, $3, $4, $5, $6, $7, $9, $11}'
 
-tail -50 $TEMP1 | awk "$PARSER" | \
+tail -100 $TEMP1 | awk "$PARSER" | \
 yad --title="Search Results" --width=1100 --height=500 \
     --image $LOGO --window-icon=$LOGO --image-on-top \
     --center --list --text="Search Results" \
@@ -201,19 +201,18 @@ echo "80 done"
 fi
 
 INFO=$(PARSER='OFS="\n" {print $1, $2, $3, $4, $5, $6, $7, $9, $11}'
-
+MYTEMP=/run/user/1000/mytemptestardoplist
 tail -50 $OUTFILE | awk "$PARSER" | \
 yad --title="Search Results" --width=1100 --height=500 \
-    --image $LOGO --window-icon=$LOGO --image-on-top \
+    --image $LOGO --window-icon=$LOGO --image-on-top --multiple \
     --center --list --text="Search Results" \
     --column Call --column Grid --column Dist \
     --column Azm --column Mode --column Speed \
     --column Dial-Freq \
     --column Center-Freq --column Shortcut \
     --button=gtk-close \
-    --button="Add Alias":2)
+    --button="Add Alias":2 > $MYTEMP)
 BUT=$?
-
 if [ "$BUT" = 2 ];then
 CALL=$(echo $INFO | awk -F "|" '{print $1}')
 SC=$(echo $INFO | awk -F "|" '{print $9}')
@@ -222,7 +221,20 @@ FREQ=$(echo $SC | sed 's/.*=//')
 	SC=$(echo $SC | sed 's/[?].*$//')
 	fi
 	
-	#check something was selected
+while read LINE; do
+CALL=$(echo $LINE | awk -F "|" '{print $1}')
+SC=$(echo $LINE | awk -F "|" '{print $9}')
+FREQ=$(echo $SC | sed 's/.*=//')
+	if [ $RIGCONTROL = 'no' ]; then
+	SC=$(echo $SC | sed 's/[?].*$//')
+	fi
+jq '.connect_aliases += {'\""$CALL-$BAND"M"-$FREQ"\"' : '\"$SC\"'}' $CONFIG > $TEMP
+cp $TEMP $CONFIG
+rm $TEMP
+done < /run/user/1000/mytemptestardoplist
+sudo killall pat
+sudo systemctl start pat@$WHO
+
 	if [ -z "$CALL" ]; then
 	yad --title="No Selection" --width=300 --height=100 \
     	--image $LOGO --window-icon=$LOGO --image-on-top \
@@ -231,11 +243,7 @@ FREQ=$(echo $SC | sed 's/.*=//')
 	$MAIN &
 	exit
 	fi
-jq '.connect_aliases += {'\""$CALL-$BAND"M"-$FREQ"\"' : '\"$SC\"'}' $CONFIG > $TEMP
-cp $TEMP $CONFIG
-rm $TEMP
-sudo killall pat
-sudo systemctl start pat@$WHO
+
 yad --title="ADDED" --width=300 --height=100 \
     --image $LOGO --window-icon=$LOGO --image-on-top \
     --center --form --text="Alias added to Pat Winlink\rRefresh Pat Mailbox Window\rto view changes" \
