@@ -13,6 +13,7 @@ yad --form --width=420 --text-align=center --center --title="Settings" --text-al
 --field="Create New Config File":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/manage-menu-functions; NEWCONFIG"' \
 --field="Load Config File":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/manage-menu-functions; LOADCONFIG"' \
 --field="Delete Config File":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/manage-menu-functions; DELETECONFIG"' \
+--field="Update Sound Card":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/manage-menu-functions; SOUND"' \
 --button="Main Menu":1
 BUT=$?
 
