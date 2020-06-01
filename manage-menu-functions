@@ -291,7 +291,10 @@ sed -i "s/$PATCARD,0/$CARD,0/g" $HOME/patmenu2/config
 yad --title="Sound Card" --width=400 --height=100 \
     --image $LOGO --window-icon=$LOGO --image-on-top --text-align=center --on-top \
     --center --form --text="\r\r\r\rSound card data has been updated\rfor both Packet and ARDOP modems." \
-    --button=gtk-ok &
+    --button=gtk-ok
+
+$MAIN &
+exit
 }
 
 
