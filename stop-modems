@@ -7,7 +7,8 @@ LOGO=$MYPATH/pmlogo.png
 
 #stop all modems that might be running
 
-sudo killall direwolf piardopc kissattach piARDOP_GUI rfcomm > /dev/null 2>&1
+sudo killall direwolf piardopc kissattach piARDOP_GUI > /dev/null 2>&1
+sudo rfcomm release /dev/rfcomm0 > /dev/null 2>&1
 
 yad --title="Modem Stopped" --width=400 --height=100 \
     --image $LOGO --window-icon=$LOGO --image-on-top --text-align=center \

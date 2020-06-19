@@ -265,7 +265,7 @@ rm $TEMPFILE
 exit
 fi
 FILE=$(echo $CONFIG | awk -F "|" '{print $1}')
-
+rm $MYPATH/$FILE
 rm $TEMPFILE
 
 yad --title="Deleted" --width=400 --height=100 \
