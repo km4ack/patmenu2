@@ -136,4 +136,3 @@ export DISPLAY=:0 && chromium-browser --app=http://127.0.0.1:$PORT > /dev/null 2
 
 
 
-

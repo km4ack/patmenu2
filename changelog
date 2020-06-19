@@ -1,10 +1,15 @@
 
 
-release=2.1.0
-
+release=2.2.0
+NOT MERGED 20200521
 
 Changelog
-2.1.0	add delete config feature
+2.2.0	add multiple alias select in Find Ardop gateways
+	update fa-funtions to show 100 stations in packet search
+	add update sound card to settings/config
+	add set ARDOP PTT to manage pat winlink
+2.1.0	add set ARDOP speed to manage pat winlink	
+	add delete config feature
 	update path in manage-menu
 	update path in patmenu
 	update path in catalog
