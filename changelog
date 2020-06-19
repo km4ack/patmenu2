@@ -1,10 +1,12 @@
 
 
-release=2.2.0
-NOT MERGED 20200521
+release=2.2.1
+
 
 Changelog
-2.2.0	add multiple alias select in Find Ardop gateways
+2.2.1	fix delete alias
+2.2.0	add mobilinkd modem	
+	add multiple alias select in Find Ardop gateways
 	update fa-funtions to show 100 stations in packet search
 	add update sound card to settings/config
 	add set ARDOP PTT to manage pat winlink
