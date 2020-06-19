@@ -56,10 +56,12 @@ fi
 #set correct connection commmand
 if [ $TNC = "2" ]
 then
-CONNECT="sudo rfcomm connect /dev/rfcomm0 $MAC"
+#CONNECT="sudo rfcomm connect /dev/rfcomm0 $MAC"
+CONNECT="sudo rfcomm bind /dev/rfcomm0 $MAC"
 elif [ $TNC = "3" ]
 then
-CONNECT="sudo rfcomm connect /dev/rfcomm0 $MAC 6"
+CONNECT="sudo rfcomm bind /dev/rfcomm0 $MAC 6"
+#CONNECT="sudo rfcomm connect /dev/rfcomm0 $MAC 6"
 fi
 
 #See if device was found and connect if found
@@ -90,7 +92,7 @@ echo "starting kissattach for winlink"
 fi
 
 #verify that piardopc is running
-PIDPIC=$(pidof rfcomm)
+PIDPIC=$(pidof kissattach)
 if [ -z "$PIDPIC" ]
 then
 yad --title="FAILED" --width=400 --height=100 \
