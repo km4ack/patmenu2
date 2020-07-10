@@ -1,9 +1,10 @@
-
-
-release=2.2.1
+release=2.2.2
 
 
 Changelog
+2.2.2	Update Find Gateway Code for Packet in FA-functions
+	Add manual grid update
+	update logo to white background
 2.2.1	fix delete alias
 2.2.0	add mobilinkd modem	
 	add multiple alias select in Find Ardop gateways
