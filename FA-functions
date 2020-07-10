@@ -94,18 +94,20 @@ fi
 SEARCHMENU(){
 #MENU
 BANDS="20|30|40|80|2M-70CM"
-SEARCH=$(yad --form --width=400 --text="<b>Find ARDOP</b> by KM4ACK" --text-align=center --center --title="Find ARDOP" --text-align=center \
+SEARCH=$(yad --form --width=400 --text="<b>Find Winlink Gateways</b>" --text-align=center --center --title="Find ARDOP" --text-align=center \
 --separator="|" --item-separator="|" \
 --image=$LOGO --window-icon=$LOGO --image-on-top \
 --field="Grid to Search" "EM" \
 --field="Band to Search":CB "$BANDS" \
---button="Search Packet":3 \
---button="Search ARDOP":2 \
+--button="Search":2 \
 --button="Cancel":1)
 QUIT=$?
 GRID=$(echo $SEARCH | awk -F "|" '{print $1}')
 GRID=$(echo "${GRID^^}")
 BAND=$(echo $SEARCH | awk -F "|" '{print $2}')
+
+echo "Grid search is $GRID"
+echo "Band is $BAND"
 
 if [ $QUIT = 1 ]; then
 $MAIN &
@@ -115,69 +117,72 @@ exit
 fi
 
 ##############PACKET SEARCH######################
-if [ $QUIT = 3 ]; then
+if [ $QUIT = 2 ] && [ "$BAND" = '2M-70CM' ]; then
+
+
+#########START TEST SECTION######################
+
+
 FILE=$MYPATH/ardop-list/packet.txt
 TEMP=/run/user/1000/temppacket.txt
 TEMP1=/run/user/1000/templist.txt
 TEMP2=/run/user/1000/tempalias.txt
-cat $FILE | tail -n +5 | grep '[^[:blank:]]' > $TEMP
-MAX=200
-rm $TEMP1
-echo "Search Packet"
-while read LINE
-    do DISTANCE=$(echo $LINE | awk '{ print $3 }')
-	CALL=$(echo $LINE | awk '{ print $1 }')
-	#echo $DISTANCE
-	if [ $DISTANCE -lt "$MAX" ]
-	then
-	echo $LINE | sed 's/packet:/ax25:/' >> $TEMP1
-	fi
-done < $TEMP | yad --center --progress --pulsate --auto-close --no-buttons --text-align=center \
---text="Please wait while the list is searched.\rThis takes about 30 seconds.\r<b>DON'T CLOSE THIS WINDOW</b>"
-INFO=$(PARSER='OFS="\n" {print $1, $2, $3, $4, $5, $6, $7, $9, $11}'
 
-tail -100 $TEMP1 | awk "$PARSER" | \
+echo "Grid search is $GRID"
+
+cat $FILE | egrep -i $GRID[[:digit:]]{2} | tee "$TEMP" > /dev/null 2>&1
+
+
+INFO=$(PARSER='OFS="\n" {print $1, $2, $3, $4, $5, $6, $7, $9, $11}'
+MYTEMP=$TEMP2
+tail -1000 $TEMP | awk "$PARSER" | \
 yad --title="Search Results" --width=1100 --height=500 \
-    --image $LOGO --window-icon=$LOGO --image-on-top \
+    --image $LOGO --window-icon=$LOGO --image-on-top --multiple \
     --center --list --text="Search Results" \
     --column Call --column Grid --column Dist \
     --column Azm --column Mode --column Speed \
     --column Dial-Freq \
     --column Center-Freq --column Shortcut \
     --button=gtk-close \
-    --button="Add Alias":2)
+    --button="Add Alias":2 > $MYTEMP)
 BUT=$?
-if [ $BUT = 0 ]; then
-$MAIN &
-exit
-elif [ "$BUT" = 2 ];then
+
+if [ "$BUT" = 2 ];then
 CALL=$(echo $INFO | awk -F "|" '{print $1}')
 SC=$(echo $INFO | awk -F "|" '{print $9}')
 FREQ=$(echo $SC | sed 's/.*=//')
 	if [ $RIGCONTROL = 'no' ]; then
 	SC=$(echo $SC | sed 's/[?].*$//')
 	fi
-	#check something was selected
-	if [ -z "$CALL" ]; then
-	yad --title="No Selection" --width=300 --height=100 \
-    	--image $LOGO --window-icon=$LOGO --image-on-top \
-    	--center --form --text="No station was selected\r Please try again" \
-    	--button=gtk-ok 
-	$MAIN &
-	exit
+	
+while read LINE; do
+CALL=$(echo $LINE | awk -F "|" '{print $1}')
+SC=$(echo $LINE | awk -F "|" '{print $9}')
+FREQ=$(echo $SC | sed 's/.*=//')
+	if [ $RIGCONTROL = 'no' ]; then
+	SC=$(echo $SC | sed 's/[?].*$//')
 	fi
-jq '.connect_aliases += {'\""$CALL-$FREQ"\"' : '\"$SC\"'}' $CONFIG > $TEMP
+
+SC=$(echo $SC | sed 's/packet/ax25/')
+
+jq '.connect_aliases += {'\""$CALL-$BAND"M"-$FREQ"\"' : '\"$SC\"'}' $CONFIG > $TEMP
 cp $TEMP $CONFIG
 rm $TEMP
+done < $TEMP2
 sudo killall pat
 sudo systemctl start pat@$WHO
+
+
+##############END TEST SECTION################
+
+
 yad --title="ADDED" --width=300 --height=100 \
     --image $LOGO --window-icon=$LOGO --image-on-top \
     --center --form --text="$CALL-$FREQ added to Pat Winlink\rRefresh Pat Mailbox Window\rto view changes" \
     --button=gtk-ok 
 SEARCHMENU
 fi
-exit
+SEARCHMENU
 fi
 
 #############ARDOP SEARCH####################
