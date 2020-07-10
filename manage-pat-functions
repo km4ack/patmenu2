@@ -402,7 +402,44 @@ exit
 
 }
 
+MANUALGPS() {
 
+WHO=$(whoami)
+CONFIG=$HOME/.wl2k/config.json
+
+GRID=$(yad --form --width=400 --text-align=center --center --title="Set Grid" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Update Pat Grid</b> by KM4ACK" \
+--field="Six Character Grid": "$NEWGRID" \
+--button="Update Grid":2 \
+--button="Cancel":1)
+BUT=$?
+
+if [ $BUT = 252 ]; then
+exit
+fi
+
+if [ $BUT = 1 ]; then
+$MAIN &
+exit
+fi
+
+NEWGRID=$(echo $GRID | awk -F "|" '{print $1}')
+
+NEWGRID=${NEWGRID^^}
+
+
+sed -i "s/\"locator\": \".*\",/\"locator\": \"$NEWGRID\",/" $CONFIG
+echo "GRID UPDATED"
+sudo killall pat
+sudo systemctl start pat@$WHO
+yad --form --width=400 --text-align=center --center --title="Grid Update" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Grid Updated to $NEWGRID</b>" \
+--button=gtk-ok
+
+$MAIN
+}
 
 
 
