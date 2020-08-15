@@ -141,7 +141,7 @@ COMPOSE
 elif [ "$WEATHER" = 'GRIB Files' ]; then
 echo "Need GRIB Files"
 
-FILE=/run/user/1000
+FILE=/run/user/$UID
 QUESTION () {
 
 DEGREE=$(yad --center --wrap --width=350 --title="Auto Download" --text-align=center \
