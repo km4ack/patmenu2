@@ -112,7 +112,7 @@ fi
 }
 
 LOADCONFIG(){
-OUTFILE=/run/user/1000/configlist.tmp
+OUTFILE=/run/user/$UID/configlist.tmp
 
 ls $MYPATH/ | grep .config > $OUTFILE
 
