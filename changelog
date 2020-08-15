@@ -7,6 +7,7 @@ Changelog
 	update logo to white background
 	update /user/run/1000 to /user/run/$UID to make compatible with users other than pi
 	fix issue #13
+	add .gitignore
 2.2.1	fix delete alias
 2.2.0	add mobilinkd modem	
 	add multiple alias select in Find Ardop gateways
