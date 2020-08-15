@@ -48,7 +48,7 @@ echo "Please wait while we check your internet connection"
 echo "This may take up to a minute"
 #yad --center --timeout=3 --timeout-indicator=top --no-buttons \
 #--text="Please wait while we check your connection \rThis can take up to 30 seconds" &
-wget -q --tries=5 --timeout=10 --spider http://google.com | yad --center --progress --pulsate --timeout-indicator=top --auto-close --no-buttons --text="Checking internet connection"
+wget -q --tries=5 --timeout=10 --spider http://google.com #| yad --center --progress --pulsate --timeout-indicator=top --auto-close --no-buttons --text="Checking internet connection"
 if [[ $? -eq 0 ]]; then
 	echo
 #yad --center --timeout=2 --timeout-indicator=top --no-buttons --text="Connection Detected" &
@@ -57,7 +57,7 @@ if [[ $? -eq 0 ]]; then
 	echo "This may take several minutes"
 	echo "Depending on your internet speed"
 else
-yad --center --timeout=2 --timeout-indicator=top --no-buttons --text="You are not connected to the internet" &
+yad --center --timeout=3 --timeout-indicator=top --no-buttons --text="You are not connected to the internet"
 	exit
 fi
 #remove old files before downloading new ones
