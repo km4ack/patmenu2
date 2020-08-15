@@ -6,8 +6,8 @@ LOGO=$MYPATH/pmlogo.png
 DELETEALIAS(){
 
 PATCONFIG=$HOME/.wl2k/config.json
-OUTFILE=/run/user/1000/currentlist.txt
-TEMP=/run/user/1000/patconfig.txt
+OUTFILE=/run/user/$UID/currentlist.txt
+TEMP=/run/user/$UID/patconfig.txt
 WHO=$(whoami)
 
 jq .connect_aliases $PATCONFIG | sed '/^}/d' | sed '/^{/d' | sed 's/^ *//g' > $OUTFILE
@@ -265,7 +265,7 @@ exit
 
 RESTORECONFIG(){
 CONFIG=$HOME/.wl2k/config.json
-OUTFILE=/run/user/1000/config.list
+OUTFILE=/run/user/$UID/config.list
 WHO=$(whoami)
 
 ls $HOME/.wl2k/ | grep .bkup > $OUTFILE
