@@ -28,7 +28,7 @@ exit
 #	AUTO Download List
 #--------------------------------
 AUTODOWN(){
-FILE=/run/user/1000/cronbkup.txt
+FILE=/run/user/$UID/cronbkup.txt
 crontab -l > $FILE
 HOURS=00,01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,17,18,19,20,21,22,23
 MINS=00,15,30,45
@@ -70,9 +70,9 @@ fi
 #	GRID SEARCH
 #--------------------------------
 GRIDSEARCH(){
-OUTFILE=/run/user/1000/tempardoplist.txt
+OUTFILE=/run/user/$UID/tempardoplist.txt
 CONFIG=$HOME/.wl2k/config.json
-TEMP=/run/user/1000/tempconfig.txt
+TEMP=/run/user/$UID/tempconfig.txt
 ARDOPLIST=$MYPATH/ardop-list
 WHO=$(whoami)
 source $MYPATH/config	#patmenu config file
@@ -124,9 +124,9 @@ if [ $QUIT = 2 ] && [ "$BAND" = '2M-70CM' ]; then
 
 
 FILE=$MYPATH/ardop-list/packet.txt
-TEMP=/run/user/1000/temppacket.txt
-TEMP1=/run/user/1000/templist.txt
-TEMP2=/run/user/1000/tempalias.txt
+TEMP=/run/user/$UID/temppacket.txt
+TEMP1=/run/user/$UID/templist.txt
+TEMP2=/run/user/$UID/tempalias.txt
 
 echo "Grid search is $GRID"
 
@@ -187,7 +187,7 @@ fi
 
 #############ARDOP SEARCH####################
 
-OUTFILE2=/run/user/1000/tempardop2.txt
+OUTFILE2=/run/user/$UID/tempardop2.txt
 
 if [ $BAND = 20 ];then
 FILE=$ARDOPLIST/20mardoplist.txt
@@ -206,7 +206,7 @@ echo "80 done"
 fi
 
 INFO=$(PARSER='OFS="\n" {print $1, $2, $3, $4, $5, $6, $7, $9, $11}'
-MYTEMP=/run/user/1000/mytemptestardoplist
+MYTEMP=/run/user/$UID/mytemptestardoplist
 tail -50 $OUTFILE | awk "$PARSER" | \
 yad --title="Search Results" --width=1100 --height=500 \
     --image $LOGO --window-icon=$LOGO --image-on-top --multiple \
@@ -236,7 +236,7 @@ FREQ=$(echo $SC | sed 's/.*=//')
 jq '.connect_aliases += {'\""$CALL-$BAND"M"-$FREQ"\"' : '\"$SC\"'}' $CONFIG > $TEMP
 cp $TEMP $CONFIG
 rm $TEMP
-done < /run/user/1000/mytemptestardoplist
+done < /run/user/$UID/mytemptestardoplist
 sudo killall pat
 sudo systemctl start pat@$WHO
 
