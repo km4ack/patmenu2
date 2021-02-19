@@ -1,0 +1,145 @@
+MYPATH=$HOME/patmenu2
+MAIN=$MYPATH/./manage-inbox
+LOGO=$MYPATH/pmlogo.png
+VERSION=$(cat $MYPATH/changelog | grep release | head -1 | sed 's/release=//')
+
+source $MYPATH/config
+
+IN=$HOME/.wl2k/mailbox/$MYCALLSIGN/in
+ARCHIVE=$HOME/.wl2k/mailbox/$MYCALLSIGN/archive
+SENT=$HOME/.wl2k/mailbox/$MYCALLSIGN/sent
+
+ARCHIVE-ALL(){
+mv $IN/* $ARCHIVE/
+yad --form --width=420 --height=100 --text-align=center --center --title="Pat Menu" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Pat Menu</b> by KM4ACK\rv$VERSION\rEmails Archived" \
+--button=gtk-ok
+$MAIN &
+}
+
+DELETE-ARCHIVE (){
+yad --form --width=420 --text-align=center --center --title="Pat Menu" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Pat Menu</b> by KM4ACK\rv$VERSION\r<b>ARE YOU SURE YOU WANT TO DELETE\rALL ITEMS FROM YOUR ARCHIVE FOLDER?\rTHIS CAN'T BE UNDONE</b>" \
+--button="Yes I'm Sure":2 \
+--button="No":1
+BUT=$?
+if [ $BUT = 1 ]; then
+$MAIN &
+exit 0
+elif [ $BUT = 252 ]; then
+exit
+elif [ $BUT = 2 ]; then
+rm $ARCHIVE/*
+yad --form --width=420 --height=100 --text-align=center --center --title="Pat Menu" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Pat Menu</b> by KM4ACK\rv$VERSION\rArchives Deleted" \
+--button=gtk-ok
+$MAIN &
+fi
+}
+
+DELETE-SENT(){
+yad --form --width=420 --text-align=center --center --title="Pat Menu" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Pat Menu</b> by KM4ACK\rv$VERSION\r<b>ARE YOU SURE YOU WANT TO DELETE\rALL ITEMS FROM YOUR SENT FOLDER?\rTHIS CAN'T BE UNDONE</b>" \
+--button="Yes I'm Sure":2 \
+--button="No":1
+BUT=$?
+if [ $BUT = 1 ]; then
+$MAIN &
+exit 0
+elif [ $BUT = 252 ]; then
+exit
+elif [ $BUT = 2 ]; then
+rm $SENT/*
+yad --form --width=420 --height=100 --text-align=center --center --title="Pat Menu" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Pat Menu</b> by KM4ACK\rv$VERSION\rSent Emails Deleted" \
+--button=gtk-ok
+$MAIN &
+fi
+}
+
+EMAILBKUP(){
+CONFIG=$HOME/.wl2k/config.json
+WHO=$(whoami)
+CALL=$(cat $HOME/.wl2k/config.json | grep -m 1 mycall | sed 's/\"mycall\": \"//' | sed 's/\",//' | sed -e 's/^\s*//' | tr '[:lower:]' '[:upper:]')
+BKUPTIME=$(date +%Y%d%m-%H%M)
+
+BACKUP=$(yad --form --width=420 --text-align=center --center --title="Email Backup" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Email Backup</b> by KM4ACK" \
+--field="Backup Directory":DIR \
+--button="Backup Emails":2 \
+--button="Cancel":1)
+BUT=$?
+
+if [ $BUT = 252 ]; then
+exit
+elif [ $BUT = 1 ]; then
+$MAIN
+exit
+fi
+
+DIR=$(echo $BACKUP | awk -F "|" '{print $1}')
+
+cp -r $HOME/.wl2k/mailbox/$CALL $DIR/email.bkup.$BKUPTIME
+
+if [ -d $DIR/email.bkup.$BKUPTIME ]; then
+yad --center --text="Backup Complete" \
+--button=gtk-ok
+$MAIN &
+exit
+fi
+}
+
+
+EMAILRESTORE(){
+MYPATH=$HOME/dev/patmenu2
+CONFIG=$HOME/.wl2k/config.json
+WHO=$(whoami)
+CALL=$(cat $HOME/.wl2k/config.json | grep -m 1 mycall | sed 's/\"mycall\": \"//' | sed 's/\",//' | sed -e 's/^\s*//' | tr '[:lower:]' '[:upper:]')
+
+RESTORE=$(yad --form --width=420 --text-align=center --center --title="Email Restore" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Email Restore</b> by KM4ACK" \
+--field="Restore Directory":DIR \
+--button="Restore Emails":2 \
+--button="Cancel":1)
+BUT=$?
+
+if [ $BUT = 252 ]; then
+exit
+elif [ $BUT = 1 ]; then
+$MAIN
+exit
+fi
+
+DIR=$(echo $RESTORE | awk -F "|" '{print $1}')
+DIRCHECK=$(ls $DIR)
+COUNT=${#DIRCHECK}
+if [ "$COUNT" = 19 ]; then
+cp $DIR/archive/* $HOME/.wl2k/mailbox/$CALL/archive/
+cp $DIR/in/* $HOME/.wl2k/mailbox/$CALL/in/
+cp $DIR/out/* $HOME/.wl2k/mailbox/$CALL/out/
+cp $DIR/sent/* $HOME/.wl2k/mailbox/$CALL/sent/
+yad --form --width=420 --text-align=center --center --title="Email Restore" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Email Restore</b> by KM4ACK\r\r<b>RESTORE COMPLETE</b>" \
+--button=gtk-ok
+else
+yad --form --width=420 --text-align=center --center --title="Email Restore" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Email Restore</b> by KM4ACK\r\r<b>Not a valid restore directory</b>" \
+--button=gtk-ok
+fi
+exit
+
+}
+
+
+
+
+
