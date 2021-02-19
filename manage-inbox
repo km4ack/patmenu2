@@ -1,0 +1,27 @@
+#!/bin/bash
+
+export MYPATH=$HOME/patmenu2
+LOGO=$MYPATH/pmlogo.png
+MAIN=$MYPATH/./patmenu
+VERSION=$(cat $MYPATH/changelog | grep release | head -1 | sed 's/release=//')
+
+CALL=$(grep mycall ~/.wl2k/config.json | head -1 | sed 's/"//g;s/mycall: //;s/,//;s/ //g')
+
+
+yad --form --width=420 --text-align=center --center --title="Pat Menu" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Pat Menu</b> by KM4ACK\rv$VERSION" \
+--field="Archive All Email":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/manage-inbox-functions; ARCHIVE-ALL"' \
+--field="Delete Archived Email":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/manage-inbox-functions; DELETE-ARCHIVE"' \
+--field="Delete Sent Email":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/manage-inbox-functions; DELETE-SENT"' \
+--field="Backup Email":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/manage-inbox-functions; EMAILBKUP"' \
+--field="Restore Email":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/manage-inbox-functions; EMAILRESTORE"' \
+--button="Main Menu":1
+BUT=$?
+
+if [ $BUT = 1 ]; then
+$MAIN &
+exit
+elif [ $BUT = 252 ]; then
+exit 0
+fi
