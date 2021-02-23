@@ -113,7 +113,7 @@ BUT=$?
 if [ $BUT = 252 ]; then
 exit
 elif [ $BUT = 1 ]; then
-$MAIN
+$MAIN &
 exit
 fi
 
@@ -135,6 +135,7 @@ yad --form --width=420 --text-align=center --center --title="Email Restore" --te
 --text="<b>Email Restore</b> by KM4ACK\r\r<b>Not a valid restore directory</b>" \
 --button=gtk-ok
 fi
+$MAIN &
 exit
 
 }
