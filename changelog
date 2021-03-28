@@ -1,7 +1,17 @@
-release=2.2.2
+release=2.3.0
 
 
 Changelog
+2.3.0	Add new mailbox management section
+		archive all email
+		delete archives
+		delete sent
+	Add listen modes to manage pat winlink section
+	add mailbox management to main menu
+	move email backup to inbox manage
+	move email restore to inbox manage
+	fix program exit after email restore
+	add quick stats
 2.2.2	Update Find Gateway Code for Packet in FA-functions
 	Add manual grid update
 	update logo to white background

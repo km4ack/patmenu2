@@ -133,7 +133,50 @@ exit
 fi
 }
 
+STATS(){
+CONFIG=$HOME/.wl2k/config.json
+SMD=/lib/systemd/system/pat@.service
+CALL=$(grep mycall  $CONFIG | head -1 | sed s'/"mycall": //;s/"//g;s/,//;s/ //g')
+GRID=$(grep locator  $CONFIG | sed 's/"//g;s/locator://;s/,//;s/ //g')
+ARDOPMAX=$(grep -i max $CONFIG | sed 's/"Max":\ //;s/ //g')
+PTT=$(grep ptt_ctrl $CONFIG | tail -1 | sed 's/"ptt_ctrl":\ //;s/,//;s/ //g')
+PORT=$(grep http_addr $CONFIG | sed 's/^.*0://;s/",//')
+RIG=$(grep RIGCONTROL $HOME/patmenu2/config | sed 's/RIGCONTROL=//')
+TELNET=$(grep telnet, $SMD)
+ARDOP=$(grep ardop, $SMD)
+AX25=$(grep ax25, $SMD)
+#Set telnet variable
+	if [ -n "$TELNET" ]; then
+	TELNET="telnet,"
+	fi
+#set ardop variable
+	if [ -n "$ARDOP" ]; then
+	ARDOP="ardop,"
+	fi
+#set ax25 variable
+	if [ -n "$AX25" ]; then
+	AX25="ax25,"
+	fi
+if [ -z "$TELNET" ] && [ -z "$ARDOP" ] && [ -z "$AX25" ]; then
+LISTEN="Not Listening"
+else
+LISTEN="$TELNET$ARDOP$AX25"
+fi
 
+yad --form --width=320 --text-align=center --center --title="Quick Stats" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Quick Stats</b>" \
+--field="Current User":RO "$CALL" \
+--field="Current Grid":RO "$GRID" \
+--field="ARDOP Speed":RO "$ARDOPMAX" \
+--field="ARDOP PTT is":RO "$PTT" \
+--field="Listen Modes":RO "$LISTEN" \
+--field="Rig Control":RO "$RIG" \
+--field="Pat Port":RO "$PORT" \
+--button=gtk-ok
+$MAIN &
+exit
+}
 
 
 

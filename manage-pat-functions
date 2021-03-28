@@ -180,89 +180,6 @@ exit
 fi
 }
 
-
-
-
-EMAILBKUP(){
-CONFIG=$HOME/.wl2k/config.json
-WHO=$(whoami)
-CALL=$(cat $HOME/.wl2k/config.json | grep -m 1 mycall | sed 's/\"mycall\": \"//' | sed 's/\",//' | sed -e 's/^\s*//' | tr '[:lower:]' '[:upper:]')
-BKUPTIME=$(date +%Y%d%m-%H%M)
-
-BACKUP=$(yad --form --width=420 --text-align=center --center --title="Email Backup" --text-align=center \
---image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
---text="<b>Email Backup</b> by KM4ACK" \
---field="Backup Directory":DIR \
---button="Backup Emails":2 \
---button="Cancel":1)
-BUT=$?
-
-if [ $BUT = 252 ]; then
-exit
-elif [ $BUT = 1 ]; then
-$MAIN
-exit
-fi
-
-DIR=$(echo $BACKUP | awk -F "|" '{print $1}')
-
-cp -r $HOME/.wl2k/mailbox/$CALL $DIR/email.bkup.$BKUPTIME
-
-if [ -d $DIR/email.bkup.$BKUPTIME ]; then
-yad --center --text="Backup Complete" \
---button=gtk-ok
-$MAIN &
-exit
-fi
-}
-
-
-EMAILRESTORE(){
-MYPATH=$HOME/dev/patmenu2
-CONFIG=$HOME/.wl2k/config.json
-WHO=$(whoami)
-CALL=$(cat $HOME/.wl2k/config.json | grep -m 1 mycall | sed 's/\"mycall\": \"//' | sed 's/\",//' | sed -e 's/^\s*//' | tr '[:lower:]' '[:upper:]')
-
-RESTORE=$(yad --form --width=420 --text-align=center --center --title="Email Restore" --text-align=center \
---image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
---text="<b>Email Restore</b> by KM4ACK" \
---field="Restore Directory":DIR \
---button="Restore Emails":2 \
---button="Cancel":1)
-BUT=$?
-
-if [ $BUT = 252 ]; then
-exit
-elif [ $BUT = 1 ]; then
-$MAIN
-exit
-fi
-
-DIR=$(echo $RESTORE | awk -F "|" '{print $1}')
-DIRCHECK=$(ls $DIR)
-COUNT=${#DIRCHECK}
-if [ "$COUNT" = 19 ]; then
-cp $DIR/archive/* $HOME/.wl2k/mailbox/$CALL/archive/
-cp $DIR/in/* $HOME/.wl2k/mailbox/$CALL/in/
-cp $DIR/out/* $HOME/.wl2k/mailbox/$CALL/out/
-cp $DIR/sent/* $HOME/.wl2k/mailbox/$CALL/sent/
-yad --form --width=420 --text-align=center --center --title="Email Restore" --text-align=center \
---image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
---text="<b>Email Restore</b> by KM4ACK\r\r<b>RESTORE COMPLETE</b>" \
---button=gtk-ok
-else
-yad --form --width=420 --text-align=center --center --title="Email Restore" --text-align=center \
---image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
---text="<b>Email Restore</b> by KM4ACK\r\r<b>Not a valid restore directory</b>" \
---button=gtk-ok
-fi
-exit
-
-}
-
-
-
-
 RESTORECONFIG(){
 CONFIG=$HOME/.wl2k/config.json
 OUTFILE=/run/user/$UID/config.list
@@ -441,7 +358,102 @@ yad --form --width=400 --text-align=center --center --title="Grid Update" --text
 $MAIN
 }
 
+LISTEN(){
+#This funtion sets the listen modes for Pat Winlink
+WHO=$(whoami)
+TEMP=/run/user/$UID/listen.txt
+NOW=$(grep ExecStart /lib/systemd/system/pat@.service | sed 's|ExecStart=/usr/bin/pat -l||;s/http//')
+if [ $NOW = 'ExecStart=/usr/bin/pat' ]; then
+NOW="Not listening for incoming connections"
+fi
 
+LISTEN=$(yad --center --list --checklist --width=600 --height=300 --separator="|" \
+--image $LOGO --column=Check --column=Mode --column=Description \
+--print-column=2 --window-icon=$LOGO --image-on-top --text-align=center \
+--text="<b>Pat Listen Modes</b>\rCurrently Listening on:\r$NOW" --title="Pat Menu" \
+false "TELNET" "Connection over Internet or Mesh" \
+false "AX25" "Packet Connections 2M-440" \
+false "ARDOP" "HF Connections using ARDOP Modem" \
+--button="Main Menu":1 \
+--button="Set Listen Mode":2 \
+--button="Stop Listening":3)
+BUT=$?
+if [ $BUT = 252 ]; then
+exit
+elif [ $BUT = 1 ]; then
+$MAIN &
+exit
+elif [ $BUT = 2 ]; then
+#Send results to temp file.
+echo $LISTEN > $TEMP
+#check temp file for what's there
+TELNET=$(grep TELNET $TEMP)
+ARDOP=$(grep ARDOP $TEMP)
+AX25=$(grep AX25 $TEMP)
+#Set telnet variable
+	if [ -n "$TELNET" ]; then
+	TELNET="telnet,"
+	fi
+#set ardop variable
+	if [ -n "$ARDOP" ]; then
+	ARDOP="ardop,"
+	fi
+#set ax25 variable
+	if [ -n "$AX25" ]; then
+	AX25="ax25,"
+	fi
+cat <<EOF > $TEMP
+[Unit]
+Description=pat - Winlink client for %I
+Documentation=https://github.com/la5nta/pat/wiki
+After=ax25.service network.target
+
+[Service]
+User=%i
+ExecStart=/usr/bin/pat http
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+EOF
+#add listen modes set by user
+sed -i "s|Exec.*|ExecStart=/usr/bin/pat -l $TELNET$ARDOP$AX25 http|" $TEMP
+sudo cp $TEMP /lib/systemd/system/pat@.service
+sudo systemctl daemon-reload
+sudo systemctl restart pat@$WHO
+yad --form --width=320 --text-align=center --center --title="Listening" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Listen mode set to $TELNET$ARDOP$AX25</b>" \
+--button=gtk-ok
+$MAIN &
+exit
+
+elif [ $BUT = 3 ]; then
+cat <<EOF > $TEMP
+[Unit]
+Description=pat - Winlink client for %I
+Documentation=https://github.com/la5nta/pat/wiki
+After=ax25.service network.target
+
+[Service]
+User=%i
+ExecStart=/usr/bin/pat http
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+EOF
+sudo cp $TEMP /lib/systemd/system/pat@.service
+sudo systemctl daemon-reload
+sudo systemctl restart pat@$WHO
+fi
+yad --form --width=320 --text-align=center --center --title="Listening" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>No longer listening for incoming connections</b>" \
+--button=gtk-ok
+$MAIN &
+exit
+}
 
 
 
