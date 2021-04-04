@@ -272,7 +272,114 @@ MAP=$MYPATH/worldgridmap.pdf
 fi
 xdg-open $MAP
 }
+#--------------------------------
+#	Alternate Grid Download
+#--------------------------------
+#make new dir in pat menu dir if needed
+mkdir -p $HOME/patmenu2/alt-ardop-list
 
+ALTGRID(){
+#check internet connection
+echo "Please wait while we check your internet connection"
+echo "This may take up to a minute"
+wget -q --tries=5 --timeout=10 --spider http://google.com #| yad --center --progress --pulsate --timeout-indicator=top --auto-close --no-buttons --text="Checking internet connection"
+if [[ $? -eq 0 ]]; then
+#yad --center --timeout=2 --timeout-indicator=top --no-buttons --text="Connection Detected" &
+        echo "Connection detected"
+else
+yad --center --timeout=3 --timeout-indicator=top --no-buttons --text="You are not connected to the internet"
+	exit
+fi
+
+#Create temp config file to use for downloads
+MAINFILE=$HOME/.wl2k/config.json
+TEMPFILE=/run/user/$UID/config.json
+cp $MAINFILE $TEMPFILE
+
+GRID=$(yad --form --width=420 --text-align=center --center --title="Pat Log In/Out" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Pat Log In/Out</b> by KM4ACK" \
+--field="Alt Grid" "" \
+--button="Download Gateway List":2 \
+--button="Cancel":1)
+BUT=$?
+if [ $BUT = 252 ]; then
+exit
+elif [ $BUT = 1 ]; then
+$MAIN &
+exit
+fi
+GRID=$(echo $GRID | awk -F "|" '{print $1}')
+
+sed -i "s/\"locator\":.*/\"locator\": \"$GRID\",/" $TEMPFILE
+
+#Download the files
+FOLDER=$HOME/patmenu2/alt-ardop-list/ardop-list-$GRID
+mkdir -p $FOLDER
+echo "downloading....please wait"
+	DL(){
+	pat --config /run/user/1000/config.json rmslist -s --band 80m --mode ardop --force-download > $FOLDER/80mardoplist.txt
+	pat --config /run/user/1000/config.json rmslist -s --band 40m --mode ardop --force-download > $FOLDER/40mardoplist.txt
+	pat --config /run/user/1000/config.json rmslist -s --band 30m --mode ardop --force-download > $FOLDER/30mardoplist.txt
+	pat --config /run/user/1000/config.json rmslist -s --band 20m --mode ardop --force-download > $FOLDER/20mardoplist.txt
+	pat --config /run/user/1000/config.json rmslist -s --mode packet --force-download > $FOLDER/packet.txt
+	yad --center --timeout=2 --timeout-indicator=top --no-buttons --text="Downloads Done" &
+	}
+DL | yad --center --progress --pulsate --auto-close --no-buttons --text-align=center \
+--text="Downloading....This takes ~30 seconds\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the download."
+rm $TEMPFILE
+$MAIN &
+exit
+}
+#--------------------------------
+#	Load Alternate Grid List
+#--------------------------------
+LOADALTGRID(){
+OUTFILE=/run/user/$UID/alt-grid.list
+
+ls $HOME/patmenu2/alt-ardop-list > $OUTFILE
+
+LIST=$(PARSER='OFS="\n" {print $1}'
+
+tail -10 $OUTFILE | awk "$PARSER" | \
+yad --title="Load Packet List" --width=300 --height=500 \
+    --image $LOGO --window-icon=$LOGO --image-on-top \
+    --center --list --text="Choose List to Load" \
+    --column List-to-Load \
+    --button="Cancel":1 \
+    --button="Load List":2 \
+    --button="Delete All Lists":3)
+BUT=$?
+LIST=$(echo $LIST | awk -F "|" '{print $1}')
+echo $LIST
+if [ $BUT = 252 ]; then
+exit
+elif [ $BUT = 1 ]; then
+$MAIN &
+exit
+elif [ $BUT = 3 ]; then
+yad --title="Delete List" --width=100 --height=100 \
+    --image $LOGO --window-icon=$LOGO --image-on-top \
+    --center --text="Are You Sure?" \
+    --button="YES":1 \
+    --button="NO":2
+BUT=$?
+	if [ $BUT = 1 ]; then
+	rm -rf $HOME/patmenu2/alt-ardop-list
+	yad --center --timeout=2 --timeout-indicator=top --no-buttons --text="Alt Lists Deleted"
+	$MAIN &
+	exit
+	fi
+$MAIN &
+exit
+fi
+cp -r $HOME/patmenu2/alt-ardop-list/$LIST/* $HOME/patmenu2/ardop-list/
+LIST=$(echo $LIST | sed 's/ardop-list-//')
+yad --center --timeout=2 --timeout-indicator=top --no-buttons --text="Grid $LIST Loaded"
+echo "GRID=$LIST" > $HOME/patmenu2/.grid
+$MAIN &
+exit
+}
 
 
 
