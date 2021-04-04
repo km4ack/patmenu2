@@ -373,6 +373,15 @@ BUT=$?
 $MAIN &
 exit
 fi
+#backup home grid before loading alt grid
+HOMEGRID=$(grep locator $HOME/.wl2k/config.json | sed 's/"//g;s/locator://;s/,//;s/ //g')
+if [ ! -d $HOME/patmenu2/alt-ardop-list/ardop-list-$HOMEGRID ]; then
+echo "Backing up home grid"
+mkdir -p $HOME/patmenu2/alt-ardop-list/ardop-list-$HOMEGRID
+cp $HOME/patmenu2/ardop-list/* $HOME/patmenu2/alt-ardop-list/ardop-list-$HOMEGRID
+fi
+
+#load alt grid
 cp -r $HOME/patmenu2/alt-ardop-list/$LIST/* $HOME/patmenu2/ardop-list/
 LIST=$(echo $LIST | sed 's/ardop-list-//')
 yad --center --timeout=2 --timeout-indicator=top --no-buttons --text="Grid $LIST Loaded"
