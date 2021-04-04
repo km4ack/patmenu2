@@ -145,6 +145,7 @@ RIG=$(grep RIGCONTROL $HOME/patmenu2/config | sed 's/RIGCONTROL=//')
 TELNET=$(grep telnet, $SMD)
 ARDOP=$(grep ardop, $SMD)
 AX25=$(grep ax25, $SMD)
+PAT=$(pidof pat)
 #Set telnet variable
 	if [ -n "$TELNET" ]; then
 	TELNET="telnet,"
@@ -163,6 +164,13 @@ else
 LISTEN="$TELNET$ARDOP$AX25"
 fi
 
+#set Pat Variable
+if [ -z $PAT ]; then
+PAT="Not Running"
+else
+PAT="Running"
+fi
+
 yad --form --width=320 --text-align=center --center --title="Quick Stats" --text-align=center \
 --image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
 --text="<b>Quick Stats</b>" \
@@ -173,6 +181,7 @@ yad --form --width=320 --text-align=center --center --title="Quick Stats" --text
 --field="Listen Modes":RO "$LISTEN" \
 --field="Rig Control":RO "$RIG" \
 --field="Pat Port":RO "$PORT" \
+--field="Pat Server":RO "$PAT" \
 --button=gtk-ok
 $MAIN &
 exit
