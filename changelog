@@ -5,6 +5,7 @@ Changelog
 2.4.0	Add pat server status to quick stats https://github.com/km4ack/patmenu2/issues/25
 	Add alternate grid download
 	Add alternate grid selection
+	Add backup home grid ardop list files
 2.3.0	Add new mailbox management section
 		archive all email
 		delete archives
