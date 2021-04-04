@@ -28,7 +28,7 @@ yad --form --width=480 --text="<b>Find Gateways</b> by KM4ACK" --text-align=cent
 --field="Download Alternate Grid Gateway List":fbtn 'bash -c "kill -USR1 $YAD_PID; source /home/pi/patmenu2/FA-functions; ALTGRID"' \
 --field="Load Alternate Grid Gateway List":fbtn 'bash -c "kill -USR1 $YAD_PID; source /home/pi/patmenu2/FA-functions; LOADALTGRID"' \
 --field="Auto Download Home Grid List <b>$CURRENT</b>":fbtn 'bash -c "kill -USR1 $YAD_PID; source /home/pi/patmenu2/FA-functions; AUTODOWN"' \
---field="Primary $LASTDL":LBL \
+--field="Home $LASTDL":LBL \
 --field="Grid List Currently Loaded <b>$GRID</b>":LBL \
 --button="Main Menu":1
 
