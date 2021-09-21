@@ -6,6 +6,10 @@ Changelog
 	Add alternate grid download
 	Add alternate grid selection
 	Add backup home grid ardop list files
+	Add manage forms
+	Add auto forms download - https://github.com/km4ack/patmenu2/issues/30
+	fix issue 26 https://github.com/km4ack/patmenu2/issues/26
+	fix issue 24 https://github.com/km4ack/patmenu2/issues/24
 2.3.0	Add new mailbox management section
 		archive all email
 		delete archives
