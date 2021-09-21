@@ -97,8 +97,7 @@ sed -i "s/\"mycall\": \".*\",/\"mycall\": \"$CALLSIGN\",/" $CONFIG
 sed -i "s/\"secure_login_password\": \".*\",/\"secure_login_password\": \"$PASS\",/" $CONFIG
 #set locator
 sed -i "s/\"locator\": \".*\",/\"locator\": \"$GRID\",/" $CONFIG
-sudo killall pat
-sudo systemctl start pat@$WHO
+sudo systemctl restart pat@$WHO
 $MAIN &
 exit
 elif [ $BUT = 3 ]; then
