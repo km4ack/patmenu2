@@ -24,7 +24,7 @@ cat $OUTFILE | awk 'OFS="\n" {print $1, $2}'
 
 REMOVE=$(PARSER='OFS="\n" {print $1, $2}'
 
-tail -10 $OUTFILE | awk "$PARSER" | \
+tail -50 $OUTFILE | awk "$PARSER" | \
 yad --title="Current Alias List" --width=1100 --height=500 \
     --image $LOGO --window-icon=$LOGO --image-on-top \
     --center --list --text="<b>Select Alias to Delete</b>" \
