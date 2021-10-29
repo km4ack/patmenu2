@@ -31,6 +31,7 @@ yad --form --width=420 --text-align=center --center --title="Pat Menu" --text-al
 --field="Pat Catalog":fbtn 'bash -c "kill -USR1 $YAD_PID; $MYPATH/catalog"' \
 --field="Manage Inbox":fbtn 'bash -c "kill -USR1 $YAD_PID; $MYPATH/manage-inbox"' \
 --field="Manage Pat Winlink":fbtn 'bash -c "kill -USR1 $YAD_PID; $MYPATH/manage-pat"' \
+--field="Manage Winlink Forms":fbtn 'bash -c "kill -USR1 $YAD_PID; $MYPATH/manage-forms"' \
 --field="Settings/Config":fbtn 'bash -c "kill -USR1 $YAD_PID; $MYPATH/manage-menu"' \
 --field="Quick Stats":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/pat-functions; STATS"' \
 --field="My Call - $MYCALLSIGN":LBL \

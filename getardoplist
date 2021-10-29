@@ -42,6 +42,8 @@ FORTY=$MYPATH'40mardoplist.txt'
 TWENTY=$MYPATH'20mardoplist.txt'
 THIRTY=$MYPATH'30mardoplist.txt'
 PACKET=$MYPATH'packet.txt'
+GRID=$(grep locator ~/.wl2k/config.json | sed 's/"locator"://;s/"//g;s/,//;s/ //g')
+echo "GRID=$GRID" > $HOME/patmenu2/.grid
 
 #check internet connection
 echo "Please wait while we check your internet connection"

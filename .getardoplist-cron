@@ -30,6 +30,9 @@ echo "Distances/Bearings will not be accurate"
 exit
 fi
 
+GRID=$(grep locator ~/.wl2k/config.json | sed 's/"locator"://;s/"//g;s/,//;s/ //g')
+echo "GRID=$GRID" > $HOME/patmenu2/.grid
+
 #make directory if it doesn't exist
 mkdir -p $MYPATH
 
@@ -40,6 +43,7 @@ FORTY=$MYPATH'40mardoplist.txt'
 TWENTY=$MYPATH'20mardoplist.txt'
 THIRTY=$MYPATH'30mardoplist.txt'
 PACKET=$MYPATH'packet.txt'
+
 
 #check internet connection
 echo "Please wait while we check your internet connection"

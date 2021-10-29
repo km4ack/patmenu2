@@ -1,0 +1,57 @@
+MYPATH=$HOME/patmenu2
+MAIN=$MYPATH/./manage-forms
+LOGO=$MYPATH/pmlogo.png
+
+DOWNLOAD(){
+#yad --center --timeout=3 --timeout-indicator=top --no-buttons --text="Downloading Forms - Please wait" \
+#--image $LOGO --window-icon=$LOGO --image-on-top &
+lxterminal -e /usr/bin/pat updateforms
+yad --center --timeout=3 --timeout-indicator=top --no-buttons --text="Forms Download Complete" \
+--image $LOGO --window-icon=$LOGO --image-on-top
+exit &
+$MAIN
+}
+
+AUTO-DOWNLOAD(){
+CHOICE="Weekly,At-Boot"
+FREQ=$(yad --center --wrap --width=350 --title="Auto Download" --text-align=center \
+--text="Download Weekly or at boot?" \
+--image $LOGO --window-icon=$LOGO --image-on-top \
+--button="Update:2" \
+--button="Cancel:1" \
+--form --separator="," --item-separator="," \
+--field="Choose":CB $CHOICE \ 
+)
+BUT=$?
+FREQ=$(echo $FREQ | awk -F "|" '{print $1}' | sed 's/,//')
+if [ $FREQ = 'At-Boot' ]; then
+FREQ=@reboot
+fi
+echo "FREQ = $FREQ"
+if [ $BUT = 1 ]; then
+exit &
+$MAIN
+elif [ $BUT = 252 ]; then
+exit
+elif [ $BUT = 2 ]; then
+echo "updating cron"
+FILE=/run/user/$UID/cron.txt
+crontab -l > $FILE
+sed -i '/updateforms$/d' $FILE
+	if [ $FREQ = '@reboot' ]; then
+	TEXT="@reboot sleep 10 && /usr/bin/pat updateforms"
+	FREQ="At-Boot"
+	else
+	TEXT="0 4 * * 6 /usr/bin/pat updateforms"
+	FREQ="Weekly"
+	fi
+echo "$TEXT" >> $FILE
+crontab $FILE
+rm $FILE
+exit &
+yad --center --timeout=3 --timeout-indicator=top --no-buttons --text="Auto download set to $FREQ" \
+--image $LOGO --window-icon=$LOGO --image-on-top
+$MAIN
+fi
+
+}
