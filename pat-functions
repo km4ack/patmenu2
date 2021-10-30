@@ -3,6 +3,7 @@
 MYPATH=$HOME/patmenu2
 LOGO=$MYPATH/pmlogo.png
 MAIN=$MYPATH/./patmenu
+PATCONFIG=$XDG_CONFIG_HOME/pat/config.json
 
 AUTOPAT(){
 
@@ -134,7 +135,7 @@ fi
 }
 
 STATS(){
-CONFIG=$HOME/.wl2k/config.json
+CONFIG=$PATCONFIG
 SMD=/lib/systemd/system/pat@.service
 CALL=$(grep mycall  $CONFIG | head -1 | sed s'/"mycall": //;s/"//g;s/,//;s/ //g')
 GRID=$(grep locator  $CONFIG | sed 's/"//g;s/locator://;s/,//;s/ //g')
