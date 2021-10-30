@@ -4,7 +4,7 @@
 #20191126 km4ack
 
 MYPATH=$HOME/patmenu2
-FILE=/run/user/1000/cronbkup.txt
+FILE=/run/user/$UID/cronbkup.txt
 
 crontab -l > $FILE
 
