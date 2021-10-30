@@ -5,9 +5,10 @@
 MYPATH=$HOME/patmenu2
 LOGO=$MYPATH/pmlogo.png
 MAIN=$MYPATH/./catalog
+PATCONFIG=XDG_CONFIG_HOME/pat/config.json
 
 #get callsign from pat config file
-CALLSIGN=$(cat $HOME/.wl2k/config.json | grep -m 1 mycall | sed 's/\"mycall\": \"//' | sed 's/\",//' | sed -e 's/^\s*//' | tr '[:lower:]' '[:upper:]')
+CALLSIGN=$(cat $PATCONFIG | grep -m 1 mycall | sed 's/\"mycall\": \"//' | sed 's/\",//' | sed -e 's/^\s*//' | tr '[:lower:]' '[:upper:]')
 
 
 #COMPOSE EMAIL Function
@@ -25,7 +26,7 @@ TODAY1=$(date)
 NEW_UUID=$(cat /dev/urandom | tr -dc 'A-Z0-9' | fold -w 12 | head -n 1)
 
 #add .b2f to end of random number for new file name
-NEW_FILE=$HOME/.wl2k/mailbox/$CALLSIGN/out/$NEW_UUID".b2f"
+NEW_FILE=$HOME/.local/share/pat/mailbox/$CALLSIGN/out/$NEW_UUID".b2f"
 
 #create new file
 touch $NEW_FILE
