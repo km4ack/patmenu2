@@ -5,9 +5,9 @@ VERSION=$(cat $MYPATH/changelog | grep release | head -1 | sed 's/release=//')
 
 source $MYPATH/config
 
-IN=$HOME/.wl2k/mailbox/$MYCALLSIGN/in
-ARCHIVE=$HOME/.wl2k/mailbox/$MYCALLSIGN/archive
-SENT=$HOME/.wl2k/mailbox/$MYCALLSIGN/sent
+IN=$HOME/.local/share/pat/mailbox/$MYCALLSIGN/in
+ARCHIVE=$HOME/.local/share/pat/mailbox/$MYCALLSIGN/archive
+SENT=$HOME/.local/share/pat/mailbox/$MYCALLSIGN/sent
 
 ARCHIVE-ALL(){
 mv $IN/* $ARCHIVE/
@@ -63,9 +63,9 @@ fi
 }
 
 EMAILBKUP(){
-CONFIG=$HOME/.wl2k/config.json
+CONFIG=$XDG_CONFIG_HOME/pat/config.json
 WHO=$(whoami)
-CALL=$(cat $HOME/.wl2k/config.json | grep -m 1 mycall | sed 's/\"mycall\": \"//' | sed 's/\",//' | sed -e 's/^\s*//' | tr '[:lower:]' '[:upper:]')
+CALL=$(cat $XDG_CONFIG_HOME/pat/config.json | grep -m 1 mycall | sed 's/\"mycall\": \"//' | sed 's/\",//' | sed -e 's/^\s*//' | tr '[:lower:]' '[:upper:]')
 BKUPTIME=$(date +%Y%d%m-%H%M)
 
 BACKUP=$(yad --form --width=420 --text-align=center --center --title="Email Backup" --text-align=center \
@@ -85,7 +85,7 @@ fi
 
 DIR=$(echo $BACKUP | awk -F "|" '{print $1}')
 
-cp -r $HOME/.wl2k/mailbox/$CALL $DIR/email.bkup.$BKUPTIME
+cp -r $HOME/.local/share/pat/mailbox/$CALL $DIR/email.bkup.$BKUPTIME
 
 if [ -d $DIR/email.bkup.$BKUPTIME ]; then
 yad --center --text="Backup Complete" \
@@ -98,9 +98,9 @@ fi
 
 EMAILRESTORE(){
 MYPATH=$HOME/dev/patmenu2
-CONFIG=$HOME/.wl2k/config.json
+CONFIG=$XDG_CONFIG_HOME/pat/config.json
 WHO=$(whoami)
-CALL=$(cat $HOME/.wl2k/config.json | grep -m 1 mycall | sed 's/\"mycall\": \"//' | sed 's/\",//' | sed -e 's/^\s*//' | tr '[:lower:]' '[:upper:]')
+CALL=$(cat $XDG_CONFIG_HOME/pat/config.json | grep -m 1 mycall | sed 's/\"mycall\": \"//' | sed 's/\",//' | sed -e 's/^\s*//' | tr '[:lower:]' '[:upper:]')
 
 RESTORE=$(yad --form --width=420 --text-align=center --center --title="Email Restore" --text-align=center \
 --image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
@@ -121,10 +121,10 @@ DIR=$(echo $RESTORE | awk -F "|" '{print $1}')
 DIRCHECK=$(ls $DIR)
 COUNT=${#DIRCHECK}
 if [ "$COUNT" = 19 ]; then
-cp $DIR/archive/* $HOME/.wl2k/mailbox/$CALL/archive/
-cp $DIR/in/* $HOME/.wl2k/mailbox/$CALL/in/
-cp $DIR/out/* $HOME/.wl2k/mailbox/$CALL/out/
-cp $DIR/sent/* $HOME/.wl2k/mailbox/$CALL/sent/
+cp $DIR/archive/* $HOME/.local/share/pat/mailbox/$CALL/archive/
+cp $DIR/in/* $HOME/.local/share/pat/mailbox/$CALL/in/
+cp $DIR/out/* $HOME/.local/share/pat/mailbox/$CALL/out/
+cp $DIR/sent/* $HOME/.local/share/pat/mailbox/$CALL/sent/
 yad --form --width=420 --text-align=center --center --title="Email Restore" --text-align=center \
 --image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
 --text="<b>Email Restore</b> by KM4ACK\r\r<b>RESTORE COMPLETE</b>" \
