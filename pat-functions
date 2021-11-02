@@ -141,7 +141,7 @@ CALL=$(grep mycall  $CONFIG | head -1 | sed s'/"mycall": //;s/"//g;s/,//;s/ //g'
 GRID=$(grep locator  $CONFIG | sed 's/"//g;s/locator://;s/,//;s/ //g')
 ARDOPMAX=$(grep -i max $CONFIG | sed 's/"Max":\ //;s/ //g')
 PTT=$(grep ptt_ctrl $CONFIG | tail -1 | sed 's/"ptt_ctrl":\ //;s/,//;s/ //g')
-PORT=$(grep http_addr $CONFIG | sed 's/^.*0://;s/",//')
+PORT=$(grep http_addr $CONFIG | awk '{print $2}' | sed 's/.*://;s/",//')
 RIG=$(grep RIGCONTROL $HOME/patmenu2/config | sed 's/RIGCONTROL=//')
 TELNET=$(grep telnet, $SMD)
 ARDOP=$(grep ardop, $SMD)
