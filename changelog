@@ -6,6 +6,7 @@ Changelog
 	#Pat Menu 2.5 will not support older versions of Pat once it is released as stable code.
 	#For now, 2.5 will remain on a seperate branch on GitHub. The master branch will continue
 	#to support Pat v0.11 and earlier for the time being.
+	fix pat port variable in quick stats
 2.4.0	Add pat server status to quick stats https://github.com/km4ack/patmenu2/issues/25
 	Add alternate grid download
 	Add alternate grid selection
