@@ -123,7 +123,7 @@ yad --title="ARDOP MODEM" --width=400 --height=100 \
 fi
 
 #open pat inbox in browser
-export DISPLAY=:0 && chromium-browser --app=http://127.0.0.1:$PORT > /dev/null 2>&1 &
+export DISPLAY=:0 && chromium-browser http://127.0.0.1:$PORT > /dev/null 2>&1 &
 
 
 
