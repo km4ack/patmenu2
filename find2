@@ -22,12 +22,12 @@ source $MYPATH/FA-functions
 yad --form --width=480 --text="<b>Find Gateways</b> by KM4ACK" --text-align=center --center --title="Find Gateways" --text-align=center \
 --image $LOGO --window-icon=$LOGO --image-on-top \
 --text="<b>Find Gateways</b> by KM4ACK" \
---field="Search for Gateway":fbtn 'bash -c "kill -USR1 $YAD_PID; source /home/pi/patmenu2/FA-functions; GRIDSEARCH"' \
---field="View Grid Map":fbtn 'bash -c "source /home/pi/patmenu2/FA-functions; MAP"' \
---field="Download Home Grid Gateway List":fbtn 'bash -c "kill -USR1 $YAD_PID; source /home/pi/patmenu2/FA-functions; DOWNLIST"' \
---field="Download Alternate Grid Gateway List":fbtn 'bash -c "kill -USR1 $YAD_PID; source /home/pi/patmenu2/FA-functions; ALTGRID"' \
---field="Load Alternate Grid Gateway List":fbtn 'bash -c "kill -USR1 $YAD_PID; source /home/pi/patmenu2/FA-functions; LOADALTGRID"' \
---field="Auto Download Home Grid List <b>$CURRENT</b>":fbtn 'bash -c "kill -USR1 $YAD_PID; source /home/pi/patmenu2/FA-functions; AUTODOWN"' \
+--field="Search for Gateway":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/FA-functions; GRIDSEARCH"' \
+--field="View Grid Map":fbtn 'bash -c "source $MYPATH/FA-functions; MAP"' \
+--field="Download Home Grid Gateway List":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/FA-functions; DOWNLIST"' \
+--field="Download Alternate Grid Gateway List":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/FA-functions; ALTGRID"' \
+--field="Load Alternate Grid Gateway List":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/FA-functions; LOADALTGRID"' \
+--field="Auto Download Home Grid List <b>$CURRENT</b>":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/FA-functions; AUTODOWN"' \
 --field="Home $LASTDL":LBL \
 --field="Grid List Currently Loaded <b>$GRID</b>":LBL \
 --button="Main Menu":1
