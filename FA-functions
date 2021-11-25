@@ -30,7 +30,7 @@ exit
 AUTODOWN(){
 FILE=/run/user/$UID/cronbkup.txt
 crontab -l > $FILE
-HOURS=At-Boot,00,01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,17,18,19,20,21,22,23
+HOURS=Disable,At-Boot,00,01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,17,18,19,20,21,22,23
 MINS=00,15,30,45
 
 TEST=$(yad --center --wrap --width=350 --title="Auto Download" --text-align=center \
@@ -59,6 +59,12 @@ sed -i '/getardoplist/d' $FILE
 	$MAIN &
 	rm $FILE
 	exit
+	elif [ $HOUR = 'Disable' ]; then
+	sed -i s'/getardoplist-cron/d' $FILE
+	crontab $FILE
+yad --center --timeout=3 --timeout-indicator=top --no-buttons --text="Auto Download Disabled" \
+--image $LOGO --window-icon=$LOGO --image-on-top
+	$MAIN & exit
 
 	else
 
