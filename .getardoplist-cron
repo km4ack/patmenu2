@@ -22,7 +22,15 @@ MYPATH=$HOME/patmenu2/ardop-list/
 #my log file
 LOG=$HOME/Documents/mylog.txt
 
-GRIDCK=$(jq .locator $HOME/.wl2k/config.json)
+#set config file location for pat version
+VERSION=$(pat version | awk '{print $2}' | awk -F "." '{print $2}')
+if [ $VERSION -le 11 ]; then
+MYCONFIG=$HOME/.wl2k/config.json
+else
+MYCONFIG=$HOME/.config/pat/config.json
+fi
+
+GRIDCK=$(jq .locator $MYCONFIG)
 if [ ${#GRIDCK} -lt 3 ]
 then
 echo "Grid square not set in Pat Configure" | tee -a $LOG
@@ -30,7 +38,7 @@ echo "Distances/Bearings will not be accurate"
 exit
 fi
 
-GRID=$(grep locator ~/.wl2k/config.json | sed 's/"locator"://;s/"//g;s/,//;s/ //g')
+GRID=$(grep locator $MYCONFIG | sed 's/"locator"://;s/"//g;s/,//;s/ //g')
 echo "GRID=$GRID" > $HOME/patmenu2/.grid
 
 #make directory if it doesn't exist
