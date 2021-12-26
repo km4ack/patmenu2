@@ -18,6 +18,7 @@ yad --form --width=420 --text-align=center --center --title="Manage Pat" --text-
 --field="Delete Alias":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/manage-pat-functions; DELETEALIAS"' \
 --field="Backup Pat Config":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/manage-pat-functions; BKUPCONFIG"' \
 --field="Restore Pat Config":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/manage-pat-functions; RESTORECONFIG"' \
+--field="Repair Pat Config":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/manage-pat-functions; REPAIRCONFIG"' \
 --button="Main Menu":1
 BUT=$?
 

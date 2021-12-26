@@ -5,7 +5,7 @@ LOGO=$MYPATH/pmlogo.png
 
 DELETEALIAS(){
 
-PATCONFIG=$HOME/.wl2k/config.json
+PATCONFIG=$XDG_CONFIG_HOME/pat/config.json
 OUTFILE=/run/user/$UID/currentlist.txt
 TEMP=/run/user/$UID/patconfig.txt
 WHO=$(whoami)
@@ -63,7 +63,7 @@ exit
 }
 
 LOGIN(){
-CONFIG=$HOME/.wl2k/config.json
+CONFIG=$XDG_CONFIG_HOME/pat/config.json
 WHO=$(whoami)
 
 
@@ -119,7 +119,7 @@ fi
 }
 
 GPSGRID(){
-CONFIG=$HOME/.wl2k/config.json
+CONFIG=$XDG_CONFIG_HOME/pat/config.json
 
 if ! hash ruby2.3 2>/dev/null; then
 echo "Ruby Not found on system"
@@ -180,11 +180,11 @@ fi
 }
 
 RESTORECONFIG(){
-CONFIG=$HOME/.wl2k/config.json
+CONFIG=$XDG_CONFIG_HOME/pat/config.json
 OUTFILE=/run/user/$UID/config.list
 WHO=$(whoami)
 
-ls $HOME/.wl2k/ | grep .bkup > $OUTFILE
+ls $XDG_CONFIG_HOME/pat/ | grep .bkup > $OUTFILE
 
 INFO=$(PARSER='OFS="\n" {print $1}'
 
@@ -204,7 +204,7 @@ $MAIN
 exit
 fi
 FILE=$(echo $INFO | awk -F "|" '{print $1}')
-cp $HOME/.wl2k/$FILE $CONFIG
+cp $XDG_CONFIG_HOME/pat/$FILE $CONFIG
 sudo killall pat
 sudo systemctl start pat@$WHO
 yad --form --width=420 --text-align=center --center --title="Config Restore" --text-align=center \
@@ -216,7 +216,7 @@ $MAIN
 }
 
 BKUPCONFIG(){
-CONFIG=$HOME/.wl2k/config.json
+CONFIG=$XDG_CONFIG_HOME/pat/config.json
 WHO=$(whoami)
 DATE=$(date +%d%b%Y-%H%M)
 
@@ -234,7 +234,7 @@ exit
 elif [ $BUT = 2 ]; then
 echo "Backing up file"
 BKUPCONFIG=config.$DATE.bkup
-cp $CONFIG $HOME/.wl2k/$BKUPCONFIG
+cp $CONFIG $XDG_CONFIG_HOME/pat/$BKUPCONFIG
 yad --form --width=420 --text-align=center --center --title="Config Backup" --text-align=center \
 --image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
 --text="<b>Config File Backup</b> by KM4ACK\r\r<b>Backup COMPLETE</b>" \
@@ -244,7 +244,7 @@ $MAIN
 }
 
 SPEED(){
-CONFIG=$HOME/.wl2k/config.json
+CONFIG=$XDG_CONFIG_HOME/pat/config.json
 CURRENT=$(cat $CONFIG | grep -i max | sed 's/"Max":\ //' | tr -d "[:blank:]")
 WHO=$(whoami)
 NEW=$(yad --form --width=320 --text-align=center --center --title="Speed" --text-align=center \
@@ -275,7 +275,7 @@ exit
 
 SETPTT(){
 
-CONFIG=$HOME/.wl2k/config.json
+CONFIG=$XDG_CONFIG_HOME/pat/config.json
 WHO=$(whoami)
 
 CURRENT=$(cat $CONFIG | grep ptt_ctrl | tail -1 | sed 's/"ptt_ctrl":\ //' | sed 's/,//' | tr -d "[:blank:]")
@@ -321,7 +321,7 @@ exit
 MANUALGPS() {
 
 WHO=$(whoami)
-CONFIG=$HOME/.wl2k/config.json
+CONFIG=$XDG_CONFIG_HOME/pat/config.json
 
 GRID=$(yad --form --width=400 --text-align=center --center --title="Set Grid" --text-align=center \
 --image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
@@ -454,7 +454,99 @@ $MAIN &
 exit
 }
 
+REPAIRCONFIG(){
+DIR=/run/user/$UID
+WHO=$(whoami)
 
+FILECHECK=$(ls $DIR | grep config.json)
+if [ ! -z $FILECHECK ]; then
+rm $DIR/config.json*
+fi
+
+
+#Verify Pat installed and set  path variable if it is
+if ! hash pat 2>/dev/null; then
+echo "Pat Winlink not found on this system"
+exit
+else
+PATV=$(pat version | awk '{print $2}' | sed 's/v0.//' | awk -F "." '{print $1}')
+	if [ $PATV -le 11 ]; then
+	PATPATH=$HOME/.wl2k/
+	else
+	PATPATH=$XDGHOME_CONFIG_PATH/
+	fi
+fi
+
+#user input
+SETTINGS=$(yad --form --width=600 --text-align=center --center --title="Repair Config File" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Pat Menu\rConfig File Repair\r</b> by KM4ACK" \
+--field="Call Sign" "" \
+--field="Winlink Password" "" \
+--field="Six Character Grid Square" "" \
+--field="Allow access to Pat across network?":CB "YES|NO" \
+--button="Repair Config File":2 \
+--button="Cancel":1)
+BUT=$?
+if [ $BUT = 1 ]; then
+$MAIN
+elif [ $BUT = 252 ]; then
+exit
+fi
+
+#parse input into variables
+CALL=$(echo $SETTINGS | awk -F "|" '{print $1}')
+CALL=${CALL^^}
+PASSWD=$(echo $SETTINGS | awk -F "|" '{print $2}')
+GRID=$(echo $SETTINGS | awk -F "|" '{print $3}')
+GRID=${GRID^^}
+SECURE=$(echo $SETTINGS | awk -F "|" '{print $4}')
+
+
+
+if [ "$SECURE" = 'NO' ]; then
+SECURE="127.0.0.1"
+else
+SECURE="0.0.0.0"
+fi
+
+#check to see if EES is installed and set port accordingly
+if [ -f /var/www/html/celladdy.php ]; then
+PORT=5000
+else
+PORT=8080
+fi
+
+#download config.json file from km4ack github
+cd $DIR
+wget -q https://raw.githubusercontent.com/km4ack/pi-scripts/master/config.json
+
+#verify download success
+if [ $? != 0 ]; then
+yad --title="Cannot Download!" --width=300 --height=100 \
+--image $LOGO --window-icon=$LOGO --image-on-top \
+--center --text="<b>Cannot download new config file.\rCheck internet connection</b>" \
+--button=gtk-ok
+$MAIN & exit
+fi
+
+#update file with user settings
+sed -i "s/N0CALL/$CALL/" $DIR/config.json
+sed -i "s/PASSWORD/$PASSWD/" $DIR/config.json
+sed -i "s/GRID/$GRID/" $DIR/config.json
+sed -i "s/8080/$PORT/" $DIR/config.json
+sed -i "s/127.0.0.1/$SECURE/" $DIR/config.json
+
+#cp file and restart pat
+cp $DIR/config.json $PATPATH/
+sudo systemctl restart pat@$WHO
+
+yad --title="Repair Complete" --width=300 --height=100 \
+--image $LOGO --window-icon=$LOGO --image-on-top \
+--center --text="<b>Config File Repaired</b>" \
+--button=gtk-ok
+$MAIN & exit
+}
 
 
 
