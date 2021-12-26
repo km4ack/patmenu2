@@ -1,9 +1,13 @@
-release=2.5.0
+release=2.6.0
 
 
 Changelog
+2.6.0	add version check
+	add peer to peer alias
+	2.6.0 does not support version of Pat prior to v0.12.0
+
 2.5.0	update paths to accommodate Pat v0.12
-	#Pat Menu 2.5 will not support older versions of Pat once it is released as stable code.
+	#Pat Menu 2.6 will not support older versions of Pat once it is released as stable code.
 	#For now, 2.5 will remain on a seperate branch on GitHub. The master branch will continue
 	#to support Pat v0.11 and earlier for the time being.
 	fix pat port variable in quick stats
