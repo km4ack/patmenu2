@@ -12,6 +12,19 @@ VERSION=$(cat $MYPATH/changelog | grep release | head -1 | sed 's/release=//')
 
 source $MYPATH/config
 
+#verify pat is at least v0.12.0
+PAT_VER=`pat version | awk '{print $2}' | awk -F "." '{print $2}'`
+
+if [ $PAT_VER -lt 12 ]; then
+#give user notice
+yad --form --width=420 --text-align=center --center --title="Pat out of Date" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="Pat Menu only supports Pat Winlink\rversion 0.12.0 or later\r<b>Please update Pat Winlink</b>" \
+--button=gtk-ok
+exit
+fi
+
+#verify call is set
 if [ "$MYCALLSIGN" = "N0CALL" ]; then
 yad --title="N0CALL" --width=400 --height=100 \
     --image $LOGO --window-icon=$LOGO --image-on-top --text-align=center \
