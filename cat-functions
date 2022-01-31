@@ -106,13 +106,19 @@ exit
 fi
 
 if [ "$WEATHER" = 'GPS Weather' ]; then
-echo "Need GPS weather"
-	GPSDATA=$(gpspipe -r -n 10 | grep G\.GGA) #Thanks K4KDR!
-	LAT=$(echo $GPSDATA | awk -F"," '{ print $3 }'| sed 's/\.//' | sed 's/./&./2')
-	LON=$(echo $GPSDATA | awk -F"," '{ print $5 }'| sed 's/\.//' | sed 's/./&./3')
+TMPFILE=/run/user/$UID/gps-data.txt
+gpxlogger > $TMPFILE &
+CGPSPID=$(echo $!)
+sleep 2
+kill $CGPSPID
+
+DATA=$(grep lat= $TMPFILE | head -1)
+LAT=$(echo $DATA | awk '{print $2}' | sed 's/"//g;s/lat=//')
+LONG=$(echo $DATA | awk '{print $3}' | sed 's/"//g;s/lon=//;s/>//')
+
 	TO="SMTP:query@saildocs.com"
 	SUBJECT="<No Subject>"
-	BODY="https://forecast.weather.gov/MapClick.php?lat="$LAT"&lon=-"$LON"&unit=0&lg=english&FcstType=text&TextType=1"
+	BODY="https://forecast.weather.gov/MapClick.php?lat="$LAT"&lon="$LONG"&unit=0&lg=english&FcstType=text&TextType=1"
 	COMPOSE
 elif [ "$WEATHER" = 'City Weather' ]; then
 FILE=$MYPATH/weather.txt
