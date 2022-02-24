@@ -279,11 +279,16 @@ CONFIG=$XDG_CONFIG_HOME/pat/config.json
 WHO=$(whoami)
 
 CURRENT=$(cat $CONFIG | grep ptt_ctrl | tail -1 | sed 's/"ptt_ctrl":\ //' | sed 's/,//' | tr -d "[:blank:]")
+if [ $CURRENT = 'false' ]; then
+CURRENT1="false|true"
+elif [ $CURRENT = 'true' ]; then
+CURRENT1="true|false"
+fi
 
 PTT=$(yad --form --width=400 --text="<b>Current Pat ARDOP PTT = $CURRENT</b>" --text-align=center --center --title="Set PTT" --text-align=center \
 --separator="|" --item-separator="|" \
 --image=$LOGO --window-icon=$LOGO --image-on-top \
---field="ARDOP PTT":CB "true|false" \
+--field="ARDOP PTT":CB "$CURRENT1" \
 --button="Set PTT":2 \
 --button="Cancel":1)
 QUIT=$?
