@@ -3,6 +3,7 @@ Pat Menu is an easy to use menu system for Pat Winlink. It is designed to make i
 
 # Install
 The preferred method of installation is with [Build a Pi](https://github.com/km4ack/pi-build). However, manual installation can be achieved by running the following command.
+
      git clone https://github.com/km4ack/patmenu2.git $HOME/patmenu2 && bash $HOME/patmenu2/setup
 
 # Video
