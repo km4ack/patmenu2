@@ -6,6 +6,7 @@ Changelog
 	update ARDOP modem start
 	update Packet modem start
 	update Set ARDOP PTT section
+	update readme file
 2.6.0	add version check
 	add peer to peer alias
 	2.6.0 does not support version of Pat prior to v0.12.0
