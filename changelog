@@ -1,7 +1,13 @@
-release=2.6.0
+release=2.6.1
 
 
 Changelog
+2.6.1	improve GPS weather accuracy
+	update ARDOP modem start
+	update Packet modem start
+	update Set ARDOP PTT section
+	update readme file
+	use default browser to open inbox instead of hard coding Chromium
 2.6.0	add version check
 	add peer to peer alias
 	2.6.0 does not support version of Pat prior to v0.12.0

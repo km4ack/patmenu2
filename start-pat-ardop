@@ -122,8 +122,11 @@ yad --title="ARDOP MODEM" --width=400 --height=100 \
     --button=gtk-ok &
 fi
 
+#restart pat so terminal window correctly reflects rig control
+sudo systemctl restart pat@`whoami`
+
 #open pat inbox in browser
-export DISPLAY=:0 && chromium-browser http://127.0.0.1:$PORT > /dev/null 2>&1 &
+export DISPLAY=:0 && xdg-open http://127.0.0.1:$PORT > /dev/null 2>&1 &
 
 
 
