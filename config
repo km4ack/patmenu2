@@ -1,19 +1,10 @@
 #20191230 KM4ACK
-
-#This setup is designed to work with a VOX soundcard (ie Signalink)
-#If using a VOX soundcard or radio with a VOX soundcard built in
-#simply edit the call sign below to yours and change 
-#RIGCONTROL=no to RIGCONTROL=yes below.
-#Now test the setup. Be sure you have FLRIG open
-#and configured for your radio.
-#AMRRON operators see bottom of this file for trimode.
-
+#last edit 04MARCH2022 KM4ACK
 
 #change next line to your call sign
 MYCALLSIGN=N0CALL
 
-#enter your piardopc command on the line below
-#Be sure to not delete the quotation marks.
+#command to start ARDOP modem
 ARDOP="$HOME/ardop/./piardopc 8515 plughw:1,0 plughw:1,0"
 
 #Path to ardop-gui if installed
@@ -52,22 +43,18 @@ MODEHF=USB
 #Mode used for packet digital comms on your radio
 MODE2M=FM
 
-#port number used by pat html service
-#pat default is 8080. I prefer 5000
+#port number for pat inbox ie. 127.0.0.1:8080
 PORT=8080
 
 #Path to log file
 LOG=$HOME/Documents/mylog.txt
 
 #Below this line is only useful to AMRRON operators. Others shouldn't edit below this line.
-#NOTE:The amrron portion of this script is still experimental.
+#NOTE:The AMRRON portion of this script is still experimental.
 
 #set next line to yes for tri-mode setup
 AMRRON=no
 
-#amrron operaters should save/exit this config file after setting above to yes and then run
-# bash ~/patmenu/trimode 
-#to enable trimode ops
 
 
 
