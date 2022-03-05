@@ -13,6 +13,7 @@ cat <<EOF
 A Mobilinkd TNC is already paired with this pi.
 Remove the existing pairing and try again.
 EOF
+sleep 3
 exit 1
 fi
 
@@ -69,6 +70,7 @@ MAC=`grep -i TNC /run/user/$UID/mobi.txt | awk '{print $1}'`
 	echo "TNC not found. Can't continue!"
 	echo "Confirm that the TNC is on and has"
 	echo "a fast flashing blue light."
+	sleep 5
 	exit 1
 	fi
 echo "Starting the pairing process....please stand by"
