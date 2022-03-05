@@ -75,4 +75,5 @@ echo "Starting the pairing process....please stand by"
 #call the connect script
 /run/user/$UID/connect $MAC >/dev/null 2>&1
 echo;echo "The pairing was probably successful" 
+echo "Start the Mobilinkd modem again"
 sleep 3
