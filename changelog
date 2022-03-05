@@ -1,7 +1,9 @@
-release=2.6.1
+release=2.7.0
 
 
 Changelog
+2.7.0	add mobi-pair script to assist with pairing mobilinkd devices
+	improve mobilink modem start
 2.6.1	improve GPS weather accuracy
 	update ARDOP modem start
 	update Packet modem start
