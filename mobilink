@@ -2,6 +2,7 @@
 
 #script to connect mobilinkd TNC for ax25 
 #20200602
+#20220304 last edit KM4ACK
 ################################################################
 #                                                              #
 #	#   #	#       #     #      #        #####  #   #     #
@@ -21,7 +22,41 @@ clear
 KISS=$(pidof kissattach)
 DIRE=$(pidof direwolf)
 ARDOP=$(pidof piardopc)
+TMPFILE=/run/user/$UID/scan.txt
+EXISTING=`bluetoothctl paired-devices | grep Mobilinkd`
 
+#see if we already have a TNC paired
+#if [ -z "$EXISTING" ]; then
+#yad --title="Mobilinkd Error" --width=400 --height=100 \
+#--image $LOGO --window-icon=$LOGO --image-on-top --text-align=center --on-top \
+#--center --form --text="\r\r\r\rNo Mobilinkd devices paired with this pi. \
+#To pair, turn your Mobilinkd on, open a terminal window, and run\r <b>~/patmenu2/mobi-pair</b>\rand then start \
+#the mobilinkd modem again." \
+#--button=gtk-ok
+#exit 1
+#fi
+
+#see if we already have a TNC paired
+if [ -z "$EXISTING" ]; then
+yad --title="Mobilinkd Error" --width=400 --height=100 \
+--image $LOGO --window-icon=$LOGO --image-on-top --text-align=center --on-top \
+--center --form --text="\r\r\r\rNo Mobilinkd devices paired with this pi. \
+Turn on your Mobilinkd before attempting to pair." \
+--button="Pair Now:1" \
+--button="Exit:2"
+BUT=$?
+
+	if [ "$BUT" = '2' ] || [ "$BUT" = '252' ]; then
+	exit
+	elif [ "$BUT" = '1' ]; then
+	lxterminal -e $HOME/patmenu2/mobi-pair
+	exit
+	fi
+
+fi
+
+
+#verify other services that might interfere aren't running
 if [ -n "$KISS" ] || [ -n "$DIRE" ] || [ -n "$ARDOP" ]; then
 yad --title="Stop Modems" --width=400 --height=100 \
 --image $LOGO --window-icon=$LOGO --image-on-top --text-align=center --on-top \
@@ -30,6 +65,7 @@ stop all modems and try again." \
 --button=gtk-ok
 exit 1
 fi
+
 #give user some feedback
 yad --center --timeout=10 --timeout-indicator=top --no-buttons --height=300 --width=300 \
 --title="Scanning" --image $LOGO --window-icon=$LOGO --image-on-top \
@@ -37,31 +73,28 @@ yad --center --timeout=10 --timeout-indicator=top --no-buttons --height=300 --wi
 Another notice will appear once a connection to the device is established." &
 
 #scan for bluetooth device and write to file
-hcitool scan > $HOME/Desktop/scan.txt
-echo "Scan complete"
+hcitool scan > $TMPFILE
 
 #Decide if its a TNC 2 or 3
-TNC2=$(cat $HOME/Desktop/scan.txt | grep -i TNC2)
-TNC3=$(cat $HOME/Desktop/scan.txt | grep -i TNC3)
+TNC2=$(grep -i TNC2 $TMPFILE)
+TNC3=$(grep -i TNC3 $TMPFILE)
 if [ -z "$TNC2" ]
 then 
-MAC=$(cat $HOME/Desktop/scan.txt | grep -i mobi | awk '{ print $1 }')
+MAC=$(grep -i mobi $TMPFILE | awk '{ print $1 }')
 TNC=3
 elif [ -z "$TNC3" ]
 then
-MAC=$(cat $HOME/Desktop/scan.txt | grep -i mobi | awk '{ print $1 }')
+MAC=$(grep -i mobi $TMPFILE | awk '{ print $1 }')
 TNC=2
 fi
 
 #set correct connection commmand
 if [ $TNC = "2" ]
 then
-#CONNECT="sudo rfcomm connect /dev/rfcomm0 $MAC"
 CONNECT="sudo rfcomm bind /dev/rfcomm0 $MAC"
 elif [ $TNC = "3" ]
 then
 CONNECT="sudo rfcomm bind /dev/rfcomm0 $MAC 6"
-#CONNECT="sudo rfcomm connect /dev/rfcomm0 $MAC 6"
 fi
 
 #See if device was found and connect if found
@@ -71,27 +104,27 @@ yad --title="Mobilinkd MODEM" --width=400 --height=100 \
     --image $LOGO --window-icon=$LOGO --image-on-top --text-align=center --on-top \
     --center --form --text="\r\r\r\rMobilinkd NOT FOUND" \
     --button=gtk-ok
-      rm $HOME/Desktop/scan.txt
+      rm $TMPFILE
 exit 1
 else
       #stop things that might conflict
-      sudo killall js8call kissattach direwolf >> /dev/null 2>&1
+      sudo killall kissattach direwolf >> /dev/null 2>&1
 yad --center --timeout=6 --timeout-indicator=top --no-buttons --height=300 --width=300 \
 --title="Detected" --image $LOGO --window-icon=$LOGO --image-on-top \
 --text="Mobilinkd TNC $TNC detected. Just a few more seconds." &
-      rm $HOME/Desktop/scan.txt
+      rm $TMPFILE
       #create bluetooth->serial connection
       $CONNECT &
       sleep 5
 
-echo "starting kissattach for winlink"
+
 		#create kissattach needed for winlink connections
       		sudo kissattach /dev/rfcomm0 wl2k &
-		echo "sleeping 3 seconds"; sleep 3 
+		sleep 3 
 		sudo kissparms -c 1 -p wl2k
 fi
 
-#verify that piardopc is running
+#verify that kissattach is running
 PIDPIC=$(pidof kissattach)
 if [ -z "$PIDPIC" ]
 then
@@ -106,6 +139,13 @@ yad --title="Mobilinkd MODEM" --width=400 --height=100 \
     --button=gtk-ok &
 fi
 
+#restart pat so terminal window correctly reflects rig control
+sudo systemctl restart pat@`whoami`
+
+source $HOME/patmenu2/config
+
+#open pat inbox in browser
+export DISPLAY=:0 && xdg-open http://127.0.0.1:$PORT > /dev/null 2>&1 &
 
 
 
