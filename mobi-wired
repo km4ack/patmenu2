@@ -1,5 +1,11 @@
 #!/bin/bash
 
+#This script will connect Mobilinkd TNC3 through a USB connection
+#and make the TNC available with Pat through an ax25 connection.
+#This script will NOT work with the Mobilinkd TNC2 as it did not
+#support a USB connection.
+#07MARCH2022 KM4ACK
+
 MYPATH=$HOME/patmenu2
 LOGO=$MYPATH/pmlogo.png
 KISS=$(pidof kissattach)
