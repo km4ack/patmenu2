@@ -1,0 +1,57 @@
+#!/bin/bash
+
+MYPATH=$HOME/patmenu2
+LOGO=$MYPATH/pmlogo.png
+KISS=$(pidof kissattach)
+DIRE=$(pidof direwolf)
+ARDOP=$(pidof piardopc)
+MOBIUSB=$(ls -l /dev/serial/by-id | grep Mobilinkd | awk '{print $NF}' | sed 's/.*tty/tty/')
+
+#verify mobilinkd is plugged in and detected
+if [ -z "$MOBIUSB" ]; then
+yad --title="Not Detected" --width=400 --height=100 \
+--image $LOGO --window-icon=$LOGO --image-on-top --text-align=center --on-top \
+--center --form --text="\r\r\r\rThe Mobilinkd TNC wasn't detected. Please \
+connect the Mobilinkd TNC to the Pi with a USB cable." \
+--button=gtk-ok
+exit 1
+fi
+
+#verify other services that might interfere aren't running
+if [ -n "$KISS" ] || [ -n "$DIRE" ] || [ -n "$ARDOP" ]; then
+yad --title="Stop Modems" --width=400 --height=100 \
+--image $LOGO --window-icon=$LOGO --image-on-top --text-align=center --on-top \
+--center --form --text="\r\r\r\rIt appears that other modems are running. Please \
+stop all modems and try again." \
+--button=gtk-ok
+exit 1
+fi
+
+
+#create kissattach needed for winlink connections
+sudo kissattach /dev/$MOBIUSB wl2k &
+sleep 3 
+sudo kissparms -c 1 -p wl2k
+
+#verify that kissattach is running
+PIDPIC=$(pidof kissattach)
+if [ -z "$PIDPIC" ]
+then
+yad --title="FAILED" --width=400 --height=100 \
+    --image $LOGO --window-icon=$LOGO --image-on-top --text-align=center \
+    --center --form --text="The Mobilinkd Modem FAILED to Start" \
+    --button=gtk-ok
+else
+yad --title="Mobilinkd MODEM" --width=400 --height=100 \
+    --image $LOGO --window-icon=$LOGO --image-on-top --text-align=center --on-top \
+    --center --form --text="\r\r\r\rThe Mobilinkd Modem has Started" \
+    --button=gtk-ok &
+fi
+
+#restart pat so terminal window correctly reflects rig control
+sudo systemctl restart pat@`whoami`
+
+source $HOME/patmenu2/config
+
+#open pat inbox in browser
+export DISPLAY=:0 && xdg-open http://127.0.0.1:$PORT > /dev/null 2>&1 &
