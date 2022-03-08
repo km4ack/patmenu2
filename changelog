@@ -6,6 +6,7 @@ Changelog
 	add mobilinkd wired modem connection (Doesn't work with version 2)
 	improve mobilinkd modem start
 	clean up initial config file
+	add new custom warning feature
 2.6.1	improve GPS weather accuracy
 	update ARDOP modem start
 	update Packet modem start
