@@ -25,6 +25,8 @@ SETTINGS=$(yad --form --width=600 --text-align=center --center --title="Pat Menu
 --field="Pat Port" "$PORT" \
 --field="Log File Location" "$LOG" \
 --field="AmRRON":CB "no|yes" \
+--field="Custom Warning":CB "no|yes" \
+--field="Warning Message" "$WARNMSG" \
 --button="Create":2 \
 --button="Cancel":1)
 BUT=$?
@@ -47,6 +49,8 @@ MODE2M=$(echo $SETTINGS | awk -F "|" '{print $11}')
 PORT=$(echo $SETTINGS | awk -F "|" '{print $12}')
 LOG=$(echo $SETTINGS | awk -F "|" '{print $13}')
 AMRRON=$(echo $SETTINGS | awk -F "|" '{print $14}')
+WARN=$(echo $SETTINGS | awk -F "|" '{print $15}')
+WARNMSG=$(echo $SETTINGS | awk -F "|" '{print $16}')
 
 NAME=$(yad --form --width=600 --text-align=center --center --title="Name?" --text-align=center \
 --image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
@@ -81,6 +85,8 @@ echo "MODE2M=$MODE2M" >> $CONFIGTMP
 echo "PORT=$PORT" >> $CONFIGTMP
 echo "LOG=$LOG" >> $CONFIGTMP
 echo "AMRRON=$AMRRON" >> $CONFIGTMP
+echo "WARN=$WARN" >> $CONFIGTMP
+echo "WARNMSG=\"$WARNMSG\"" >> $CONFIGTMP
 CHECKFILE=$(ls $MYPATH | grep $NEWCONFIG)
 if [ -z "$CHECKFILE" ];then
 cp $CONFIGTMP $MYPATH/$NEWCONFIG
@@ -175,6 +181,12 @@ else
 AMRRON="no|yes"
 fi
 
+if [ "$WARN" = 'yes' ]; then
+WARN="yes|no"
+else
+WARN="no|yes"
+fi
+
 SETTINGS=$(yad --form --width=600 --text-align=center --center --title="Pat Menu Settings" --text-align=center \
 --image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
 --text="<b>Pat Menu Settings</b> by KM4ACK" \
@@ -192,6 +204,8 @@ SETTINGS=$(yad --form --width=600 --text-align=center --center --title="Pat Menu
 --field="Pat Port" "$PORT" \
 --field="Log File Location" "$LOG" \
 --field="AmRRON":CB "$AMRRON" \
+--field="Custom Warning":CB "$WARN" \
+--field="Warning Message" "$WARNMSG" \
 --button="Update":2 \
 --button="Cancel":1)
 BUT=$?
@@ -214,6 +228,8 @@ MODE2M=$(echo $SETTINGS | awk -F "|" '{print $11}')
 PORT=$(echo $SETTINGS | awk -F "|" '{print $12}')
 LOG=$(echo $SETTINGS | awk -F "|" '{print $13}')
 AMRRON=$(echo $SETTINGS | awk -F "|" '{print $14}')
+WARN=$(echo $SETTINGS | awk -F "|" '{print $15}')
+WARNMSG=$(echo $SETTINGS | awk -F "|" '{print $16}')
 
 echo "#Config file for Pat Menu" > $CONFIGTMP
 echo "#20200429 KM4ACK" >> $CONFIGTMP
@@ -231,6 +247,8 @@ echo "MODE2M=$MODE2M" >> $CONFIGTMP
 echo "PORT=$PORT" >> $CONFIGTMP
 echo "LOG=$LOG" >> $CONFIGTMP
 echo "AMRRON=$AMRRON" >> $CONFIGTMP
+echo "WARN=$WARN" >> $CONFIGTMP
+echo "WARNMSG=\"$WARNMSG\"" >> $CONFIGTMP
 cp $CONFIGTMP $CONFIG
 rm $CONFIGTMP
 $MAIN &
