@@ -478,7 +478,7 @@ PATV=$(pat version | awk '{print $2}' | sed 's/v0.//' | awk -F "." '{print $1}')
 	if [ $PATV -le 11 ]; then
 	PATPATH=$HOME/.wl2k/
 	else
-	PATPATH=$XDGHOME_CONFIG_PATH/
+	PATPATH=$XDG_CONFIG_HOME/pat/
 	fi
 fi
 
