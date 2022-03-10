@@ -24,6 +24,15 @@ yad --form --width=420 --text-align=center --center --title="Pat out of Date" --
 exit
 fi
 
+if [ $WARN = 'yes' ] && [ ! -f /run/user/$UID/patwarn.txt ]; then
+#give user warning message
+yad --form --width=420 --text-align=center --center --title="WARNING!!" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>${WARNMSG}</b>" \
+--button=gtk-ok
+touch /run/user/$UID/patwarn.txt
+fi
+
 #verify call is set
 if [ "$MYCALLSIGN" = "N0CALL" ]; then
 yad --title="N0CALL" --width=400 --height=100 \
@@ -37,7 +46,8 @@ yad --form --width=420 --text-align=center --center --title="Pat Menu" --text-al
 --text="<b>Pat Menu</b> by KM4ACK\rv$VERSION" \
 --field="Start ARDOP Modem":fbtn 'bash -c "$MYPATH/start-pat-ardop"' \
 --field="Start Packet Modem":fbtn 'bash -c "$MYPATH/start-pat2m"' \
---field="Start Mobilinkd Modem (BETA)":fbtn 'bash -c "$MYPATH/mobilink"' \
+--field="Start Mobilinkd Modem Bluetooth":fbtn 'bash -c "$MYPATH/mobilink"' \
+--field="Start Mobilinkd Modem Wired":fbtn 'bash -c "$MYPATH/mobi-wired"' \
 --field="Stop Modems":fbtn 'bash -c "$MYPATH/stop-modems"' \
 --field="Find Winlink Gateways":fbtn 'bash -c "kill -USR1 $YAD_PID; $MYPATH/find2"' \
 --field="Pat Auto Connect":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/pat-functions; AUTOPAT"' \

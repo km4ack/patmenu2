@@ -1,0 +1,81 @@
+#!/bin/bash
+
+#this script attempts to pair a Mobilinkd TNC with the Pi.
+#04MARCH2022 KM4ACK
+
+EXISTING=`bluetoothctl paired-devices | grep Mobilinkd`
+TMP=/run/user/$UID/mobi.txt
+
+#see if we already have a TNC paired
+if [ -n "$EXISTING" ]; then
+clear;echo;echo
+cat <<EOF
+A Mobilinkd TNC is already paired with this pi.
+Remove the existing pairing and try again.
+EOF
+sleep 3
+exit 1
+fi
+
+if ! hash expect 2>/dev/null; then
+echo "We are missing a dependency....expect"
+echo "Hang on while it is installed"
+echo "You can press ctrl+c to exit"
+sleep 3
+sudo apt update
+sudo apt install -y expect
+fi
+
+#create connect script in RAM memory. (Called later from this script)
+cat << "MYFILE" > /run/user/$UID/connect
+#!/usr/bin/expect -f
+
+set prompt "#"
+set address [lindex $argv 0]
+
+spawn sudo bluetoothctl
+expect -re $prompt
+send "scan on\r"
+send_user "\nStandby\r"
+sleep 10
+send_user "\nStill working\r"
+send "scan off\r"
+expect "Controller"
+send "pair $address\r"
+sleep 5
+send "1234\r"
+sleep 3
+send_user "\nShould be paired now.\r"
+send "quit\r"
+expect eof
+MYFILE
+chmod +x /run/user/$UID/connect
+
+#give user some feedback
+echo;echo; clear
+cat <<EOF
+####################################################################
+#   Please stand by while the pairing is attempted.                #
+#   This process takes approximately 60 seconds to complete.       #
+####################################################################
+EOF
+
+#get the TNC of the mobilinkd
+echo "Discovering nearby Mobilinkd device....please wait"
+hcitool scan > $TMP
+echo "Discovery complete. TNC found.";echo
+MAC=`grep -i TNC /run/user/$UID/mobi.txt | awk '{print $1}'`
+#verify we have a MAC address to work with
+	if [ -z "$MAC" ]; then
+	echo "TNC not found. Can't continue!"
+	echo "Confirm that the TNC is on and has"
+	echo "a fast flashing blue light."
+	sleep 5
+	exit 1
+	fi
+echo "Starting the pairing process....please stand by"
+#call the connect script
+/run/user/$UID/connect $MAC >/dev/null 2>&1
+echo;echo "The pairing was probably successful" 
+echo "Start the Mobilinkd modem again"
+sleep 3
