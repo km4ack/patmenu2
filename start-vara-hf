@@ -1,0 +1,134 @@
+#!/bin/bash
+
+#script to start vara hf modem
+#10MARCH2022 KM4ACK
+
+MYPATH=$HOME/patmenu2
+LOGO=$MYPATH/pmlogo.png
+source $MYPATH/config
+
+#Check if FLRIG is running if user has it set in config file
+if [ "$RIGCONTROL" = 'yes' ]; then
+echo "rig control is on"
+FLRIG=$(echo $RIG | grep "\-m 4")
+	if [ ! -z "$FLRIG" ]; then
+	FLRIG=$(pidof flrig)
+		if [ -z "$FLRIG" ]; then
+		yad --title="FAILED" --width=400 --height=100 \
+    		--image $LOGO --window-icon=$LOGO --image-on-top --text-align=center \
+   		--center --form --text="Please start FLRIG and try again" \
+    		--button=gtk-ok
+		exit
+		fi
+	fi
+fi
+
+#Check if modem is already running
+MODEMCHECK=$(ps aux | grep -i box86 | grep -i varafm)
+	if [ ! -z "$MODEMCHECK" ]; then
+	yad --title="FAILED" --width=400 --height=100 \
+	--image $LOGO --window-icon=$LOGO --image-on-top --text-align=center \
+	--center --form --text="Packet Modem is already running" \
+	--button=gtk-ok
+	exit
+	fi
+
+#check if piardopc is running
+PIDDW=$(pidof piardopc)
+	if [ ! -z "$PIDDW" ]; then
+	yad --title="FAILED" --width=400 --height=100 \
+	--image $LOGO --window-icon=$LOGO --image-on-top --text-align=center \
+	--center --form --text="It looks like the ARDOP modem is running.\rStop all modems and try again" \
+	--button=gtk-ok
+	exit 0
+	fi
+
+#check if direwolf is running
+PIDDW=$(pidof direwolf)
+	if [ ! -z "$PIDDW" ]; then
+	yad --title="FAILED" --width=400 --height=100 \
+	--image $LOGO --window-icon=$LOGO --image-on-top --text-align=center \
+	--center --form --text="It looks like direwolf is running.\rStop all modems and try again" \
+	--button=gtk-ok
+	exit 0
+	fi
+
+#give user some feedback
+yad --width=350 --height=75 --title="Starting Modem" --timeout=20 --timeout-indicator=top --no-buttons --center \
+--image $LOGO --window-icon=$LOGO --image-on-top --text-align=center --text="Modem Starting....standby" &
+
+#Set Mode
+RIGFM=$RIG" M $MODEHF"
+
+SETRIG () {
+
+#set radio frequency & mode
+$RIGFM
+
+sleep 1
+
+#check rig is in correct mode
+MODE=$($RIG m | grep $MODE2M)
+
+sleep 1
+
+	MODECHECK() {
+	#check rig is in correct mode
+	MODE=$($RIG m | grep $MODE2M)
+	}
+
+sleep 1
+
+	if [ -z $MODE ]
+	then
+	$RIGFM
+	MODECHECK
+	fi
+}
+
+
+#see if rig control is used
+if [ $RIGCONTROL == 'yes' ]; then
+PIDCTL=$(pidof rigctld)
+	if [ -z "$PIDCTL" ]; then
+	CONTROL=$(cat $MYPATH/config | grep '^RIG="' | sed 's/RIG="//' | sed 's/"//' | sed 's/rigctl/rigctld/')
+	$CONTROL &
+	rigpid=`echo $!`
+	fi
+SETRIG
+fi
+
+echo "starting VARA-FM"
+/usr/local/bin/wine /home/pi/.wine/drive_c/VARA/VARA.exe > /dev/null 2>&1 &
+sleep 7 #give vara time to start
+
+#verify vara has started
+PIDVARA=$(ps aux | grep -i box86 | grep VARA.exe)
+if [ -z "$PIDVARA" ]
+then
+yad --title="FAILED" --width=400 --height=100 \
+    --image $LOGO --window-icon=$LOGO --image-on-top --text-align=center \
+    --center --form --text="The VARA Modem FAILED to Start" \
+    --button=gtk-ok
+
+else
+
+yad --title="VARA MODEM" --width=400 --height=100 \
+    --image $LOGO --window-icon=$LOGO --image-on-top --text-align=center --on-top \
+    --center --form --text="\r\r\r\rThe VARA Modem has Started\rJust a few more seconds" \
+    --button=gtk-ok &
+fi
+
+sleep 1
+#restart pat so terminal window correctly reflects rig control
+sudo systemctl restart pat@`whoami`
+
+echo "starting browser"
+#open pat inbox in browser
+export DISPLAY=:0 && xdg-open http://127.0.0.1:$PORT > /dev/null 2>&1
+
+#echo "cleaning up and closing"
+#varapid=`ps aux | grep -i box86 | grep VARA.exe`
+#kill $varapid > /dev/null 2>&1
+#kill $rigpid > /dev/null 2>&1
+
