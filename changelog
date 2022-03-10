@@ -1,7 +1,10 @@
-release=2.7.0
-
+release=2.8.0
 
 Changelog
+2.8.0	redesign layout of main screen
+	add new modem menu
+	add vara modem start (beta)
+	add vara FM modem start (beta)
 2.7.0	add mobi-pair script to assist with pairing mobilinkd devices
 	add mobilinkd wired modem connection (Doesn't work with version 2)
 	improve mobilinkd modem start
