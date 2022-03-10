@@ -7,6 +7,7 @@ Changelog
 	improve mobilinkd modem start
 	clean up initial config file
 	add new custom warning feature
+	fix path for repairing config file
 2.6.1	improve GPS weather accuracy
 	update ARDOP modem start
 	update Packet modem start
