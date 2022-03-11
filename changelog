@@ -5,6 +5,9 @@ Changelog
 	add new modem menu
 	add vara modem start (beta)
 	add vara FM modem start (beta)
+	deprecate alternate grid list download function
+	deprecate load alternate grid funtion
+	add gateway distance/bearing recalculation
 2.7.0	add mobi-pair script to assist with pairing mobilinkd devices
 	add mobilinkd wired modem connection (Doesn't work with version 2)
 	improve mobilinkd modem start
