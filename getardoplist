@@ -87,15 +87,13 @@ if	[ -f $PACKET ]; then
 	rm $PACKET
 fi
 
-#put date on top line of each file
-echo "List Last Downloaded $(date)" >> $FILE
-echo "List Last Downloaded $(date)" >> $FORTY
-echo "List Last Downloaded $(date)" >> $EIGHTY
-echo "List Last Downloaded $(date)" >> $TWENTY
-echo "List Last Downloaded $(date)" >> $THIRTY
-echo "List Last Downloaded $(date)" >> $PACKET
 
-#yad --center --progress --pulsate --timeout-indicator=top --auto-close --no-buttons --text="Start Download"
+#create file that has grid variable used in calculations
+touch $HOME/patmenu2/ardop-list/grid.txt
+MYGRID=$(grep locator $HOME/.config/pat/config.json | sed 's/.*": //;s/"//g;s/,//')
+echo "GRID=$MYGRID" > $HOME/patmenu2/ardop-list/grid.txt
+echo "LASTDL=List downloaded `date`" >> $HOME/patmenu2/ardop-list/grid.txt
+
 
 #download list to individual files.
 DL(){
