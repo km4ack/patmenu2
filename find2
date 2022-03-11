@@ -4,18 +4,13 @@
 #20200425 KM4ACK
 #side note: written during covid-19 outbreak of 2020
 
-#######DEV NOTES#############
-#############################
-
-
-#############################
-
 MYPATH=$HOME/patmenu2
 PATMENU=$MYPATH/patmenu
 LOGO=$MYPATH/pmlogo.png
 CURRENT=$(crontab -l | grep getardoplist | awk '{print $2":"$1}')
 source $MYPATH/.grid
-GRID=$GRID
+GRID=$(grep GRID $HOME/patmenu2/ardop-list/grid.txt | sed 's/GRID=//')
+LASTDOWNLOAD=$(grep LASTDL $HOME/patmenu2/ardop-list/grid.txt | tail -1 | sed 's/LASTDL=//')
 
 source $MYPATH/FA-functions
 
@@ -25,11 +20,10 @@ yad --form --width=480 --text="<b>Find Gateways</b> by KM4ACK" --text-align=cent
 --field="Search for Gateway":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/FA-functions; GRIDSEARCH"' \
 --field="View Grid Map":fbtn 'bash -c "source $MYPATH/FA-functions; MAP"' \
 --field="Download Home Grid Gateway List":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/FA-functions; DOWNLIST"' \
---field="Download Alternate Grid Gateway List":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/FA-functions; ALTGRID"' \
---field="Load Alternate Grid Gateway List":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/FA-functions; LOADALTGRID"' \
 --field="Auto Download Home Grid List <b>$CURRENT</b>":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/FA-functions; AUTODOWN"' \
---field="Home $LASTDL":LBL \
---field="Grid List Currently Loaded <b>$GRID</b>":LBL \
+--field="Recalculate Distance and Bearings":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/FA-functions; NEWCALC"' \
+--field="$LASTDOWNLOAD":LBL \
+--field="Current calculations based on grid <b>$GRID</b>":LBL \
 --button="Main Menu":1
 
 QUIT=$?
@@ -40,3 +34,8 @@ exit
 elif [ $QUIT = 252 ]; then
 exit
 fi
+
+
+#left for reference
+#--field="Download Alternate Grid Gateway List":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/FA-functions; ALTGRID"' \
+#--field="Load Alternate Grid Gateway List":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/FA-functions; LOADALTGRID"' \
