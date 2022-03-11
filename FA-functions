@@ -436,6 +436,11 @@ TMPFILE2=$DIR/tempfile2
 TMPFILE3=$DIR/tempfile3
 MYGRID=$(cat /run/user/$UID/gridinfo.txt | cut -c1-6)
 
+#backup current lists
+BKDIR=$MYPATH/ardop-list/bkup-`date +%F.%H%M`
+mkdir -p $BKDIR
+cp -r $HOME/patmenu2/ardop-list/*.txt $BKDIR/
+
 MYGRID=$(yad --form --width=450 --text="<b>Recalculate Distance and Bearings to Gateways</b>\rThis takes 2-3 minutes to complete" \
 --text-align=center --center --title="Recalculate" --text-align=center --separator="|" --item-separator="|" \
 --image=$LOGO --window-icon=$LOGO --image-on-top \
@@ -477,6 +482,8 @@ RECALC 80mardoplist.txt | yad --center --progress --pulsate --auto-close --no-bu
 echo "Recalculating Packet list"
 RECALC packet.txt | yad --center --progress --pulsate --auto-close --no-buttons --text-align=center --title="Recalculate" \
 --text="Recalculating Packet List\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the process\rand leave you with a corrupt list."
+
+yad --center --timeout=2 --timeout-indicator=top --no-buttons --text="New Calculations Complete"
 }
 
 RECALC(){
