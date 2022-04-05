@@ -206,9 +206,11 @@ SETTINGS=$(yad --form --width=600 --text-align=center --center --title="Pat Menu
 --field="AmRRON":CB "$AMRRON" \
 --field="Custom Warning":CB "$WARN" \
 --field="Warning Message" "$WARNMSG" \
+--button="Save As":3 \
 --button="Update":2 \
 --button="Cancel":1)
 BUT=$?
+
 if [ $BUT = 1 ]; then
 $MAIN
 elif [ $BUT = 252 ]; then
@@ -251,6 +253,30 @@ echo "WARN=$WARN" >> $CONFIGTMP
 echo "WARNMSG=\"$WARNMSG\"" >> $CONFIGTMP
 cp $CONFIGTMP $CONFIG
 rm $CONFIGTMP
+$MAIN &
+exit
+elif [ $BUT = 3 ]; then
+NEWNAME=$(yad --form --width=600 --text-align=center --center --title="Name?" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Pat Menu Settings</b> by KM4ACK" \
+--field="New Config Name")
+BUT=$?
+if [ $BUT = 1 ]; then
+$MAIN & exit
+elif [ $BUT = 252 ]; then
+exit
+fi
+
+NEWNAME=$(echo $NEWNAME | awk -F "|" '{print $1}')
+NEWNAME=$NEWNAME.config #add .config to filename
+NEWNAME=$(echo $NEWNAME | sed 's/ /-/g') #remove spaces in file name
+
+cp $CONFIG $HOME/patmenu2/$NEWNAME
+
+yad --title="Config Created" --width=400 --height=200 \
+--image $LOGO --window-icon=$LOGO --image-on-top \
+--center --text="$NEWNAME created\r\r<b>Don't forget to load the new config file</b>" \
+--button=gtk-ok
 $MAIN &
 exit
 fi
