@@ -147,6 +147,7 @@ elif [ $BUT = 2 ]; then
 	exit
 	else
 	cp $MYPATH/$NEWCONFIG $MYPATH/config
+	echo "CONF=$NEWCONFIG" > $MYPATH/.currentconf 		#write config file name to a file
 	rm $OUTFILE
 	yad --title="Config Loaded" --width=400 --height=200 \
         --image $LOGO --window-icon=$LOGO --image-on-top \
