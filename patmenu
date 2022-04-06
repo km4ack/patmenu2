@@ -41,6 +41,13 @@ yad --title="N0CALL" --width=400 --height=100 \
     --button=gtk-ok
 fi
 
+#get name of current config file
+source $MYPATH/.currentconf
+CONFIG=$(echo $CONF | sed 's/.config//')
+if [ -z $CONFIG ]; then
+CONFIG=default
+fi
+
 yad --form --width=420 --text-align=center --center --title="Pat Menu" --text-align=center \
 --image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
 --text="<b>Pat Menu</b> by KM4ACK\rv$VERSION" \
@@ -54,6 +61,7 @@ yad --form --width=420 --text-align=center --center --title="Pat Menu" --text-al
 --field="Settings/Config":fbtn 'bash -c "kill -USR1 $YAD_PID; $MYPATH/manage-menu"' \
 --field="Quick Stats":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/pat-functions; STATS"' \
 --field="My Call - $MYCALLSIGN":LBL \
+--field="Config=$CONFIG":LBL \
 --button="QUIT":1
 
 BUT=$?
