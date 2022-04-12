@@ -10,6 +10,7 @@ Changelog
 	add gateway distance/bearing recalculation
 	add "save as" to current config file see https://github.com/km4ack/patmenu2/issues/48
 	add config file name to bottom of main menu
+	update menu shortcut to support non-pi usernames
 2.7.0	add mobi-pair script to assist with pairing mobilinkd devices
 	add mobilinkd wired modem connection (Doesn't work with version 2)
 	improve mobilinkd modem start
