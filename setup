@@ -38,8 +38,19 @@ rm -rf $HOME/patmenu
 fi
 
 
-#copy new desktop link 
-sudo cp $MYPATH/patmenu2.desktop /usr/share/applications/patmenu.desktop
+#create new desktop link
+cat <<EOF > /run/user/$UID/patmenu.desktop
+[Desktop Entry]
+Name=Pat Menu
+GenericName=Amateur Radio Digital Modem
+Comment=Amateur Radio Sound Card Communications
+Exec=/home/`whoami`/patmenu2/patmenu
+Icon=/home/`whoami`/patmenu2/pmlogo.png
+Terminal=false
+Type=Application
+Categories=Network;HamRadio;
+EOF
+sudo cp /run/user/$UID/patmenu.desktop /usr/share/applications/patmenu.desktop
 
 #download RMS List
 $MYPATH/getardoplist
