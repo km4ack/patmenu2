@@ -1,6 +1,8 @@
 release=2.8.0
 
 Changelog
+2.9.0	add 100 Mobiles to Position Request screen in catalog
+	fix stop modems
 2.8.0	redesign layout of main screen
 	add new modem menu
 	add vara modem start (beta)
