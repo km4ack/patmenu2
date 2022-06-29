@@ -1,14 +1,19 @@
 #!/bin/bash
 
 #20191117 km4ack
+#20220614 edit by KM4ACK
 
 MYPATH=$HOME/patmenu2
 LOGO=$MYPATH/pmlogo.png
 
 #stop all modems that might be running
 
-sudo killall direwolf piardopc kissattach piARDOP_GUI > /dev/null 2>&1
+sudo killall direwolf piardopc kissattach piARDOP_GUI rigctld > /dev/null 2>&1
 sudo rfcomm release /dev/rfcomm0 > /dev/null 2>&1
+VARA=$(ps aux | grep wine | grep VARA | head -1 | awk '{print $2}')
+kill -9 $VARA > /dev/null 2>&1
+VARA=$(ps aux | grep wine | grep VARA | head -1 | awk '{print $2}')
+kill -9 $VARA > /dev/null 2>&1
 
 yad --title="Modem Stopped" --width=400 --height=100 \
     --image $LOGO --window-icon=$LOGO --image-on-top --text-align=center \
