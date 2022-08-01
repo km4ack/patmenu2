@@ -4,6 +4,8 @@
 #that can be imported into YAAC
 #KM4ACK 01AUGUST2022
 
+LOGO=$MYPATH/pmlogo.png
+MAIN=$MYPATH/./catalog
 CONFIG=$HOME/.config/pat/config.json
 PATCALL=$(grep mycall $HOME/.config/pat/config.json | head -1 | sed 's/"mycall": "//;s/",//;s/ //g')
 LIST=$HOME/.local/share/pat/mailbox/$PATCALL/in
@@ -40,7 +42,8 @@ cp $FILE /run/user/$UID/tempgatelist
 if [ $? = 1 ]; then
 yad --form --width=500 --text-align=center --center --title="WL2K to ARPS Object" --text-align=center \
 --image ${LOGO} --window-icon=${LOGO} --image-on-top --separator="|" --item-separator="|" \
---text="<b>FAILED</b>\rNo Nearby File Found in Inbox"
+--text="<b>FAILED</b>\rNo Nearby (WL2K_NEARBY) File Found in Inbox"
+MAIN
 fi
 
 sed -i '1,17d' /run/user/$UID/tempgatelist
