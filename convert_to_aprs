@@ -4,6 +4,7 @@
 #that can be imported into YAAC
 #KM4ACK 01AUGUST2022
 
+MYPATH=$HOME/patmenu2
 LOGO=$MYPATH/pmlogo.png
 MAIN=$MYPATH/./catalog
 CONFIG=$HOME/.config/pat/config.json
