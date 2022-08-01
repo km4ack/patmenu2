@@ -1,0 +1,62 @@
+#!/bin/bash
+
+#scirpt to convert WL2K_NEARBY to POS file
+#that can be imported into YAAC
+#KM4ACK 01AUGUST2022
+
+CONFIG=$HOME/.config/pat/config.json
+PATCALL=$(grep mycall $HOME/.config/pat/config.json | head -1 | sed 's/"mycall": "//;s/",//;s/ //g')
+LIST=$HOME/.local/share/pat/mailbox/$PATCALL/in
+MAILBOX=$HOME/.local/share/pat/mailbox/$PATCALL/in
+
+yad --form --width=500 --text-align=center --center --title="WL2K to ARPS Object" --text-align=center \
+--image ${LOGO} --window-icon=${LOGO} --image-on-top --separator="|" --item-separator="|" \
+--text="<b>CAUTION</b>\rBe sure only one WL2K_NEARBY report\ris in your inbox. Multiples will cause erroneous data."
+
+BUT=$?
+if [ $BUT = 1 ]; then
+MAIN
+elif [ $BUT = 252 ]; then
+exit
+fi
+
+if [ -f $HOME/Desktop/gateways.pos ]; then
+rm $HOME/Desktop/gateways.pos
+fi
+
+yad --center --timeout=2 --timeout-indicator=top --no-buttons \
+--text="<b>Processing File</b>" &
+
+for file in $MAILBOX/*
+do
+    NEARBY_LIST=$(grep WL2K_NEARBY $file)
+    if [ -n "$NEARBY_LIST" ]; then
+    FILE=$file
+    fi
+done
+
+cp $FILE /run/user/$UID/tempgatelist
+sed -i '1,17d' /run/user/$UID/tempgatelist
+
+while read -r line; do
+    CALL=$(echo $line | awk '{print $1}')
+    CALL=$CALL-WL
+    CALL=`printf "%-9s" $CALL`
+    LAT=$(echo $line | awk '{print $5}' | sed 's/-//')
+    LONG=$(echo $line | awk '{print $6}' | sed 's/-//')
+    COMMENT=$(echo $line | awk '{$1=$2=$3=$4=$5=$6=$7=$8=""; print $0}' | sed -e 's/^[ \t]*//')
+    TIME=$(date -u +%H%M%S)
+
+    echo ";$CALL*$TIME""h""$LAT/$LONG-$COMMENT" >> ~/Desktop/gateways.pos
+done < /run/user/$UID/tempgatelist
+
+yad --form --width=500 --text-align=center --center --title="WL2K to ARPS Object" --text-align=center \
+--image ${LOGO} --window-icon=${LOGO} --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Processing done.</b>\rA gateways.pos file has been created and\r is on your desktop ready to import into YAAC."
+
+#rm /run/user/$UID/tempgatelist
+exit
+
+
+
+echo "$CALL*$TIME""z""$LAT/$LONG-$COMMENT" > ~/Desktop/gateways.pos
