@@ -1,8 +1,11 @@
-release=2.8.0
+release=2.9.0
 
 Changelog
-2.9.0	add 100 Mobiles to Position Request screen in catalog
-	fix stop modems
+2.9.0	add 100 Mobiles to Position Request screen in catalog - https://github.com/km4ack/patmenu2/issues/51
+	fix stop modems - https://github.com/km4ack/patmenu2/issues/51
+	add wait for internet to getardoplist-cron - https://github.com/km4ack/patmenu2/issues/50
+	add convert WL2K_NEARBY to APRS in Pat Catalog
+	add convert_to_aprs file
 2.8.0	redesign layout of main screen
 	add new modem menu
 	add vara modem start (beta)
