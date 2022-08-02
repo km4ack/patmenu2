@@ -12,6 +12,7 @@ PATCALL=$(grep mycall $HOME/.config/pat/config.json | head -1 | sed 's/"mycall":
 LIST=$HOME/.local/share/pat/mailbox/$PATCALL/in
 MAILBOX=$HOME/.local/share/pat/mailbox/$PATCALL/in
 
+#Warn user about multiple WL2K_NEARBY Reports in inbox
 yad --form --width=500 --text-align=center --center --title="WL2K to ARPS Object" --text-align=center \
 --image ${LOGO} --window-icon=${LOGO} --image-on-top --separator="|" --item-separator="|" \
 --text="<b>CAUTION</b>\rBe sure only one WL2K_NEARBY report\ris in your inbox. Multiples will cause erroneous data."
@@ -24,13 +25,16 @@ elif [ $BUT = 252 ]; then
 exit
 fi
 
+#remove exiting file if it exist
 if [ -f $HOME/Desktop/gateways.pos ]; then
 rm $HOME/Desktop/gateways.pos
 fi
 
+#give user feedback
 yad --center --timeout=2 --timeout-indicator=top --no-buttons \
 --text="<b>Processing File</b>" &
 
+#Look for the WL2K_NEARBY email
 for file in $MAILBOX/*
 do
     NEARBY_LIST=$(grep WL2K_NEARBY $file)
@@ -39,8 +43,10 @@ do
     fi
 done
 
+#create a copy to work with
 cp $FILE /run/user/$UID/tempgatelist
 
+#check that we have a file. warn user if not
 if [ $? = 1 ]; then
 yad --form --width=500 --text-align=center --center --title="WL2K to ARPS Object" --text-align=center \
 --image ${LOGO} --window-icon=${LOGO} --image-on-top --separator="|" --item-separator="|" \
@@ -49,8 +55,10 @@ $MAIN &
 exit
 fi
 
+#remove everything but the data we need at the top of the file
 sed -i '1,17d' /run/user/$UID/tempgatelist
 
+#process the file
 while read -r line; do
     CALL=$(echo $line | awk '{print $1}')
     CALL=$CALL-WL
@@ -63,11 +71,13 @@ while read -r line; do
     echo ";$CALL*$TIME""h""$LAT/$LONG-$COMMENT" >> ~/Desktop/gateways.pos
 done < /run/user/$UID/tempgatelist
 
+#let user know processing is finished
 yad --form --width=500 --text-align=center --center --title="WL2K to ARPS Object" --text-align=center \
 --image ${LOGO} --window-icon=${LOGO} --image-on-top --separator="|" --item-separator="|" \
 --text="<b>Processing done.</b>\rA gateways.pos file has been created and\r is on your desktop ready to import into YAAC."
 
-#rm /run/user/$UID/tempgatelist
+#remove the temp file
+rm /run/user/$UID/tempgatelist
 $MAIN &
 exit
 
