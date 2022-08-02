@@ -12,18 +12,7 @@ PATCALL=$(grep mycall $HOME/.config/pat/config.json | head -1 | sed 's/"mycall":
 LIST=$HOME/.local/share/pat/mailbox/$PATCALL/in
 MAILBOX=$HOME/.local/share/pat/mailbox/$PATCALL/in
 
-#Warn user about multiple WL2K_NEARBY Reports in inbox
-yad --form --width=500 --text-align=center --center --title="WL2K to ARPS Object" --text-align=center \
---image ${LOGO} --window-icon=${LOGO} --image-on-top --separator="|" --item-separator="|" \
---text="<b>CAUTION</b>\rBe sure only one WL2K_NEARBY report\ris in your inbox. Multiples will cause erroneous data."
 
-BUT=$?
-if [ $BUT = 1 ]; then
-$MAIN &
-exit
-elif [ $BUT = 252 ]; then
-exit
-fi
 
 #remove exiting file if it exist
 if [ -f $HOME/Desktop/gateways.pos ]; then
@@ -35,10 +24,22 @@ yad --center --timeout=2 --timeout-indicator=top --no-buttons \
 --text="<b>Processing File</b>" &
 
 #Look for the WL2K_NEARBY email
+COUNT=0
+#var=$((var+1))
 for file in $MAILBOX/*
 do
     NEARBY_LIST=$(grep WL2K_NEARBY $file)
     if [ -n "$NEARBY_LIST" ]; then
+    COUNT=$((COUNT+1))
+        if [ $COUNT -gt 1 ]; then
+        #Warn user about multiple WL2K_NEARBY Reports in inbox
+        yad --form --width=500 --text-align=center --center --title="WL2K to ARPS Object" --text-align=center \
+        --image ${LOGO} --window-icon=${LOGO} --image-on-top --separator="|" --item-separator="|" \
+        --text="<b>Multiples Found</b>\rBe sure only one WL2K_NEARBY report\ris in your inbox. Multiples will cause erroneous data." \
+        --button=gtk-ok
+        $MAIN &
+        exit
+        fi
     FILE=$file
     fi
 done
@@ -81,7 +82,8 @@ done < /run/user/$UID/tempgatelist
 #let user know processing is finished
 yad --form --width=500 --text-align=center --center --title="WL2K to ARPS Object" --text-align=center \
 --image ${LOGO} --window-icon=${LOGO} --image-on-top --separator="|" --item-separator="|" \
---text="<b>Processing done.</b>\rA gateways.pos file has been created and\r is on your desktop ready to import into YAAC."
+--text="<b>Processing done.</b>\rA gateways.pos file has been created and\r is on your desktop ready to import into YAAC." \
+--button=gtk-ok
 
 #remove the temp file
 rm /run/user/$UID/tempgatelist
