@@ -58,18 +58,24 @@ fi
 #remove everything but the data we need at the top of the file
 sed -i '1,17d' /run/user/$UID/tempgatelist
 
+###########NOTE#############
+#APRS symbol lookup table can be found at 
+#https://4.bp.blogspot.com/-ewK-9I_62wk/WIMI_LFpEII/AAAAAAAAWYA/xMso0AANY649LEWvOAjMIsmyPLWBwOszQCLcB/s1600/KWFAPRS_LUTv2.png
+#In the echo command below I have used "\a" which produces a red diamond on the map. The "\" goes between the $LAT $LONG and the
+#second character goes between the $LONG and $Comment
+#########End Note###########
+
 #process the file
 while read -r line; do
     CALL=$(echo $line | awk '{print $1}')
-    #CALL=$CALL-WL
     CALL=`printf "%-9s" $CALL`
     LAT=$(echo $line | awk '{print $5}' | sed 's/-//')
     LONG=$(echo $line | awk '{print $6}' | sed 's/-//')
     COMMENT=$(echo $line | awk '{$1=$2=$3=$4=$5=$6=$7=$8=""; print $0}' | sed -e 's/^[ \t]*//')
     TIME=$(date -u +%H%M%S)
 
-#    echo ";$CALL*$TIME""h""$LAT/$LONG-$COMMENT" >> ~/Desktop/gateways.pos
-    echo ";$CALL*$TIME""h""$LAT\\$LONG""a""$COMMENT" >> ~/Desktop/gateways.pos
+#    echo ";$CALL*$TIME""h""$LAT/$LONG-$COMMENT" >> ~/Desktop/gateways.pos                (Produces a house on the map)
+    echo ";$CALL*$TIME""h""$LAT\\$LONG""a""$COMMENT" >> ~/Desktop/gateways.pos           #(Produces a red diamond on the map)
 done < /run/user/$UID/tempgatelist
 
 #let user know processing is finished
