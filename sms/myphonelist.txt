@@ -1,0 +1,5 @@
+AT&T=@txt.att.net
+Sprint=@messaging.sprintpcs.com
+T-Mobile=@tmomail.net
+Unknown=
+Verizon=@vtext.com
