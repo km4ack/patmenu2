@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#script to add phone carries to master list
+#KM4ACK 02AUGUST2022
+
+FILE=$HOME/patmenu2/sms/myphonelist.txt
+MYTEMP=/run/user/$UID/templist.txt
+MAIN=$HOME/patmenu2/sms/manage-sms
+
+INFO=$(PARSER='OFS="\n" {print $1}'
+
+tail -300 $FILE | awk "$PARSER" | \
+yad --title="Search Results" --width=1100 --height=500 \
+    --image $LOGO --window-icon=$LOGO --image-on-top --multiple \
+    --center --list --text="Carrier List" \
+    --column Carrier \
+    --button=gtk-close \
+    --button=gtk-ok)
+BUT=$?
+
+$MAIN
