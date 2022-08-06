@@ -1,7 +1,7 @@
 3-River-Wireless=@sms.3rivers.net
 ACS-Wireless=@paging.acswireless.com
 Alltel=@message.alltel.com
-AT&T=@txt.att.net
+ATT=@txt.att.net
 Bell-Canada=@txt.bellmobility.ca
 Bell-Canada=@bellmobility.ca
 Bell-Mobility=@txt.bell.ca
