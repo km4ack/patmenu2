@@ -1,0 +1,33 @@
+#!/bin/bash
+
+#Pat SMS Manager
+#20220720 KM4ACK
+
+#TODO
+# [X] Change path below
+# [] Change path in phone list script
+# [] create add to list script
+# [] create remove from list script
+
+export MYPATH=$HOME/patmenu2
+LOGO=$MYPATH/pmlogo.png
+MAIN=$MYPATH/./patmenu
+
+
+yad --form --width=420 --text-align=center --center --title="Pat SMS Manager" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Pat SMS Manager</b> by KM4ACK" \
+--field="Show Current Carrier List":fbtn 'bash -c "kill -USR1 $YAD_PID; $MYPATH/sms/current-carriers"' \
+--field="Add Carriers":fbtn 'bash -c "kill -USR1 $YAD_PID; $MYPATH/sms/add-carrier"' \
+--field="Remove Carriers":fbtn 'bash -c "kill -USR1 $YAD_PID; $MYPATH/sms/remove-carrier"' \
+--field="Send Text Message":fbtn 'bash -c "kill -USR1 $YAD_PID; $MYPATH/sms/winlink2sms"' \
+--button="Main Menu":1
+
+BUT=$?
+
+if [ $BUT = 1 ]; then
+$MAIN &
+exit
+elif [ $BUT = 252 ]; then
+exit
+fi
