@@ -13,8 +13,10 @@ UNKNOWN(){
 #send message to every carrier in the list
 while read line in ; do
 CARRIER=$(echo $line | awk -F "=" '{print $2}')
+if [ -n "$CARRIER" ]; then
 TO="-c $PHONE$CARRIER"
 echo $TO >> /run/user/$UID/$PHONE.txt
+fi
 done <$PHONE_LIST
 
 #remove the "-c" from the first address on the list
