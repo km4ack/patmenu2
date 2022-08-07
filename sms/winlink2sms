@@ -35,7 +35,7 @@ CARRIER=$(cat $PHONE_LIST | awk -F"=" '{print $1"|"}')
 SETTING=$(yad --center --width=500 --wrap --window-icon=$HOME/Pi-APRS/ISS.png \
 --title="Send Text Messages via Winlink" --text="Please complete the following:" \
 --form --separator="|" --item-separator="|" \
---field="Number to Text" "$PHONE" \
+--field="Phone Number" "$PHONE" \
 --field="Carrier":CB "${CARRIER[@]}" \
 --field="Message" "$MSG" \
 --button="Post Message" \
@@ -54,7 +54,7 @@ fi
 
 #check to see if carrier is unknown. If so, send to UNKNOWN function.
 CARRIER=$(echo $SETTING | awk -F"|" '{print $2}' | sed 's/ //')
-if [ "$CARRIER" = 'Unknown' ] || [ "$CARRIER" = 'Unknown' ]; then
+if [ "$CARRIER" = 'Unknown' ]; then
 PHONE=$(echo $SETTING | awk -F"|" '{print $1}')
 MESSAGE=$(echo $SETTING | awk -F"|" '{print $3}')
 UNKNOWN
@@ -67,7 +67,13 @@ CARRIER=$(cat $PHONE_LIST | grep "$CARRIER" | sed 's/.*=//')
 TO=$PHONE$CARRIER
 MESSAGE=$(echo $SETTING | awk -F"|" '{print $3}')
 
-
+if [ -z "$PHONE" ]; then
+yad --center --width=300 --wrap --window-icon=$HOME/Pi-APRS/ISS.png \
+--title="ERROR" --text="Phone Number Can't Be Blank!" \
+--button=gtk-ok
+$MAIN &
+exit
+fi
 
 
 
