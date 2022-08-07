@@ -30,7 +30,7 @@ fi
 sed -i 's/|//g' $MYTEMP
 
 cat $MYTEMP >> $HOME/patmenu2/sms/myphonelist.txt
-sort $HOME/patmenu2/sms/myphonelist.txt > /run/usr/$UID/sortedlist
+sort $HOME/patmenu2/sms/myphonelist.txt > /run/user/$UID/sortedlist
 mv /run/user/$UID/sortedlist $HOME/patmenu2/sms/myphonelist.txt
 
 yad --center --timeout=3 --timeout-indicator=top --no-buttons --text="The carrier list has been updated"
