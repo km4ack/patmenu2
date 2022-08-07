@@ -3,11 +3,6 @@
 #Pat SMS Manager
 #20220720 KM4ACK
 
-#TODO
-# [X] Change path below
-# [] Change path in phone list script
-# [] create add to list script
-# [] create remove from list script
 
 export MYPATH=$HOME/patmenu2
 LOGO=$MYPATH/pmlogo.png
