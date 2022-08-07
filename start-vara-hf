@@ -99,7 +99,7 @@ SETRIG
 fi
 
 echo "starting VARA-FM"
-/usr/local/bin/wine /home/pi/.wine/drive_c/VARA/VARA.exe > /dev/null 2>&1 &
+/usr/local/bin/wine $HOME/.wine/drive_c/VARA/VARA.exe > /dev/null 2>&1 &
 sleep 7 #give vara time to start
 
 #verify vara has started
