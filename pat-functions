@@ -147,7 +147,7 @@ TELNET=$(grep telnet, $SMD)
 ARDOP=$(grep ardop, $SMD)
 AX25=$(grep ax25, $SMD)
 PAT=$(pidof pat)
-CARD=$(arecord -l | grep CODEC | awk '{print $2;}' | sed 's/://')
+CARD=$(arecord -l | grep USB | awk '{print $2;}' | sed 's/://')
 
 #Check if sound card found
 if [ -z $CARD ]; then
