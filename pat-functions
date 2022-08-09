@@ -147,6 +147,14 @@ TELNET=$(grep telnet, $SMD)
 ARDOP=$(grep ardop, $SMD)
 AX25=$(grep ax25, $SMD)
 PAT=$(pidof pat)
+CARD=$(arecord -l | grep CODEC | awk '{print $2;}' | sed 's/://')
+
+#Check if sound card found
+if [ -z $CARD ]; then
+CARD="Not found"
+else
+CARD="$CARD,0"
+fi
 #Set telnet variable
 	if [ -n "$TELNET" ]; then
 	TELNET="telnet,"
@@ -183,6 +191,7 @@ yad --form --width=320 --text-align=center --center --title="Quick Stats" --text
 --field="Rig Control":RO "$RIG" \
 --field="Pat Port":RO "$PORT" \
 --field="Pat Server":RO "$PAT" \
+--field="Sound Card":RO "$CARD" \
 --button=gtk-ok
 $MAIN &
 exit
