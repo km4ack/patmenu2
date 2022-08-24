@@ -98,7 +98,7 @@ PIDCTL=$(pidof rigctld)
 SETRIG
 fi
 
-echo "starting VARA-FM"
+echo "starting VARA HF"
 /usr/local/bin/wine $HOME/.wine/drive_c/VARA/VARA.exe > /dev/null 2>&1 &
 sleep 7 #give vara time to start
 
