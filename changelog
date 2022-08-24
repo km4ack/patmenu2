@@ -9,6 +9,7 @@ Changelog
 	fix issue #54 when starting VARA modems - https://github.com/km4ack/patmenu2/issues/54
 	add sms text feature
 	add sound card to quick stats
+	fix typo - https://github.com/km4ack/patmenu2/issues/57
 2.8.0	redesign layout of main screen
 	add new modem menu
 	add vara modem start (beta)
