@@ -65,6 +65,6 @@ yad --form --width=420 --text-align=center --center --title="Pat Menu" --text-al
 --button="QUIT":1
 
 BUT=$?
-if [ $BUT = 1 ] && [ "$AMRRON" = 'no' ]; then
-sudo killall piardopc kissattach direwolf piARDOP_GUI rigctld > /dev/null 2>&1
+if [ $BUT = 1 ]; then
+exit
 fi
