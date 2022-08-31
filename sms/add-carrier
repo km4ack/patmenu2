@@ -1,0 +1,39 @@
+#!/bin/bash
+
+#script to add phone carries to master list
+#KM4ACK 02AUGUST2022
+
+FILE=$HOME/patmenu2/sms/cellproviders.txt
+MYTEMP=/run/user/$UID/templist.txt
+MAIN=$HOME/patmenu2/sms/manage-sms
+export MYPATH=$HOME/patmenu2
+LOGO=$MYPATH/pmlogo.png
+
+INFO=$(PARSER='OFS="\n" {print $1}'
+
+tail -300 $FILE | awk "$PARSER" | \
+yad --title="Search Results" --width=1100 --height=500 \
+    --image $LOGO --window-icon=$LOGO --image-on-top --multiple \
+    --center --list --text="Carrier List" \
+    --column Carrier \
+    --button="Cancel":1 \
+    --button="Add Carrier":2 > $MYTEMP)
+BUT=$?
+
+if [ $BUT = 1 ]; then
+$MAIN &
+exit
+elif [ $BUT = 252 ]; then
+exit
+fi
+
+sed -i 's/|//g' $MYTEMP
+
+cat $MYTEMP >> $HOME/patmenu2/sms/myphonelist.txt
+sort $HOME/patmenu2/sms/myphonelist.txt > /run/user/$UID/sortedlist
+mv /run/user/$UID/sortedlist $HOME/patmenu2/sms/myphonelist.txt
+
+yad --center --timeout=3 --timeout-indicator=top --no-buttons --text="The carrier list has been updated"
+
+$MAIN &
+exit

@@ -246,7 +246,7 @@ POSITION(){
 POST=$(yad --form --width=420 --text-align=center --center --title="Position" --text-align=center \
 --image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
 --text="<b>Position Reports</b> by KM4ACK" \
---field="Choose":CB "Post Position|Single Station Request|All Nearby Stations" \
+--field="Choose":CB "Post Position|Single Station Request|All Nearby Stations|100 Mobile Stations" \
 --field="Enter Call Below <b>ONLY</b> for Single Station Requests":LBL \
 --field="Call Sign-SSID" \
 --field="Comment for Post Position" \
@@ -282,6 +282,11 @@ elif [ "$REPORT" = "All Nearby Stations" ]; then
         TO="INQUIRY"
 	SUBJECT="REQUEST"
 	BODY="WL2K_NEARBY"
+	COMPOSE
+elif [ "$REPORT" = "100 Mobile Stations" ]; then
+        TO="INQUIRY"
+	SUBJECT="REQUEST"
+	BODY="WL2K_MOBILES"
 	COMPOSE
 fi
 

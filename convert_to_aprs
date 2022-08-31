@@ -1,0 +1,91 @@
+#!/bin/bash
+
+#scirpt to convert WL2K_NEARBY to POS file
+#that can be imported into YAAC
+#KM4ACK 01AUGUST2022
+
+MYPATH=$HOME/patmenu2
+LOGO=$MYPATH/pmlogo.png
+MAIN=$MYPATH/./catalog
+CONFIG=$HOME/.config/pat/config.json
+PATCALL=$(grep mycall $HOME/.config/pat/config.json | head -1 | sed 's/"mycall": "//;s/",//;s/ //g')
+LIST=$HOME/.local/share/pat/mailbox/$PATCALL/in
+MAILBOX=$HOME/.local/share/pat/mailbox/$PATCALL/in
+
+
+
+#remove exiting file if it exist
+if [ -f $HOME/Desktop/gateways.pos ]; then
+rm $HOME/Desktop/gateways.pos
+fi
+
+#give user feedback
+yad --center --timeout=2 --timeout-indicator=top --no-buttons \
+--text="<b>Processing File</b>" &
+
+#Look for the WL2K_NEARBY email
+COUNT=0
+#var=$((var+1))
+for file in $MAILBOX/*
+do
+    NEARBY_LIST=$(grep WL2K_NEARBY $file)
+    if [ -n "$NEARBY_LIST" ]; then
+    COUNT=$((COUNT+1))
+        if [ $COUNT -gt 1 ]; then
+        #Warn user about multiple WL2K_NEARBY Reports in inbox
+        yad --form --width=500 --text-align=center --center --title="WL2K to ARPS Object" --text-align=center \
+        --image ${LOGO} --window-icon=${LOGO} --image-on-top --separator="|" --item-separator="|" \
+        --text="<b>Multiples Found</b>\rBe sure only one WL2K_NEARBY report\ris in your inbox. Multiples will cause erroneous data." \
+        --button=gtk-ok
+        $MAIN &
+        exit
+        fi
+    FILE=$file
+    fi
+done
+
+#create a copy to work with
+cp $FILE /run/user/$UID/tempgatelist
+
+#check that we have a file. warn user if not
+if [ $? = 1 ]; then
+yad --form --width=500 --text-align=center --center --title="WL2K to ARPS Object" --text-align=center \
+--image ${LOGO} --window-icon=${LOGO} --image-on-top --separator="|" --item-separator="|" \
+--text="<b>FAILED</b>\rNo Nearby (WL2K_NEARBY) File Found in Inbox"
+$MAIN & 
+exit
+fi
+
+#remove everything but the data we need at the top of the file
+sed -i '1,17d' /run/user/$UID/tempgatelist
+
+###########NOTE#############
+#APRS symbol lookup table can be found at 
+#https://4.bp.blogspot.com/-ewK-9I_62wk/WIMI_LFpEII/AAAAAAAAWYA/xMso0AANY649LEWvOAjMIsmyPLWBwOszQCLcB/s1600/KWFAPRS_LUTv2.png
+#In the echo command below I have used "\a" which produces a red diamond on the map. The "\" goes between the $LAT $LONG and the
+#second character goes between the $LONG and $Comment
+#########End Note###########
+
+#process the file
+while read -r line; do
+    CALL=$(echo $line | awk '{print $1}')
+    CALL=`printf "%-9s" $CALL`
+    LAT=$(echo $line | awk '{print $5}' | sed 's/-//')
+    LONG=$(echo $line | awk '{print $6}' | sed 's/-//')
+    COMMENT=$(echo $line | awk '{$1=$2=$3=$4=$5=$6=$7=$8=""; print $0}' | sed -e 's/^[ \t]*//')
+    TIME=$(date -u +%H%M%S)
+
+#    echo ";$CALL*$TIME""h""$LAT/$LONG-$COMMENT" >> ~/Desktop/gateways.pos                (Produces a house on the map)
+    echo ";$CALL*$TIME""h""$LAT\\$LONG""a""$COMMENT" >> ~/Desktop/gateways.pos           #(Produces a red diamond on the map)
+done < /run/user/$UID/tempgatelist
+
+#let user know processing is finished
+yad --form --width=500 --text-align=center --center --title="WL2K to ARPS Object" --text-align=center \
+--image ${LOGO} --window-icon=${LOGO} --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Processing done.</b>\rA gateways.pos file has been created and\r is on your desktop ready to import into YAAC." \
+--button=gtk-ok
+
+#remove the temp file
+rm /run/user/$UID/tempgatelist
+$MAIN &
+exit

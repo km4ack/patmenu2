@@ -18,6 +18,8 @@ yad --form --width=420 --text-align=center --center --title="Pat Catalog" --text
 --field="Position Reports":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/cat-functions; POSITION"' \
 --field="Propagation Reports":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/cat-functions; PROPAGATION"' \
 --field="News Reports":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/cat-functions; NEWS"' \
+--field="Send SMS":fbtn 'bash -c "kill -USR1 $YAD_PID; $HOME/patmenu2/sms/manage-sms"' \
+--field="Convert WL2K_NEARBY to APRS":fbtn 'bash -c "kill -USR1 $YAD_PID; $HOME/patmenu2/convert_to_aprs"' \
 --button="Main Menu":1
 
 QUIT=$?

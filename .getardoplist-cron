@@ -66,7 +66,18 @@ if [[ $? -eq 0 ]]; then
 	echo "Depending on your internet speed"
 else
 
-	exit
+	#check for internet before attempting to download the list
+
+	internet=1    #set the test to false
+
+	while [ "$internet" = 1 ]; do
+	echo "check for internet connection"
+	ping -c 5 8.8.8.8
+	internet=$?
+	sleep 60    #wait one minute before trying again
+	done
+
+echo "Internet connection detected"
 fi
 #remove old files before downloading new ones
 if	[ -f $THIRTY ]; then

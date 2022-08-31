@@ -1,0 +1,93 @@
+#!/bin/bash
+
+#Script to send text message to regular cellphones via Winlink
+#20JULY2022 KM4ACK
+
+#subject CANNOT be blank
+SUBJECT="Winlink text msg"
+#PHONE_LIST=/run/user/$UID/my_phonelist.txt
+PHONE_LIST=$HOME/patmenu2/sms/myphonelist.txt
+MAIN=$HOME/patmenu2/sms/manage-sms
+
+UNKNOWN(){
+#send message to every carrier in the list
+while read line in ; do
+CARRIER=$(echo $line | awk -F "=" '{print $2}')
+if [ -n "$CARRIER" ]; then
+TO="-c $PHONE$CARRIER"
+echo $TO >> /run/user/$UID/$PHONE.txt
+fi
+done <$PHONE_LIST
+
+#remove the "-c" from the first address on the list
+sed -i '0,/-c /{s/-c //}' /run/user/$UID/$PHONE.txt
+TO=$(cat /run/user/$UID/$PHONE.txt)
+rm /run/user/$UID/$PHONE.txt
+
+#compose message and send to pat outbox
+echo "$MESSAGE" | pat compose $TO -s "$SUBJECT"
+yad --center --timeout=3 --timeout-indicator=top --no-buttons --text="Message posted to Pat outbox." &
+exit
+}
+
+#get list of carriers to populate dialog carrier box on main screen
+CARRIER=$(cat $PHONE_LIST | awk -F"=" '{print $1"|"}')
+
+#main menu
+SETTING=$(yad --center --width=500 --wrap --window-icon=$HOME/Pi-APRS/ISS.png \
+--title="Send Text Messages via Winlink" --text="Please complete the following:" \
+--form --separator="|" --item-separator="|" \
+--field="Phone Number" "$PHONE" \
+--field="Carrier":CB "${CARRIER[@]}" \
+--field="Message" "$MSG" \
+--button="Post Message" \
+--button="Cancel"
+)
+BUT=$?
+
+#check to see if user wants to exit
+if [ $BUT = 252 ]; then
+echo "goodbye"
+exit
+elif [ $BUT = 1 ]; then
+$MAIN &
+exit
+fi
+
+#check to see if carrier is unknown. If so, send to UNKNOWN function.
+CARRIER=$(echo $SETTING | awk -F"|" '{print $2}' | sed 's/ //')
+if [ "$CARRIER" = 'Unknown' ]; then
+PHONE=$(echo $SETTING | awk -F"|" '{print $1}')
+MESSAGE=$(echo $SETTING | awk -F"|" '{print $3}')
+UNKNOWN
+fi
+
+
+PHONE=$(echo $SETTING | awk -F"|" '{print $1}' | sed 's/ //g')
+CARRIER=$(echo $SETTING | awk -F"|" '{print $2}' | sed 's/ //g')
+CARRIER=$(cat $PHONE_LIST | grep "$CARRIER" | sed 's/.*=//')
+TO=$PHONE$CARRIER
+MESSAGE=$(echo $SETTING | awk -F"|" '{print $3}')
+
+if [ -z "$PHONE" ]; then
+yad --center --width=300 --wrap --window-icon=$HOME/Pi-APRS/ISS.png \
+--title="ERROR" --text="Phone Number Can't Be Blank!" \
+--button=gtk-ok
+$MAIN &
+exit
+fi
+
+
+
+echo "$MESSAGE" | pat compose "$TO" -s "$SUBJECT"
+
+yad --center --timeout=3 --timeout-indicator=top --no-buttons --text="Message posted to Pat outbox."
+$MAIN &
+exit
+
+
+
+
+
+
+
