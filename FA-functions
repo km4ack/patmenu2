@@ -95,6 +95,7 @@ OUTFILE=/run/user/$UID/tempardoplist.txt
 CONFIG=$XDG_CONFIG_HOME/pat/config.json
 TEMP=/run/user/$UID/tempconfig.txt
 ARDOPLIST=$MYPATH/ardop-list
+VARALIST=$MYPATH/vara-list
 WHO=$(whoami)
 source $MYPATH/config	#patmenu config file
 #check to make sure user has downloaded
@@ -118,14 +119,16 @@ BANDS="20|30|40|80|2M-70CM"
 SEARCH=$(yad --form --width=400 --text="<b>Find Winlink Gateways</b>" --text-align=center --center --title="Find ARDOP" --text-align=center \
 --separator="|" --item-separator="|" \
 --image=$LOGO --window-icon=$LOGO --image-on-top \
+--field="Choose Modem":CB "VARA|ARDOP" \
 --field="Grid to Search" "EM" \
 --field="Band to Search":CB "$BANDS" \
 --button="Search":2 \
 --button="Cancel":1)
 QUIT=$?
-GRID=$(echo $SEARCH | awk -F "|" '{print $1}')
+MODEM=$(echo $SEARCH | awk -F "|" '{print $1}')
+GRID=$(echo $SEARCH | awk -F "|" '{print $2}')
 GRID=$(echo "${GRID^^}")
-BAND=$(echo $SEARCH | awk -F "|" '{print $2}')
+BAND=$(echo $SEARCH | awk -F "|" '{print $3}')
 
 echo "Grid search is $GRID"
 echo "Band is $BAND"
@@ -141,7 +144,7 @@ fi
 if [ $QUIT = 2 ] && [ "$BAND" = '2M-70CM' ]; then
 
 
-#########START TEST SECTION######################
+#########START PACKET SECTION######################
 
 
 FILE=$MYPATH/ardop-list/packet.txt
@@ -168,6 +171,7 @@ yad --title="Search Results" --width=1100 --height=500 \
     --button="Add Alias":2 > $MYTEMP)
 BUT=$?
 
+
 if [ "$BUT" = 2 ];then
 CALL=$(echo $INFO | awk -F "|" '{print $1}')
 SC=$(echo $INFO | awk -F "|" '{print $9}')
@@ -193,10 +197,6 @@ done < $TEMP2
 sudo killall pat
 sudo systemctl start pat@$WHO
 
-
-##############END TEST SECTION################
-
-
 yad --title="ADDED" --width=300 --height=100 \
     --image $LOGO --window-icon=$LOGO --image-on-top \
     --center --form --text="$CALL-$FREQ added to Pat Winlink\rRefresh Pat Mailbox Window\rto view changes" \
@@ -205,6 +205,10 @@ SEARCHMENU
 fi
 SEARCHMENU
 fi
+##############END PACKET SECTION################
+
+#determine which modem was chosen
+if [ "$MODEM" = 'ARDOP' ]; then
 
 #############ARDOP SEARCH####################
 
@@ -213,16 +217,19 @@ OUTFILE2=/run/user/$UID/tempardop2.txt
 if [ $BAND = 20 ];then
 FILE=$ARDOPLIST/20mardoplist.txt
 cat $FILE | egrep -i $GRID[[:digit:]]{2} | tee "$OUTFILE" > /dev/null 2>&1
-#cat $OUTFILE  | tr -s '[:space:]' | sed 's/ /|/g'| sed 's/[A-Za-z]*$/|/g' > $OUTFILE2
+sed -i 's/&/&amp;/g' $OUTFILE > /dev/null 2>&1
 elif [ $BAND = 30 ];then
 FILE=$ARDOPLIST/30mardoplist.txt
 cat $FILE | egrep -i $GRID[[:digit:]]{2} | tee "$OUTFILE" > /dev/null 2>&1
+sed -i 's/&/&amp;/g' $OUTFILE > /dev/null 2>&1
 elif [ $BAND = 40 ];then
 FILE=$ARDOPLIST/40mardoplist.txt
 cat $FILE | egrep -i $GRID[[:digit:]]{2} | tee "$OUTFILE" > /dev/null 2>&1
+sed -i 's/&/&amp;/g' $OUTFILE > /dev/null 2>&1
 elif [ $BAND = 80 ];then
 FILE=$ARDOPLIST/80mardoplist.txt
 cat $FILE | egrep -i $GRID[[:digit:]]{2} | tee "$OUTFILE" > /dev/null 2>&1
+sed -i 's/&/&amp;/g' $OUTFILE > /dev/null 2>&1
 echo "80 done"
 fi
 
@@ -249,12 +256,12 @@ FREQ=$(echo $SC | sed 's/.*=//')
 	
 while read LINE; do
 CALL=$(echo $LINE | awk -F "|" '{print $1}')
-SC=$(echo $LINE | awk -F "|" '{print $9}')
+SC=$(echo $LINE | awk -F "|" '{print $9}' | sed 's/\&amp;/\&/')
 FREQ=$(echo $SC | sed 's/.*=//')
 	if [ $RIGCONTROL = 'no' ]; then
 	SC=$(echo $SC | sed 's/[?].*$//')
 	fi
-jq '.connect_aliases += {'\""$CALL-$BAND"M"-$FREQ"\"' : '\"$SC\"'}' $CONFIG > $TEMP
+jq '.connect_aliases += {'\""$CALL-$BAND"M"-""ARDOP"\"' : '\"$SC\"'}' $CONFIG > $TEMP
 cp $TEMP $CONFIG
 rm $TEMP
 done < /run/user/$UID/mytemptestardoplist
@@ -277,6 +284,97 @@ yad --title="ADDED" --width=300 --height=100 \
 SEARCHMENU
 fi
 
+elif [ "$MODEM" = 'VARA' ]; then
+#############VARA SEARCH####################
+
+OUTFILE2=/run/user/$UID/tempardop2.txt
+
+if [ $BAND = 20 ];then
+FILE=$VARALIST/20mvaralist.txt
+cat $FILE | egrep -i $GRID[[:digit:]]{2} | tee "$OUTFILE" > /dev/null 2>&1
+sed -i 's/&/&amp;/g' $OUTFILE > /dev/null 2>&1
+elif [ $BAND = 30 ];then
+FILE=$VARALIST/30mvaralist.txt
+cat $FILE | egrep -i $GRID[[:digit:]]{2} | tee "$OUTFILE" > /dev/null 2>&1
+sed -i 's/&/&amp;/g' $OUTFILE > /dev/null 2>&1
+elif [ $BAND = 40 ];then
+FILE=$VARALIST/40mvaralist.txt
+cat $FILE | egrep -i $GRID[[:digit:]]{2} | tee "$OUTFILE" > /dev/null 2>&1
+sed -i 's/&/&amp;/g' $OUTFILE > /dev/null 2>&1
+elif [ $BAND = 80 ];then
+FILE=$VARALIST/80mvaralist.txt
+cat $FILE | egrep -i $GRID[[:digit:]]{2} | tee "$OUTFILE" > /dev/null 2>&1
+sed -i 's/&/&amp;/g' $OUTFILE > /dev/null 2>&1
+echo "80 done"
+fi
+
+#remove outfile2 if it exist
+if [ -f $OUTFILE2 ]; then
+rm $OUTFILE2
+fi
+
+#add speed to line if not in list already
+while read -r line
+do
+CHECK=$(echo $line | awk '{print $6}')
+if [ "$CHECK" = 500 ] || [ "$CHECK" = 2750 ]; then
+echo $line >> $OUTFILE2
+else
+echo $line | sed 's/VARA/VARA 500/' >> $OUTFILE2
+fi
+done < $OUTFILE
+
+INFO=$(PARSER='OFS="\n" {print $1, $2, $3, $4, $5, $6, $7, $9, $11}'
+MYTEMP=/run/user/$UID/mytemptestardoplist
+tail -50 $OUTFILE2 | awk "$PARSER" | \
+yad --title="Search Results" --width=1100 --height=500 \
+    --image $LOGO --window-icon=$LOGO --image-on-top --multiple \
+    --center --list --text="Search Results" \
+    --column Call --column Grid --column Dist \
+    --column Azm --column Mode --column Speed \
+    --column Dial-Freq \
+    --column Center-Freq --column Shortcut \
+    --button=gtk-close \
+    --button="Add Alias":2 > $MYTEMP)
+BUT=$?
+if [ "$BUT" = 2 ];then
+CALL=$(echo $INFO | awk -F "|" '{print $1}')
+SC=$(echo $INFO | awk -F "|" '{print $9}')
+FREQ=$(echo $SC | sed 's/.*=//')
+	if [ $RIGCONTROL = 'no' ]; then
+	SC=$(echo $SC | sed 's/[?].*$//')
+	fi
+	
+while read LINE; do
+CALL=$(echo $LINE | awk -F "|" '{print $1}')
+SC=$(echo $LINE | awk -F "|" '{print $9}' | sed 's/\&amp;/\&/')
+FREQ=$(echo $SC | sed 's/.*=//')
+	if [ $RIGCONTROL = 'no' ]; then
+	SC=$(echo $SC | sed 's/[?].*$//')
+	fi
+jq '.connect_aliases += {'\""$CALL-$BAND"M"-""VARA"\"' : '\"$SC\"'}' $CONFIG > $TEMP
+cp $TEMP $CONFIG
+rm $TEMP
+done < /run/user/$UID/mytemptestardoplist
+sudo killall pat
+sudo systemctl start pat@$WHO
+
+	if [ -z "$CALL" ]; then
+	yad --title="No Selection" --width=300 --height=100 \
+    	--image $LOGO --window-icon=$LOGO --image-on-top \
+    	--center --form --text="No station was selected\r Please try again" \
+    	--button=gtk-ok 
+	$MAIN &
+	exit
+	fi
+
+yad --title="ADDED" --width=300 --height=100 \
+    --image $LOGO --window-icon=$LOGO --image-on-top \
+    --center --form --text="Alias added to Pat Winlink\rRefresh Pat Mailbox Window\rto view changes" \
+    --button=gtk-ok 
+SEARCHMENU
+fi
+	fi	#close modem if/then statement
 SEARCHMENU
 }
 SEARCHMENU
