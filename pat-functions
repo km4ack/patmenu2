@@ -6,7 +6,6 @@ MAIN=$MYPATH/./patmenu
 PATCONFIG=$XDG_CONFIG_HOME/pat/config.json
 
 AUTOPAT(){
-
 source $MYPATH/config
 if [ $RIGCONTROL == 'no' ]
 then
@@ -26,6 +25,7 @@ MAX="500|550|600|650|700|750|800|850|900|950|1000|1500|2000|2500|3000"
 INFO=$(yad --form --width=420 --text-align=center --center --title="Pat Auto" --text-align=center \
 --image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
 --text="<b>Pat Auto Connect</b> by KM4ACK" \
+--field="Modem":CB "VARA|ARDOP" \
 --field="Band":CB "20|30|40|80" \
 --field="Minimum Distance":CBE "$MIN" \
 --field="Maximum Distance":CBE "$MAX" \
@@ -37,9 +37,15 @@ $MAIN
 exit
 fi
 
-BAND=$(echo $INFO | awk -F "|" '{print $1}')
-MIN=$(echo $INFO | awk -F "|" '{print $2}')
-MAX=$(echo $INFO | awk -F "|" '{print $3}')
+MODEM=$(echo $INFO | awk -F "|" '{print $1}')
+BAND=$(echo $INFO | awk -F "|" '{print $2}')
+MIN=$(echo $INFO | awk -F "|" '{print $3}')
+MAX=$(echo $INFO | awk -F "|" '{print $4}')
+
+#echo "Modem = $MODEM"
+#echo "Band = $BAND"
+#echo "MIN = $MIN"
+#echo "MAX = $MAX"
 
 if [ -z "$MIN" ]; then
 MIN=0
@@ -57,11 +63,14 @@ yad --form --width=420 --text-align=center --center --title="Pat Auto" --text-al
 --button=gtk-ok
 AUTOPAT
 fi 
-echo "Band = $BAND"
-echo "MIN = $MIN"
-echo "MAX = $MAX"
 
+#set correct comamnd for modem
+if [ "$MODEM" = 'ARDOP' ]; then
 lxterminal -e $MYPATH/autopat $MAX $BAND $MIN
+elif [ "$MODEM" = 'VARA' ]; then
+lxterminal -e $MYPATH/autopat-vara $MAX $BAND $MIN
+fi
+
 $MAIN
 }
 
