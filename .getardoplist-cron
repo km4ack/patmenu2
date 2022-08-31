@@ -18,6 +18,7 @@ TODAY=$(date)
 #path where files are located
 #must match path in findardop script
 MYPATH=$HOME/patmenu2/ardop-list/
+MYVARA=$HOME/patmenu2/vara-list/
 
 #my log file
 LOG=$HOME/Documents/mylog.txt
@@ -43,8 +44,9 @@ echo "GRID=$GRID" > $HOME/patmenu2/.grid
 
 #make directory if it doesn't exist
 mkdir -p $MYPATH
+mkdir -p $MYVARA
 
-#set variables for each list
+#set variables for each ARDOP list
 FILE=$MYPATH'ardoplist.txt'
 EIGHTY=$MYPATH'80mardoplist.txt'
 FORTY=$MYPATH'40mardoplist.txt'
@@ -52,6 +54,13 @@ TWENTY=$MYPATH'20mardoplist.txt'
 THIRTY=$MYPATH'30mardoplist.txt'
 PACKET=$MYPATH'packet.txt'
 
+#set variables for each vara list
+VARAFILE=$MYVARA'varalist.txt'
+VARAEIGHTY=$MYVARA'80mvaralist.txt'
+VARAFORTY=$MYVARA'40mvaralist.txt'
+VARATWENTY=$MYVARA'20mvaralist.txt'
+VARATHIRTY=$MYVARA'30mvaralist.txt'
+VARAFM=$MYVARA'varafm.txt'
 
 #check internet connection
 echo "Please wait while we check your internet connection"
@@ -79,7 +88,33 @@ else
 
 echo "Internet connection detected"
 fi
-#remove old files before downloading new ones
+
+#remove old vara files before downloading new ones
+if	[ -f $VARATHIRTY ]; then
+	rm $VARATHIRTY
+fi
+
+if 	[ -f $VARAFILE ]; then
+	rm $VARAFILE
+fi
+
+if      [ -f $VARAEIGHTY ]; then
+        rm $VARAEIGHTY
+fi
+
+if      [ -f $VARAFORTY ]; then
+        rm $VARAFORTY
+fi
+
+if 	[ -f $VARATWENTY ]; then
+	rm $VARATWENTY
+fi
+
+if	[ -f $VARAFM ]; then
+	rm $VARAFM
+fi
+
+#remove old ARDOP files before downloading new ones
 if	[ -f $THIRTY ]; then
 	rm $THIRTY
 fi
@@ -118,6 +153,13 @@ pat rmslist -s --band 40m --mode ardop --force-download >> $FORTY
 pat rmslist -s --band 20m --mode ardop --force-download >> $TWENTY 
 pat rmslist -s --band 30m --mode ardop --force-download >> $THIRTY 
 pat rmslist -s --mode packet --force-download >> $PACKET
+
+pat rmslist -s --mode vara --force-download >> $VARAFILE 
+pat rmslist -s --band 80m --mode vara --force-download >> $VARAEIGHTY 
+pat rmslist -s --band 40m --mode vara --force-download >> $VARAFORTY 
+pat rmslist -s --band 20m --mode vara --force-download >> $VARATWENTY 
+pat rmslist -s --band 30m --mode vara --force-download >> $VARATHIRTY
+pat rmslist -s --band 2m --mode varafm --force-download >> $VARAFM
 }
 DL
 
