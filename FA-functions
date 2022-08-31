@@ -534,12 +534,17 @@ TMPFILE2=$DIR/tempfile2
 TMPFILE3=$DIR/tempfile3
 MYGRID=$(cat /run/user/$UID/gridinfo.txt | cut -c1-6)
 
-#backup current lists
+#backup current ARDOP lists
 BKDIR=$MYPATH/ardop-list/bkup-`date +%F.%H%M`
 mkdir -p $BKDIR
 cp -r $HOME/patmenu2/ardop-list/*.txt $BKDIR/
 
-MYGRID=$(yad --form --width=450 --text="<b>Recalculate Distance and Bearings to Gateways</b>\rThis takes 2-3 minutes to complete" \
+#backup current VARA lists
+BKDIRVARA=$MYPATH/vara-list/bkup-`date +%F.%H%M`
+mkdir -p $BKDIRVARA
+cp -r $HOME/patmenu2/vara-list/*.txt $BKDIRVARA/
+
+MYGRID=$(yad --form --width=450 --text="<b>Recalculate Distance and Bearings to Gateways</b>\rThis takes 5-6 minutes to complete" \
 --text-align=center --center --title="Recalculate" --text-align=center --separator="|" --item-separator="|" \
 --image=$LOGO --window-icon=$LOGO --image-on-top \
 --field="Current Grid Square" "$MYGRID" \
@@ -561,30 +566,47 @@ echo "GRID=$MYGRID" > $HOME/patmenu2/ardop-list/grid.txt
 echo "LASTDL=Recalculated `date`" >> $HOME/patmenu2/ardop-list/grid.txt
 
 MAIN(){
-echo "Recalculating 20M List"
+echo "Recalculating ARDOP 20M List"
 RECALC 20mardoplist.txt | yad --center --progress --pulsate --auto-close --no-buttons --text-align=center --title="Recalculate" \
---text="Recalculating 20M List\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the process\rand leave you with a corrupt list."
+--text="Recalculating ARDOP 20M List\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the process\rand leave you with a corrupt list."
 
-echo "Recalculating 30M List"
+echo "Recalculating ARDOP 30M List"
 RECALC 30mardoplist.txt | yad --center --progress --pulsate --auto-close --no-buttons --text-align=center --title="Recalculate" \
---text="Recalculating 30M List\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the process\rand leave you with a corrupt list."
+--text="Recalculating ARDOP 30M List\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the process\rand leave you with a corrupt list."
 
-echo "Recalculating 40M List"
+echo "Recalculating ARDOP 40M List"
 RECALC 40mardoplist.txt | yad --center --progress --pulsate --auto-close --no-buttons --text-align=center --title="Recalculate" \
---text="Recalculating 40M List\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the process\rand leave you with a corrupt list."
+--text="Recalculating ARDOP 40M List\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the process\rand leave you with a corrupt list."
 
-echo "Recalculating 80M List"
+echo "Recalculating ARDOP 80M List"
 RECALC 80mardoplist.txt | yad --center --progress --pulsate --auto-close --no-buttons --text-align=center --title="Recalculate" \
---text="Recalculating 80M List\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the process\rand leave you with a corrupt list."
+--text="Recalculating ARDOP 80M List\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the process\rand leave you with a corrupt list."
 
 echo "Recalculating Packet list"
 RECALC packet.txt | yad --center --progress --pulsate --auto-close --no-buttons --text-align=center --title="Recalculate" \
 --text="Recalculating Packet List\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the process\rand leave you with a corrupt list."
 
+echo "Recalculating Vara 20M List"
+RECALCVARA 20mvaralist.txt | yad --center --progress --pulsate --auto-close --no-buttons --text-align=center --title="Recalculate" \
+--text="Recalculating VARA 20M List\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the process\rand leave you with a corrupt list."
+
+echo "Recalculating Vara 30M List"
+RECALCVARA 30mvaralist.txt | yad --center --progress --pulsate --auto-close --no-buttons --text-align=center --title="Recalculate" \
+--text="Recalculating VARA 30M List\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the process\rand leave you with a corrupt list."
+
+echo "Recalculating Vara 40M List"
+RECALCVARA 40mvaralist.txt | yad --center --progress --pulsate --auto-close --no-buttons --text-align=center --title="Recalculate" \
+--text="Recalculating VARA 40M List\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the process\rand leave you with a corrupt list."
+
+echo "Recalculating Vara 80M List"
+RECALCVARA 80mvaralist.txt | yad --center --progress --pulsate --auto-close --no-buttons --text-align=center --title="Recalculate" \
+--text="Recalculating VARA 80M List\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the process\rand leave you with a corrupt list."
+
 yad --center --timeout=2 --timeout-indicator=top --no-buttons --text="New Calculations Complete"
 }
 
 RECALC(){
+#This section recalculates the ARDOP lists and 2M Packet list
 FILE=$HOME/patmenu2/ardop-list/$1
 #check for and remove existing temp file
 if [ -f $TMPFILE3 ]; then
@@ -624,6 +646,50 @@ rm $TMPFILE2
 sort -k3 -o $TMPFILE3 $TMPFILE3
 
 cp $TMPFILE3 $HOME/patmenu2/ardop-list/$1
+}
+
+###########VARA Recalculate#######################
+RECALCVARA(){
+#This section recalculates the VARA lists.
+FILE=$HOME/patmenu2/vara-list/$1
+#check for and remove existing temp file
+if [ -f $TMPFILE3 ]; then
+rm $TMPFILE3
+fi
+
+#create temp list to work with and remove headers/blank lines
+cp $FILE $TMPFILE
+sed -i 's/.*information...//;s/.*succeeded.//;s/.*url//' $TMPFILE
+sed -i '/^$/d' $TMPFILE
+
+
+
+#read file, calculate new distance, and update
+while read LINE;
+do
+GRID=`echo $LINE | awk '{print $2}' | sed 's/\[//;s/\]//'`
+DISTANCE=`echo $LINE | awk '{print $3 }'`
+BEARING=`echo $LINE | awk '{print $4 }'`
+CALC=`/usr/bin/wwl $MYGRID $GRID`
+NEWDISTANCE=`echo $CALC | awk '{print $2}'`
+NEWBEARING=`echo $CALC | awk '{print $5}'`
+echo $LINE | sed "s/$DISTANCE/$NEWDISTANCE/;s/$BEARING/$NEWBEARING/" >> $TMPFILE2
+done < $TMPFILE
+rm $TMPFILE
+
+#pad distance with zeros for sorting
+while read LINE
+    do 
+	DISTANCE=$(echo $LINE | awk '{ print $3 }')
+	NEWDISTANCE=$(echo $LINE | awk '{ print $3 }' | sed -e :a -e 's/^.\{1,4\}$/0&/;ta')
+	echo $LINE | sed "s/$DISTANCE/$NEWDISTANCE/" >> $TMPFILE3
+done < $TMPFILE2
+rm $TMPFILE2
+
+#sort list by distance
+sort -k3 -o $TMPFILE3 $TMPFILE3
+
+cp $TMPFILE3 $HOME/patmenu2/vara-list/$1
 }
 
 #call main function
