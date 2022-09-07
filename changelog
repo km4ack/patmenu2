@@ -6,6 +6,8 @@ Changelog
 	add Pat Autoconnect VARA script
 	add VARA modem to auto connect
 	add VARA gateway search
+	add modem check to start vara hf script
+	add modem check to start vara fm script
 2.9.0	add 100 Mobiles to Position Request screen in catalog - https://github.com/km4ack/patmenu2/issues/51
 	fix stop modems - https://github.com/km4ack/patmenu2/issues/51
 	add wait for internet to getardoplist-cron - https://github.com/km4ack/patmenu2/issues/50
