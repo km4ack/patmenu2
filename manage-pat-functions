@@ -65,6 +65,7 @@ exit
 LOGIN(){
 CONFIG=$XDG_CONFIG_HOME/pat/config.json
 WHO=$(whoami)
+CURRENT_USER=$(grep mycall $CONFIG | head -1 | sed 's/"mycall": "//;s/ //g;s/",//')
 
 
 USER=$(yad --form --width=420 --text-align=center --center --title="Pat Log In/Out" --text-align=center \
@@ -73,16 +74,16 @@ USER=$(yad --form --width=420 --text-align=center --center --title="Pat Log In/O
 --field="Call Sign" "" \
 --field="Winlink Password" "" \
 --field="Six Character Grid Square" "EM65TV" \
+--field="Current User Logged In ---- <b>$CURRENT_USER</b>":LBL \
 --button="Log In":2 \
 --button="Log Out":3 \
 --button="Cancel":1)
 BUT=$?
 
 if [ $BUT = 252 ]; then
-echo "true exit"
 exit
 elif [ $BUT = 1 ]; then
-echo "cancel"
+$MAIN
 elif [ $BUT = 2 ]; then
 echo "Log IN"
 CALLSIGN=$(echo $USER | awk -F "|" '{print $1}')
