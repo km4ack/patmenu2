@@ -10,6 +10,9 @@ Changelog
 	add modem check to start vara fm script
 	add current user to login/logout screen - https://github.com/km4ack/patmenu2/issues/62
 	fix login cancel not returning to previous screen - https://github.com/km4ack/patmenu2/issues/62
+	add current grid to manual grid update screen - https://github.com/km4ack/patmenu2/issues/62
+	fix false ruby warning with GPS grid update - https://github.com/km4ack/patmenu2/issues/62
+	update ruby install to 2.5
 2.9.0	add 100 Mobiles to Position Request screen in catalog - https://github.com/km4ack/patmenu2/issues/51
 	fix stop modems - https://github.com/km4ack/patmenu2/issues/51
 	add wait for internet to getardoplist-cron - https://github.com/km4ack/patmenu2/issues/50
