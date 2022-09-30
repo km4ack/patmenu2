@@ -1,0 +1,245 @@
+#!/bin/bash
+
+#script to perform auto connects to gateways
+#using pat winlink and the vara modem
+#20220831 KM4ACK
+
+#Most of this code was copied from the autopat script which does
+#the same thing using the ARDOP modem.
+
+MYPATH=$HOME/patmenu2
+LOGO=$MYPATH/pmlogo.png
+MAIN=$MYPATH/patmenu
+
+source $MYPATH/config
+
+#verify we have rig control
+if [ $RIGCONTROL == 'no' ]
+then
+
+yad --title="NO RIG CONTROL" --width=400 --height=100 \
+    --image $LOGO --window-icon=$LOGO --image-on-top --text-align=center \
+    --center --form --text="\r\r\r\rRig Control is needed for auto pat.\rPlease configure rig control and try again." \
+    --button=gtk-ok
+
+exit
+fi
+
+#Check if FLRIG is running if user has it set in config file
+if [ "$RIGCONTROL" = 'yes' ]; then
+FLRIG=$(echo $RIG | grep "\-m 4")
+	if [ -z "$FLRIG" ]; then
+	echo
+	else
+	FLRIG=$(pidof flrig)
+		if [ -z "$FLRIG" ]; then
+		yad --title="FAILED" --width=400 --height=100 \
+    		--image $LOGO --window-icon=$LOGO --image-on-top --text-align=center \
+   		--center --form --text="Please start FLRIG and try again" \
+    		--button=gtk-ok
+		exit
+		fi
+	fi
+fi
+
+#clear any temp files from previous runs that might exist
+rm -rf $HOME/tempardop > /dev/null
+
+VARALIST=$MYPATH/vara-list/
+
+touch $LOG
+
+DATE=$(date)
+
+STARTRIG () {
+#start rigctld & restart pat
+PIDCTL=$(pidof rigctld)
+WHO=$(whoami)
+	if [ -z "$PIDCTL" ]
+	then
+	CONTROL=$(echo $RIG | sed 's/rigctl/rigctld/')
+	$CONTROL &
+	sudo systemctl restart pat@$WHO
+	fi
+}
+
+STARTRIG
+
+if [ -z "$PIDCTL" ]
+then
+STARTRIG
+fi
+
+SETRIG () {
+#Set Mode for rigcontrol
+$RIG M $MODEHF
+}
+SETRIG 
+
+#Directions Function
+directions () {
+echo "The script needs two arguments to run."
+echo "It needs the distance that you want to try to connect"
+echo "and it needs the band you wish to use"
+echo "Bands available are 20, 30, 40, & 80"
+echo "The first argument is the distance"
+echo "and the second is the band. So to try all 40M"
+echo "stations in a 300km radius, you would enter"
+echo "autopat 300 40"
+exit 0
+}
+
+#check if distance is empty and give direction
+if [ -z "$1" ]
+then
+directions
+fi
+
+#check if band is empty and give direction
+if [ -z "$2" ]
+then
+directions
+fi
+
+#Check for min distance
+if [ -z "$3" ]
+then
+MIN=0
+else
+MIN=$3
+fi
+
+#take $2 as band to use
+if [ $2 = "20" ]
+then
+FILE=$VARALIST"20mvaralist.txt"
+elif [ $2 = "30" ]
+then 
+FILE=$VARALIST"30mvaralist.txt"
+elif [ $2 = "40" ]
+then
+FILE=$VARALIST"40mvaralist.txt"
+elif [ $2 = "80" ]
+then
+FILE=$VARALIST"80mvaralist.txt"
+fi
+
+#Verify we have a list to work with
+test -f $FILE
+FILERESULT=$(echo $?)
+if [ $FILERESULT = "1" ]
+then
+echo "FILE DOESN'T EXIST."
+yad --title="NO LIST" --width=400 --height=100 \
+    --image $LOGO --window-icon=$LOGO --image-on-top --text-align=center \
+    --center --form --text="\r\r\rNo list has been downloaded. Auto Pat has no data to work with. Please download the gateway list \
+    and try again" \
+    --button="Download List":2 \
+    --button="Cancel":1
+BUT=$?
+	if [ $BUT = 1 ]; then
+	exit
+	elif [ $BUT = 2 ]; then
+	$MYPATH/getardoplist
+	$MAIN &
+	exit
+	fi
+fi
+
+if [ $AMRRON = "no" ]
+then
+#start varaHF modem
+echo "Starting VARA-HF modem"
+/usr/local/bin/wine $HOME/.wine/drive_c/VARA/VARA.exe > /dev/null 2>&1 &
+echo "standby while the modem starts....."
+sleep 10 #give vara time to start	
+fi
+
+#Pat Connection Function
+connect () {
+pat connect $CALL
+#Check if connection was successful
+RESULTS=$(echo $?)
+if [ $RESULTS = "0" ]
+then
+echo "A connection was made"
+echo $DATE" "$CALL" Success with autopat" >> $LOG
+CALL=$(echo "$CALL" | sed 's/&/ /')
+
+yad --title="SUCCESS" --width=300 --height=100 \
+    --image $LOGO --window-icon=$LOGO --image-on-top \
+    --center --form --text="<b>Successfully connected!</b>\r$CALL\r\rSee mylog in documents\rdirectory for more details." \
+    --button=gtk-ok
+
+if [ $AMRRON = "no" ]
+then
+sudo killall direwolf piardopc kissattach piARDOP_GUI rigctld > /dev/null 2>&1
+VARA=$(ps aux | grep wine | grep VARA | head -1 | awk '{print $2}')
+kill -9 $VARA > /dev/null 2>&1
+VARA=$(ps aux | grep wine | grep VARA | head -1 | awk '{print $2}')
+kill -9 $VARA > /dev/null 2>&1
+fi
+exit 0
+fi
+}
+
+#create temp dir & manipulate file
+mkdir -p $HOME/tempardop/
+#cat file, remove first few lines, remove blanks > NEWFILE NAME
+cat $FILE | tail -n +5 | grep '[^[:blank:]]' > $HOME/tempardop/tempardop.txt
+
+#add speed to line if not in list already
+#otherwise the URL is wrong
+while read -r line
+do
+CHECK=$(echo $line | awk '{print $6}')
+if [ "$CHECK" = 500 ] || [ "$CHECK" = 2750 ]; then
+echo $line >> $HOME/tempardop/temp.txt
+else
+echo $line | sed 's/VARA/VARA 500/' >> $HOME/tempardop/temp.txt
+fi
+done < $HOME/tempardop/tempardop.txt
+cp $HOME/tempardop/temp.txt $HOME/tempardop/tempardop.txt
+
+#pad with zeros
+while read LINE
+    do DISTANCE=$(echo $LINE | awk '{ print $3 }' | sed -e :a -e 's/^.\{1,4\}$/0&/;ta')
+	CALL=$(echo $LINE | awk '{ print $11 }')
+	echo $DISTANCE" "$CALL >> $HOME/tempardop/tempardop1.txt
+done < $HOME/tempardop/tempardop.txt
+
+cat $HOME/tempardop/tempardop1.txt | sort >> $HOME/tempardop/sorted.txt
+
+echo "Will Attempt to Connect to This Station"
+#loop through file and find needed station info
+while read LINE
+    do DISTANCE=$(echo $LINE | awk '{ print $1 }')
+	CALL=$(echo $LINE | awk '{ print $2 }')
+	if [ $DISTANCE -lt "$1" ] && [ $DISTANCE -gt "$MIN" ]
+	then
+	echo "Distance="$DISTANCE " Call="$CALL
+	#call the connect funtion
+	connect						
+	fi
+done < $HOME/tempardop/sorted.txt
+
+
+#remove temp directory & files
+rm -rf $HOME/tempardop
+
+if [ $AMRRON = "no" ]
+then
+sudo killall direwolf piardopc kissattach piARDOP_GUI rigctld > /dev/null 2>&1
+sudo rfcomm release /dev/rfcomm0 > /dev/null 2>&1
+VARA=$(ps aux | grep wine | grep VARA | head -1 | awk '{print $2}')
+kill -9 $VARA > /dev/null 2>&1
+VARA=$(ps aux | grep wine | grep VARA | head -1 | awk '{print $2}')
+kill -9 $VARA > /dev/null 2>&1
+
+fi
+
+yad --title="NO Connection" --width=400 --height=100 \
+    --image $LOGO --window-icon=$LOGO --image-on-top --text-align=center \
+    --center --form --text="\r\r\r\rNo Winlink connection was made using the criteria you entered." \
+    --button=gtk-ok
+

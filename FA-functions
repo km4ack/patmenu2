@@ -95,6 +95,7 @@ OUTFILE=/run/user/$UID/tempardoplist.txt
 CONFIG=$XDG_CONFIG_HOME/pat/config.json
 TEMP=/run/user/$UID/tempconfig.txt
 ARDOPLIST=$MYPATH/ardop-list
+VARALIST=$MYPATH/vara-list
 WHO=$(whoami)
 source $MYPATH/config	#patmenu config file
 #check to make sure user has downloaded
@@ -118,14 +119,16 @@ BANDS="20|30|40|80|2M-70CM"
 SEARCH=$(yad --form --width=400 --text="<b>Find Winlink Gateways</b>" --text-align=center --center --title="Find ARDOP" --text-align=center \
 --separator="|" --item-separator="|" \
 --image=$LOGO --window-icon=$LOGO --image-on-top \
+--field="Choose Modem":CB "VARA|ARDOP" \
 --field="Grid to Search" "EM" \
 --field="Band to Search":CB "$BANDS" \
 --button="Search":2 \
 --button="Cancel":1)
 QUIT=$?
-GRID=$(echo $SEARCH | awk -F "|" '{print $1}')
+MODEM=$(echo $SEARCH | awk -F "|" '{print $1}')
+GRID=$(echo $SEARCH | awk -F "|" '{print $2}')
 GRID=$(echo "${GRID^^}")
-BAND=$(echo $SEARCH | awk -F "|" '{print $2}')
+BAND=$(echo $SEARCH | awk -F "|" '{print $3}')
 
 echo "Grid search is $GRID"
 echo "Band is $BAND"
@@ -141,7 +144,7 @@ fi
 if [ $QUIT = 2 ] && [ "$BAND" = '2M-70CM' ]; then
 
 
-#########START TEST SECTION######################
+#########START PACKET SECTION######################
 
 
 FILE=$MYPATH/ardop-list/packet.txt
@@ -168,6 +171,7 @@ yad --title="Search Results" --width=1100 --height=500 \
     --button="Add Alias":2 > $MYTEMP)
 BUT=$?
 
+
 if [ "$BUT" = 2 ];then
 CALL=$(echo $INFO | awk -F "|" '{print $1}')
 SC=$(echo $INFO | awk -F "|" '{print $9}')
@@ -193,10 +197,6 @@ done < $TEMP2
 sudo killall pat
 sudo systemctl start pat@$WHO
 
-
-##############END TEST SECTION################
-
-
 yad --title="ADDED" --width=300 --height=100 \
     --image $LOGO --window-icon=$LOGO --image-on-top \
     --center --form --text="$CALL-$FREQ added to Pat Winlink\rRefresh Pat Mailbox Window\rto view changes" \
@@ -205,6 +205,10 @@ SEARCHMENU
 fi
 SEARCHMENU
 fi
+##############END PACKET SECTION################
+
+#determine which modem was chosen
+if [ "$MODEM" = 'ARDOP' ]; then
 
 #############ARDOP SEARCH####################
 
@@ -213,16 +217,19 @@ OUTFILE2=/run/user/$UID/tempardop2.txt
 if [ $BAND = 20 ];then
 FILE=$ARDOPLIST/20mardoplist.txt
 cat $FILE | egrep -i $GRID[[:digit:]]{2} | tee "$OUTFILE" > /dev/null 2>&1
-#cat $OUTFILE  | tr -s '[:space:]' | sed 's/ /|/g'| sed 's/[A-Za-z]*$/|/g' > $OUTFILE2
+sed -i 's/&/&amp;/g' $OUTFILE > /dev/null 2>&1
 elif [ $BAND = 30 ];then
 FILE=$ARDOPLIST/30mardoplist.txt
 cat $FILE | egrep -i $GRID[[:digit:]]{2} | tee "$OUTFILE" > /dev/null 2>&1
+sed -i 's/&/&amp;/g' $OUTFILE > /dev/null 2>&1
 elif [ $BAND = 40 ];then
 FILE=$ARDOPLIST/40mardoplist.txt
 cat $FILE | egrep -i $GRID[[:digit:]]{2} | tee "$OUTFILE" > /dev/null 2>&1
+sed -i 's/&/&amp;/g' $OUTFILE > /dev/null 2>&1
 elif [ $BAND = 80 ];then
 FILE=$ARDOPLIST/80mardoplist.txt
 cat $FILE | egrep -i $GRID[[:digit:]]{2} | tee "$OUTFILE" > /dev/null 2>&1
+sed -i 's/&/&amp;/g' $OUTFILE > /dev/null 2>&1
 echo "80 done"
 fi
 
@@ -249,12 +256,12 @@ FREQ=$(echo $SC | sed 's/.*=//')
 	
 while read LINE; do
 CALL=$(echo $LINE | awk -F "|" '{print $1}')
-SC=$(echo $LINE | awk -F "|" '{print $9}')
+SC=$(echo $LINE | awk -F "|" '{print $9}' | sed 's/\&amp;/\&/')
 FREQ=$(echo $SC | sed 's/.*=//')
 	if [ $RIGCONTROL = 'no' ]; then
 	SC=$(echo $SC | sed 's/[?].*$//')
 	fi
-jq '.connect_aliases += {'\""$CALL-$BAND"M"-$FREQ"\"' : '\"$SC\"'}' $CONFIG > $TEMP
+jq '.connect_aliases += {'\""$CALL-$BAND"M"-""ARDOP"\"' : '\"$SC\"'}' $CONFIG > $TEMP
 cp $TEMP $CONFIG
 rm $TEMP
 done < /run/user/$UID/mytemptestardoplist
@@ -277,6 +284,97 @@ yad --title="ADDED" --width=300 --height=100 \
 SEARCHMENU
 fi
 
+elif [ "$MODEM" = 'VARA' ]; then
+#############VARA SEARCH####################
+
+OUTFILE2=/run/user/$UID/tempardop2.txt
+
+if [ $BAND = 20 ];then
+FILE=$VARALIST/20mvaralist.txt
+cat $FILE | egrep -i $GRID[[:digit:]]{2} | tee "$OUTFILE" > /dev/null 2>&1
+sed -i 's/&/&amp;/g' $OUTFILE > /dev/null 2>&1
+elif [ $BAND = 30 ];then
+FILE=$VARALIST/30mvaralist.txt
+cat $FILE | egrep -i $GRID[[:digit:]]{2} | tee "$OUTFILE" > /dev/null 2>&1
+sed -i 's/&/&amp;/g' $OUTFILE > /dev/null 2>&1
+elif [ $BAND = 40 ];then
+FILE=$VARALIST/40mvaralist.txt
+cat $FILE | egrep -i $GRID[[:digit:]]{2} | tee "$OUTFILE" > /dev/null 2>&1
+sed -i 's/&/&amp;/g' $OUTFILE > /dev/null 2>&1
+elif [ $BAND = 80 ];then
+FILE=$VARALIST/80mvaralist.txt
+cat $FILE | egrep -i $GRID[[:digit:]]{2} | tee "$OUTFILE" > /dev/null 2>&1
+sed -i 's/&/&amp;/g' $OUTFILE > /dev/null 2>&1
+echo "80 done"
+fi
+
+#remove outfile2 if it exist
+if [ -f $OUTFILE2 ]; then
+rm $OUTFILE2
+fi
+
+#add speed to line if not in list already
+while read -r line
+do
+CHECK=$(echo $line | awk '{print $6}')
+if [ "$CHECK" = 500 ] || [ "$CHECK" = 2750 ]; then
+echo $line >> $OUTFILE2
+else
+echo $line | sed 's/VARA/VARA 500/' >> $OUTFILE2
+fi
+done < $OUTFILE
+
+INFO=$(PARSER='OFS="\n" {print $1, $2, $3, $4, $5, $6, $7, $9, $11}'
+MYTEMP=/run/user/$UID/mytemptestardoplist
+tail -50 $OUTFILE2 | awk "$PARSER" | \
+yad --title="Search Results" --width=1100 --height=500 \
+    --image $LOGO --window-icon=$LOGO --image-on-top --multiple \
+    --center --list --text="Search Results" \
+    --column Call --column Grid --column Dist \
+    --column Azm --column Mode --column Speed \
+    --column Dial-Freq \
+    --column Center-Freq --column Shortcut \
+    --button=gtk-close \
+    --button="Add Alias":2 > $MYTEMP)
+BUT=$?
+if [ "$BUT" = 2 ];then
+CALL=$(echo $INFO | awk -F "|" '{print $1}')
+SC=$(echo $INFO | awk -F "|" '{print $9}')
+FREQ=$(echo $SC | sed 's/.*=//')
+	if [ $RIGCONTROL = 'no' ]; then
+	SC=$(echo $SC | sed 's/[?].*$//')
+	fi
+	
+while read LINE; do
+CALL=$(echo $LINE | awk -F "|" '{print $1}')
+SC=$(echo $LINE | awk -F "|" '{print $9}' | sed 's/\&amp;/\&/')
+FREQ=$(echo $SC | sed 's/.*=//')
+	if [ $RIGCONTROL = 'no' ]; then
+	SC=$(echo $SC | sed 's/[?].*$//')
+	fi
+jq '.connect_aliases += {'\""$CALL-$BAND"M"-""VARA"\"' : '\"$SC\"'}' $CONFIG > $TEMP
+cp $TEMP $CONFIG
+rm $TEMP
+done < /run/user/$UID/mytemptestardoplist
+sudo killall pat
+sudo systemctl start pat@$WHO
+
+	if [ -z "$CALL" ]; then
+	yad --title="No Selection" --width=300 --height=100 \
+    	--image $LOGO --window-icon=$LOGO --image-on-top \
+    	--center --form --text="No station was selected\r Please try again" \
+    	--button=gtk-ok 
+	$MAIN &
+	exit
+	fi
+
+yad --title="ADDED" --width=300 --height=100 \
+    --image $LOGO --window-icon=$LOGO --image-on-top \
+    --center --form --text="Alias added to Pat Winlink\rRefresh Pat Mailbox Window\rto view changes" \
+    --button=gtk-ok 
+SEARCHMENU
+fi
+	fi	#close modem if/then statement
 SEARCHMENU
 }
 SEARCHMENU
@@ -436,12 +534,17 @@ TMPFILE2=$DIR/tempfile2
 TMPFILE3=$DIR/tempfile3
 MYGRID=$(cat /run/user/$UID/gridinfo.txt | cut -c1-6)
 
-#backup current lists
+#backup current ARDOP lists
 BKDIR=$MYPATH/ardop-list/bkup-`date +%F.%H%M`
 mkdir -p $BKDIR
 cp -r $HOME/patmenu2/ardop-list/*.txt $BKDIR/
 
-MYGRID=$(yad --form --width=450 --text="<b>Recalculate Distance and Bearings to Gateways</b>\rThis takes 2-3 minutes to complete" \
+#backup current VARA lists
+BKDIRVARA=$MYPATH/vara-list/bkup-`date +%F.%H%M`
+mkdir -p $BKDIRVARA
+cp -r $HOME/patmenu2/vara-list/*.txt $BKDIRVARA/
+
+MYGRID=$(yad --form --width=450 --text="<b>Recalculate Distance and Bearings to Gateways</b>\rThis takes 5-6 minutes to complete" \
 --text-align=center --center --title="Recalculate" --text-align=center --separator="|" --item-separator="|" \
 --image=$LOGO --window-icon=$LOGO --image-on-top \
 --field="Current Grid Square" "$MYGRID" \
@@ -463,30 +566,47 @@ echo "GRID=$MYGRID" > $HOME/patmenu2/ardop-list/grid.txt
 echo "LASTDL=Recalculated `date`" >> $HOME/patmenu2/ardop-list/grid.txt
 
 MAIN(){
-echo "Recalculating 20M List"
+echo "Recalculating ARDOP 20M List"
 RECALC 20mardoplist.txt | yad --center --progress --pulsate --auto-close --no-buttons --text-align=center --title="Recalculate" \
---text="Recalculating 20M List\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the process\rand leave you with a corrupt list."
+--text="Recalculating ARDOP 20M List\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the process\rand leave you with a corrupt list."
 
-echo "Recalculating 30M List"
+echo "Recalculating ARDOP 30M List"
 RECALC 30mardoplist.txt | yad --center --progress --pulsate --auto-close --no-buttons --text-align=center --title="Recalculate" \
---text="Recalculating 30M List\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the process\rand leave you with a corrupt list."
+--text="Recalculating ARDOP 30M List\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the process\rand leave you with a corrupt list."
 
-echo "Recalculating 40M List"
+echo "Recalculating ARDOP 40M List"
 RECALC 40mardoplist.txt | yad --center --progress --pulsate --auto-close --no-buttons --text-align=center --title="Recalculate" \
---text="Recalculating 40M List\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the process\rand leave you with a corrupt list."
+--text="Recalculating ARDOP 40M List\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the process\rand leave you with a corrupt list."
 
-echo "Recalculating 80M List"
+echo "Recalculating ARDOP 80M List"
 RECALC 80mardoplist.txt | yad --center --progress --pulsate --auto-close --no-buttons --text-align=center --title="Recalculate" \
---text="Recalculating 80M List\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the process\rand leave you with a corrupt list."
+--text="Recalculating ARDOP 80M List\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the process\rand leave you with a corrupt list."
 
 echo "Recalculating Packet list"
 RECALC packet.txt | yad --center --progress --pulsate --auto-close --no-buttons --text-align=center --title="Recalculate" \
 --text="Recalculating Packet List\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the process\rand leave you with a corrupt list."
 
+echo "Recalculating Vara 20M List"
+RECALCVARA 20mvaralist.txt | yad --center --progress --pulsate --auto-close --no-buttons --text-align=center --title="Recalculate" \
+--text="Recalculating VARA 20M List\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the process\rand leave you with a corrupt list."
+
+echo "Recalculating Vara 30M List"
+RECALCVARA 30mvaralist.txt | yad --center --progress --pulsate --auto-close --no-buttons --text-align=center --title="Recalculate" \
+--text="Recalculating VARA 30M List\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the process\rand leave you with a corrupt list."
+
+echo "Recalculating Vara 40M List"
+RECALCVARA 40mvaralist.txt | yad --center --progress --pulsate --auto-close --no-buttons --text-align=center --title="Recalculate" \
+--text="Recalculating VARA 40M List\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the process\rand leave you with a corrupt list."
+
+echo "Recalculating Vara 80M List"
+RECALCVARA 80mvaralist.txt | yad --center --progress --pulsate --auto-close --no-buttons --text-align=center --title="Recalculate" \
+--text="Recalculating VARA 80M List\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the process\rand leave you with a corrupt list."
+
 yad --center --timeout=2 --timeout-indicator=top --no-buttons --text="New Calculations Complete"
 }
 
 RECALC(){
+#This section recalculates the ARDOP lists and 2M Packet list
 FILE=$HOME/patmenu2/ardop-list/$1
 #check for and remove existing temp file
 if [ -f $TMPFILE3 ]; then
@@ -526,6 +646,50 @@ rm $TMPFILE2
 sort -k3 -o $TMPFILE3 $TMPFILE3
 
 cp $TMPFILE3 $HOME/patmenu2/ardop-list/$1
+}
+
+###########VARA Recalculate#######################
+RECALCVARA(){
+#This section recalculates the VARA lists.
+FILE=$HOME/patmenu2/vara-list/$1
+#check for and remove existing temp file
+if [ -f $TMPFILE3 ]; then
+rm $TMPFILE3
+fi
+
+#create temp list to work with and remove headers/blank lines
+cp $FILE $TMPFILE
+sed -i 's/.*information...//;s/.*succeeded.//;s/.*url//' $TMPFILE
+sed -i '/^$/d' $TMPFILE
+
+
+
+#read file, calculate new distance, and update
+while read LINE;
+do
+GRID=`echo $LINE | awk '{print $2}' | sed 's/\[//;s/\]//'`
+DISTANCE=`echo $LINE | awk '{print $3 }'`
+BEARING=`echo $LINE | awk '{print $4 }'`
+CALC=`/usr/bin/wwl $MYGRID $GRID`
+NEWDISTANCE=`echo $CALC | awk '{print $2}'`
+NEWBEARING=`echo $CALC | awk '{print $5}'`
+echo $LINE | sed "s/$DISTANCE/$NEWDISTANCE/;s/$BEARING/$NEWBEARING/" >> $TMPFILE2
+done < $TMPFILE
+rm $TMPFILE
+
+#pad distance with zeros for sorting
+while read LINE
+    do 
+	DISTANCE=$(echo $LINE | awk '{ print $3 }')
+	NEWDISTANCE=$(echo $LINE | awk '{ print $3 }' | sed -e :a -e 's/^.\{1,4\}$/0&/;ta')
+	echo $LINE | sed "s/$DISTANCE/$NEWDISTANCE/" >> $TMPFILE3
+done < $TMPFILE2
+rm $TMPFILE2
+
+#sort list by distance
+sort -k3 -o $TMPFILE3 $TMPFILE3
+
+cp $TMPFILE3 $HOME/patmenu2/vara-list/$1
 }
 
 #call main function
