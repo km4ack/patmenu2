@@ -91,10 +91,10 @@ fi
 #set correct connection commmand
 if [ $TNC = "2" ]
 then
-CONNECT="sudo rfcomm bind /dev/rfcomm0 $MAC"
+CONNECT="sudo -A rfcomm bind /dev/rfcomm0 $MAC"
 elif [ $TNC = "3" ]
 then
-CONNECT="sudo rfcomm bind /dev/rfcomm0 $MAC 6"
+CONNECT="sudo -A rfcomm bind /dev/rfcomm0 $MAC 6"
 fi
 
 #See if device was found and connect if found
@@ -108,7 +108,7 @@ yad --title="Mobilinkd MODEM" --width=400 --height=100 \
 exit 1
 else
       #stop things that might conflict
-      sudo killall kissattach direwolf >> /dev/null 2>&1
+      sudo -A killall kissattach direwolf >> /dev/null 2>&1
 yad --center --timeout=6 --timeout-indicator=top --no-buttons --height=300 --width=300 \
 --title="Detected" --image $LOGO --window-icon=$LOGO --image-on-top \
 --text="Mobilinkd TNC $TNC detected. Just a few more seconds." &
@@ -119,9 +119,9 @@ yad --center --timeout=6 --timeout-indicator=top --no-buttons --height=300 --wid
 
 
 		#create kissattach needed for winlink connections
-      		sudo kissattach /dev/rfcomm0 wl2k &
+      		sudo -A kissattach /dev/rfcomm0 wl2k &
 		sleep 3 
-		sudo kissparms -c 1 -p wl2k
+		sudo -A kissparms -c 1 -p wl2k
 fi
 
 #verify that kissattach is running
@@ -140,7 +140,7 @@ yad --title="Mobilinkd MODEM" --width=400 --height=100 \
 fi
 
 #restart pat so terminal window correctly reflects rig control
-sudo systemctl restart pat@`whoami`
+sudo -A systemctl restart pat@`whoami`
 
 source $HOME/patmenu2/config
 
