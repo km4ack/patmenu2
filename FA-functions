@@ -3,7 +3,7 @@
 
 MYPATH=$HOME/patmenu2
 MAIN=$MYPATH/./find2
-CONFIG=$XDG_CONFIG_HOME/pat/config.json
+CONFIG=$HOME/.config/pat/config.json
 TEMP=$HOME/patmenu2/tempconfig.txt
 TODAY=$(date +%Y%m%d-%R)
 WHO=$(whoami)
@@ -11,8 +11,6 @@ LASTDL=$(cat $MYPATH/ardop-list/ardoplist.txt | head -1)
 LOGO=$MYPATH/pmlogo.png
 
 source $MYPATH/config
-
-
 
 #--------------------------------
 #	MANUAL Download List
@@ -92,7 +90,7 @@ fi
 #--------------------------------
 GRIDSEARCH(){
 OUTFILE=/run/user/$UID/tempardoplist.txt
-CONFIG=$XDG_CONFIG_HOME/pat/config.json
+CONFIG=$HOME/.config/pat/config.json
 TEMP=/run/user/$UID/tempconfig.txt
 ARDOPLIST=$MYPATH/ardop-list
 VARALIST=$MYPATH/vara-list
@@ -194,8 +192,8 @@ jq '.connect_aliases += {'\""$CALL-$BAND"M"-$FREQ"\"' : '\"$SC\"'}' $CONFIG > $T
 cp $TEMP $CONFIG
 rm $TEMP
 done < $TEMP2
-sudo killall pat
-sudo systemctl start pat@$WHO
+sudo -A killall pat
+sudo -A systemctl start pat@$WHO
 
 yad --title="ADDED" --width=300 --height=100 \
     --image $LOGO --window-icon=$LOGO --image-on-top \
@@ -265,8 +263,8 @@ jq '.connect_aliases += {'\""$CALL-$BAND"M"-""ARDOP"\"' : '\"$SC\"'}' $CONFIG > 
 cp $TEMP $CONFIG
 rm $TEMP
 done < /run/user/$UID/mytemptestardoplist
-sudo killall pat
-sudo systemctl start pat@$WHO
+sudo -A killall pat
+sudo -A systemctl start pat@$WHO
 
 	if [ -z "$CALL" ]; then
 	yad --title="No Selection" --width=300 --height=100 \
@@ -356,8 +354,8 @@ jq '.connect_aliases += {'\""$CALL-$BAND"M"-""VARA"\"' : '\"$SC\"'}' $CONFIG > $
 cp $TEMP $CONFIG
 rm $TEMP
 done < /run/user/$UID/mytemptestardoplist
-sudo killall pat
-sudo systemctl start pat@$WHO
+sudo -A killall pat
+sudo -A systemctl start pat@$WHO
 
 	if [ -z "$CALL" ]; then
 	yad --title="No Selection" --width=300 --height=100 \
@@ -414,7 +412,7 @@ yad --center --timeout=3 --timeout-indicator=top --no-buttons --text="You are no
 fi
 
 #Create temp config file to use for downloads
-MAINFILE=$XDG_CONFIG_HOME/pat/config.json
+MAINFILE=$HOME/.config/pat/config.json
 TEMPFILE=/run/user/$UID/config.json
 cp $MAINFILE $TEMPFILE
 
@@ -500,7 +498,7 @@ $MAIN &
 exit
 fi
 #backup home grid before loading alt grid
-HOMEGRID=$(grep locator $XDG_CONFIG_HOME/pat/config.json | sed 's/"//g;s/locator://;s/,//;s/ //g')
+HOMEGRID=$(grep locator $HOME/.config/pat/config.json | sed 's/"//g;s/locator://;s/,//;s/ //g')
 if [ ! -d $HOME/patmenu2/alt-ardop-list/ardop-list-$HOMEGRID ]; then
 echo "Backing up home grid"
 mkdir -p $HOME/patmenu2/alt-ardop-list/ardop-list-$HOMEGRID
