@@ -8,6 +8,7 @@ MYPATH=$HOME/patmenu2
 LOGO=$MYPATH/pmlogo.png
 MAIN=$MYPATH/patmenu
 
+
 source $MYPATH/config
 
 if [ $RIGCONTROL == 'no' ]
@@ -49,7 +50,7 @@ if [ -z "$DIRE" ]
 then
 echo
 else
-sudo killall direwolf kissattach
+sudo -A killall direwolf kissattach
 fi
 
 PIARDOPC=$(pidof piardopc)
@@ -57,7 +58,7 @@ if [ -z "$PIARDOPC" ]
 then
 echo
 else
-sudo killall piardopc ardop-GUI
+sudo -A killall piardopc ardop-GUI
 fi
 
 fi
@@ -79,7 +80,7 @@ WHO=$(whoami)
 	then
 	CONTROL=$(echo $RIG | sed 's/rigctl/rigctld/')
 	$CONTROL &
-	sudo systemctl restart pat@$WHO
+	sudo -A systemctl restart pat@$WHO
 	fi
 }
 
@@ -212,7 +213,7 @@ yad --title="SUCCESS" --width=300 --height=100 \
 
 if [ $AMRRON = "no" ]
 then
-sudo killall piardopc piARDOP_GUI
+sudo -A killall piardopc piARDOP_GUI
 fi
 exit 0
 fi
@@ -252,7 +253,7 @@ rm -rf $HOME/tempardop
 if [ $AMRRON = "no" ]
 then
 #Stop ARDOP modem and gui
-sudo killall piardopc piARDOP_GUI
+sudo -A killall piardopc piARDOP_GUI
 fi
 
 yad --title="NO Connection" --width=400 --height=100 \
