@@ -59,7 +59,7 @@ WHO=$(whoami)
 	then
 	CONTROL=$(echo $RIG | sed 's/rigctl/rigctld/')
 	$CONTROL &
-	sudo systemctl restart pat@$WHO
+	sudo -A systemctl restart pat@$WHO
 	fi
 }
 
@@ -173,7 +173,7 @@ yad --title="SUCCESS" --width=300 --height=100 \
 
 if [ $AMRRON = "no" ]
 then
-sudo killall direwolf piardopc kissattach piARDOP_GUI rigctld > /dev/null 2>&1
+sudo -A killall direwolf piardopc kissattach piARDOP_GUI rigctld > /dev/null 2>&1
 VARA=$(ps aux | grep wine | grep VARA | head -1 | awk '{print $2}')
 kill -9 $VARA > /dev/null 2>&1
 VARA=$(ps aux | grep wine | grep VARA | head -1 | awk '{print $2}')
@@ -229,8 +229,8 @@ rm -rf $HOME/tempardop
 
 if [ $AMRRON = "no" ]
 then
-sudo killall direwolf piardopc kissattach piARDOP_GUI rigctld > /dev/null 2>&1
-sudo rfcomm release /dev/rfcomm0 > /dev/null 2>&1
+sudo -A killall direwolf piardopc kissattach piARDOP_GUI rigctld > /dev/null 2>&1
+sudo -A rfcomm release /dev/rfcomm0 > /dev/null 2>&1
 VARA=$(ps aux | grep wine | grep VARA | head -1 | awk '{print $2}')
 kill -9 $VARA > /dev/null 2>&1
 VARA=$(ps aux | grep wine | grep VARA | head -1 | awk '{print $2}')
