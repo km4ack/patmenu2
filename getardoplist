@@ -23,7 +23,7 @@ MYVARA=$HOME/patmenu2/vara-list/
 #my log file
 LOG=$HOME/Documents/mylog.txt
 
-GRIDCK=$(jq .locator $XDG_CONFIG_HOME/pat/config.json)
+GRIDCK=$(jq .locator $HOME/.config/pat/config.json)
 if [ ${#GRIDCK} -lt 3 ]
 then
 echo "Grid square not set in Pat Configure" | tee -a $LOG
@@ -52,7 +52,7 @@ VARATWENTY=$MYVARA'20mvaralist.txt'
 VARATHIRTY=$MYVARA'30mvaralist.txt'
 VARAFM=$MYVARA'varafm.txt'
 
-GRID=$(grep locator $XDG_CONFIG_HOME/pat/config.json | sed 's/"locator"://;s/"//g;s/,//;s/ //g')
+GRID=$(grep locator $HOME/.config/pat/config.json | sed 's/"locator"://;s/"//g;s/,//;s/ //g')
 echo "GRID=$GRID" > $HOME/patmenu2/.grid
 
 #check internet connection
