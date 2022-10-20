@@ -9,12 +9,12 @@ BKDIR=$HOME/Desktop/config-bkups
 NEWCONFIG=$HOME/Desktop/test.txt
 
 #get depends if needed.
-sudo apt-get update
+sudo -A apt-get update
 if ! hash yad 2>/dev/null; then
-sudo apt install -y yad
+sudo -A apt install -y yad
 fi
 if ! hash jq 2>/dev/null; then
-sudo apt install -y jq
+sudo -A apt install -y jq
 fi
 
 if [ -f $HOME/patmenu/config ]; then
@@ -50,7 +50,7 @@ Terminal=false
 Type=Application
 Categories=Network;HamRadio;
 EOF
-sudo cp /run/user/$UID/patmenu.desktop /usr/share/applications/patmenu.desktop
+sudo -A cp /run/user/$UID/patmenu.desktop /usr/share/applications/patmenu.desktop
 
 #download RMS List
 $MYPATH/getardoplist
