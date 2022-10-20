@@ -52,8 +52,8 @@ RCALL1=$(echo "\"$RCALL\"")
 jq 'del(.connect_aliases.'$RCALL1')' $PATCONFIG > $TEMP
 cp $TEMP $PATCONFIG
 rm $TEMP $OUTFILE
-sudo killall pat
-sudo systemctl start pat@$WHO
+sudo -A killall pat
+sudo -A systemctl start pat@$WHO
 yad --title="Alias Deleted" --width=400 --height=200 \
 --image $LOGO --window-icon=$LOGO --image-on-top \
 --center --text="$RCALL1 Alias DELETED" \
@@ -65,7 +65,6 @@ exit
 LOGIN(){
 CONFIG=$XDG_CONFIG_HOME/pat/config.json
 WHO=$(whoami)
-CURRENT_USER=$(grep mycall $CONFIG | head -1 | sed 's/"mycall": "//;s/ //g;s/",//')
 
 
 USER=$(yad --form --width=420 --text-align=center --center --title="Pat Log In/Out" --text-align=center \
@@ -74,16 +73,16 @@ USER=$(yad --form --width=420 --text-align=center --center --title="Pat Log In/O
 --field="Call Sign" "" \
 --field="Winlink Password" "" \
 --field="Six Character Grid Square" "EM65TV" \
---field="Current User Logged In ---- <b>$CURRENT_USER</b>":LBL \
 --button="Log In":2 \
 --button="Log Out":3 \
 --button="Cancel":1)
 BUT=$?
 
 if [ $BUT = 252 ]; then
+echo "true exit"
 exit
 elif [ $BUT = 1 ]; then
-$MAIN
+echo "cancel"
 elif [ $BUT = 2 ]; then
 echo "Log IN"
 CALLSIGN=$(echo $USER | awk -F "|" '{print $1}')
@@ -98,7 +97,7 @@ sed -i "s/\"mycall\": \".*\",/\"mycall\": \"$CALLSIGN\",/" $CONFIG
 sed -i "s/\"secure_login_password\": \".*\",/\"secure_login_password\": \"$PASS\",/" $CONFIG
 #set locator
 sed -i "s/\"locator\": \".*\",/\"locator\": \"$GRID\",/" $CONFIG
-sudo systemctl restart pat@$WHO
+sudo -A systemctl restart pat@$WHO
 $MAIN &
 exit
 elif [ $BUT = 3 ]; then
@@ -112,7 +111,7 @@ sed -i "s/\"mycall\": \".*\",/\"mycall\": \"$CALLSIGN\",/" $CONFIG
 sed -i "s/\"secure_login_password\": \".*\",/\"secure_login_password\": \"$PASS\",/" $CONFIG
 #set locator
 sed -i "s/\"locator\": \".*\",/\"locator\": \"$GRID\",/" $CONFIG
-sudo killall pat
+sudo -A killall pat
 $MAIN &
 exit
 fi
@@ -121,9 +120,9 @@ fi
 
 GPSGRID(){
 CONFIG=$XDG_CONFIG_HOME/pat/config.json
-RUBY_INSTALLED=$(which ruby)
 
-if [ -z "$RUBY_INSTALLED" ]; then
+if ! hash ruby2.3 2>/dev/null; then
+echo "Ruby Not found on system"
 yad --form --width=300 --text-align=center --center --title="Ruby not Found" --text-align=center \
 --image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
 --text="Ruby is needed to read GPS data but not found installed on your system. Would you like to install it now?" \
@@ -135,10 +134,10 @@ BUT=$?
 	exit
 	elif [ $BUT = 2 ]; then
 	INSTALLRUBY(){
-	sudo apt-get update
-	sudo apt-get install -y ruby2.5
-	sudo gem install gpsd_client
-	sudo gem install maidenhead
+	sudo -A apt-get update
+	sudo -A apt-get install -y ruby2.3
+	sudo -A gem install gpsd_client
+	sudo -A gem install maidenhead
 	}
 	INSTALLRUBY | yad --center --progress --pulsate --auto-close --no-buttons --text-align=center \
 --text="Installing Ruby. This will take several minutes\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the install."
@@ -206,8 +205,8 @@ exit
 fi
 FILE=$(echo $INFO | awk -F "|" '{print $1}')
 cp $XDG_CONFIG_HOME/pat/$FILE $CONFIG
-sudo killall pat
-sudo systemctl start pat@$WHO
+sudo -A killall pat
+sudo -A systemctl start pat@$WHO
 yad --form --width=420 --text-align=center --center --title="Config Restore" --text-align=center \
 --image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
 --text="<b>Config Restore</b> by KM4ACK\r\r<b>RESTROE COMPLETE</b>" \
@@ -264,8 +263,8 @@ fi
 NEW=$(echo $NEW | awk -F "|" '{print $1}')
 
 sed -i "s/\"Max\":.*/ \"Max\": $NEW/" $CONFIG
-sudo killall pat
-sudo systemctl start pat@$WHO
+sudo -A killall pat
+sudo -A systemctl start pat@$WHO
 yad --form --width=320 --text-align=center --center --title="Speed" --text-align=center \
 --image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
 --text="<b>ARDOP Speed set to $NEW</b>" \
@@ -310,8 +309,8 @@ sed -i "s/\"ptt_ctrl\":\ false,/\"ptt_ctrl\":\ $ANS,/" $CONFIG
 elif [ $CURRENT = 'true' ]; then
 sed -i "s/\"ptt_ctrl\":\ true,/\"ptt_ctrl\":\ $ANS,/" $CONFIG
 fi
-sudo killall pat
-sudo systemctl start pat@$WHO
+sudo -A killall pat
+sudo -A systemctl start pat@$WHO
 
 
 yad --form --width=400 --text-align=center --center --title="Set PTT" --text-align=center \
@@ -328,13 +327,11 @@ MANUALGPS() {
 
 WHO=$(whoami)
 CONFIG=$XDG_CONFIG_HOME/pat/config.json
-CURRENT_GRID=$(grep locator $CONFIG | sed 's/"locator": "//;s/ //g;s/",//')
 
 GRID=$(yad --form --width=400 --text-align=center --center --title="Set Grid" --text-align=center \
 --image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
 --text="<b>Update Pat Grid</b> by KM4ACK" \
 --field="Six Character Grid": "$NEWGRID" \
---field="Current Grid -------- <b>$CURRENT_GRID</b>":LBL \
 --button="Update Grid":2 \
 --button="Cancel":1)
 BUT=$?
@@ -355,8 +352,8 @@ NEWGRID=${NEWGRID^^}
 
 sed -i "s/\"locator\": \".*\",/\"locator\": \"$NEWGRID\",/" $CONFIG
 echo "GRID UPDATED"
-sudo killall pat
-sudo systemctl start pat@$WHO
+sudo -A killall pat
+sudo -A systemctl start pat@$WHO
 yad --form --width=400 --text-align=center --center --title="Grid Update" --text-align=center \
 --image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
 --text="<b>Grid Updated to $NEWGRID</b>" \
@@ -425,9 +422,9 @@ WantedBy=multi-user.target
 EOF
 #add listen modes set by user
 sed -i "s|Exec.*|ExecStart=/usr/bin/pat -l $TELNET$ARDOP$AX25 http|" $TEMP
-sudo cp $TEMP /lib/systemd/system/pat@.service
-sudo systemctl daemon-reload
-sudo systemctl restart pat@$WHO
+sudo -A cp $TEMP /lib/systemd/system/pat@.service
+sudo -A systemctl daemon-reload
+sudo -A systemctl restart pat@$WHO
 yad --form --width=320 --text-align=center --center --title="Listening" --text-align=center \
 --image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
 --text="<b>Listen mode set to $TELNET$ARDOP$AX25</b>" \
@@ -450,9 +447,9 @@ Restart=on-failure
 [Install]
 WantedBy=multi-user.target
 EOF
-sudo cp $TEMP /lib/systemd/system/pat@.service
-sudo systemctl daemon-reload
-sudo systemctl restart pat@$WHO
+sudo -A cp $TEMP /lib/systemd/system/pat@.service
+sudo -A systemctl daemon-reload
+sudo -A systemctl restart pat@$WHO
 fi
 yad --form --width=320 --text-align=center --center --title="Listening" --text-align=center \
 --image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
@@ -547,7 +544,7 @@ sed -i "s/127.0.0.1/$SECURE/" $DIR/config.json
 
 #cp file and restart pat
 cp $DIR/config.json $PATPATH/
-sudo systemctl restart pat@$WHO
+sudo -A systemctl restart pat@$WHO
 
 yad --title="Repair Complete" --width=300 --height=100 \
 --image $LOGO --window-icon=$LOGO --image-on-top \
@@ -587,7 +584,7 @@ SC="telnet://{mycall}:CMSTelnet@$IP:8774/wl2k"
 #mod config file
 jq '.connect_aliases += {'\"P2P-"$REMOTE_CALL"-"$IP"\"' : '\"$SC\"'}' $CONFIG > $TEMP_CONFIG
 cp $TEMP_CONFIG $CONFIG
-sudo systemctl restart pat@$WHO
+sudo -A systemctl restart pat@$WHO
 
 #give user notice
 yad --form --width=420 --text-align=center --center --title="P2P Alias Add" --text-align=center \
@@ -598,119 +595,6 @@ $MAIN
 fi
 }
 
-AUTOMODEM(){
-CONF=$HOME/patmenu2/.autostart.conf
-HTTP_ADDR=$(grep http_addr $HOME/.config/pat/config.json | sed 's/.*": "//;s/:.*//')
 
-#pat server check
-if [ "$HTTP_ADDR" = '127.0.0.1' ]; then
-yad --form --width=420 --text-align=center --center --title="Auto Modem Start" --text-align=center \
---image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
---text="The Pat mailbox server is currently set to only accept connections from the Pi itself. \
-Typically if using the auto modem start feature, you will be accessing the Pat mailbox from \
-another device. Would you like to configure the system to accept connections over the network?" \
---button="Keep Current Settings":1 \
---button="Allow Network Connections":2
-BUT=$?
-	if [ $BUT = 2 ]; then
-	cp $HOME/.config/pat/config.json $HOME/.config/pat/config.json.bkup
-	sed -i 's/127.0.0.1/0.0.0.0/' $HOME/.config/pat/config.json
-	sudo systemctl restart pat@`whoami`
-	fi
-fi
-
-source $CONF
-
-#Figure out which modem (if any) is set to auto start already and give it a pretty name.
-CUR=$(echo $AUTO_CMD | awk -F "/" '{print $NF}')
-if [ -z $CUR ]; then
-echo
-else
-	if [ $CUR = 'start-vara-hf' ]; then
-	CUR=VARA-HF
-	elif [ $CUR = 'start-vara-fm' ]; then
-	CUR=VARA-FM
-	elif [ $CUR = 'start-pat-ardop' ]; then
-	CUR=ARDOP
-	elif [ $CUR = 'start-pat2m' ]; then
-	CUR=Packet
-	fi
-fi
-
-#check to see if we already have a autostart in place. Give user
-#a chance to delete before adding a new one. Can only have one
-#modem starting at a time.
-if [ -f $CONF ]; then
-yad --form --width=420 --text-align=center --center --title="Auto Modem Start" --text-align=center \
---image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
---text="<b>Existing Auto Start Found - $CUR</b>\rYou must delete the existing auto start before creating a new one. \
-Only one modem at a time can be set to auto start at boot." \
---button="Delete Current":1 \
---button="Keep Current":2
-BUT=$?
-	if [ $BUT = 1 ]; then
-	crontab -l > /run/user/$UID/tempcron.txt
-	rm $CONF
-	sed -i '/patmenu2\/start/d' /run/user/$UID/tempcron.txt
-	crontab /run/user/$UID/tempcron.txt
-	elif [ $BUT = 2 ]; then
-	$MAIN &
-	exit
-	elif [ $BUT = 252 ]; then
-	exit
-	fi
-fi
-
-AUTO=$(yad --form --width=420 --text-align=center --center --title="Auto Modem Start" --text-align=center \
---image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
---text="<b>Auto Modem Start</b> by KM4ACK" \
---field="Auto Start Modem on Boot":CB "NONE|VARA|VARA-FM|ARDOP|Packet")
-BUT=$?
-
-AUTO=$(echo $AUTO | awk -F "|" '{print $1}')
-
-#give user chance to exit/cancel
-if [ $BUT = 252 ]; then
-exit
-elif [ $BUT = 1 ]; then
-$MAIN &
-exit
-fi
-
-#set command per user selection
-if [ "$AUTO" = 'VARA' ]; then
-echo "VARA Selected"
-AUTO_CMD="sleep 15 && export DISPLAY=:0 && $HOME/patmenu2/start-vara-hf"
-elif [ "$AUTO" = 'VARA-FM' ]; then
-echo "VARA FM Selected"
-AUTO_CMD="sleep 15 && export DISPLAY=:0 && $HOME/patmenu2/start-vara-fm"
-elif [ "$AUTO" = 'ARDOP' ]; then
-echo "ARDOP Selected"
-AUTO_CMD="sleep 15 && export DISPLAY=:0 && $HOME/patmenu2/start-pat-ardop"
-elif [ "$AUTO" = 'Packet' ]; then
-echo "Packet Selected"
-AUTO_CMD="sleep 15 && export DISPLAY=:0 && $HOME/patmenu2/start-pat2m"
-elif [ "$AUTO" = 'NONE' ]; then
-$MAIN &
-exit
-fi
-
-#send the command to the conf file
-echo "AUTO_CMD=\"$AUTO_CMD\"" > $CONF
-
-#add auto start to current cron job
-crontab -l > /run/user/$UID/tempcron.txt
-echo "@reboot $AUTO_CMD" >> /run/user/$UID/tempcron.txt
-crontab /run/user/$UID/tempcron.txt
-
-#give user feedback
-yad --form --width=420 --text-align=center --center --title="Auto Modem Start" --text-align=center \
---image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
---text="$AUTO will auto start at boot\r\r<b>IMPORTANT NOTE!</b>\rThe sound card MUST be plugged in \
-before booting the Pi or the auto start feature will FAIL." \
---button=gtk-ok
-$MAIN &
-exit
-}
 
 
