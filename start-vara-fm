@@ -129,7 +129,7 @@ fi
 
 sleep 1
 #restart pat so terminal window correctly reflects rig control
-sudo systemctl restart pat@`whoami`
+sudo -A systemctl restart pat@`whoami`
 
 echo "starting browser"
 #open pat inbox in browser
