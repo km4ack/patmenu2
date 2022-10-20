@@ -22,8 +22,8 @@ echo "We are missing a dependency....expect"
 echo "Hang on while it is installed"
 echo "You can press ctrl+c to exit"
 sleep 3
-sudo apt update
-sudo apt install -y expect
+sudo -A apt update
+sudo -A apt install -y expect
 fi
 
 #create connect script in RAM memory. (Called later from this script)
@@ -33,7 +33,7 @@ cat << "MYFILE" > /run/user/$UID/connect
 set prompt "#"
 set address [lindex $argv 0]
 
-spawn sudo bluetoothctl
+spawn sudo -A bluetoothctl
 expect -re $prompt
 send "scan on\r"
 send_user "\nStandby\r"
