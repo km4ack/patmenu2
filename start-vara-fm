@@ -32,7 +32,7 @@ FLRIG=$(echo $RIG | grep "\-m 4")
 fi
 
 #Check if modem is already running
-MODEMCHECK=$(ps aux | grep -i box86 | grep -i varafm)
+MODEMCHECK=$(ps aux | grep -i .wine | grep -i varafm)
 	if [ ! -z "$MODEMCHECK" ]; then
 	yad --title="FAILED" --width=400 --height=100 \
 	--image $LOGO --window-icon=$LOGO --image-on-top --text-align=center \
