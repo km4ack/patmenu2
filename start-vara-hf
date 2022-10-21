@@ -112,7 +112,7 @@ echo "starting VARA HF"
 sleep 7 #give vara time to start
 
 #verify vara has started
-PIDVARA=$(ps aux | grep VARA.exe)
+PIDVARA=$(ps aux | grep .wine | grep VARA.exe)
 if [ -z "$PIDVARA" ]
 then
 yad --title="FAILED" --width=400 --height=100 \
