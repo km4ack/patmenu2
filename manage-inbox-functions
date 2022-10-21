@@ -63,9 +63,9 @@ fi
 }
 
 EMAILBKUP(){
-CONFIG=$XDG_CONFIG_HOME/pat/config.json
+CONFIG=$HOME/.config/pat/config.json
 WHO=$(whoami)
-CALL=$(cat $XDG_CONFIG_HOME/pat/config.json | grep -m 1 mycall | sed 's/\"mycall\": \"//' | sed 's/\",//' | sed -e 's/^\s*//' | tr '[:lower:]' '[:upper:]')
+CALL=$(cat $HOME/.config/pat/config.json | grep -m 1 mycall | sed 's/\"mycall\": \"//' | sed 's/\",//' | sed -e 's/^\s*//' | tr '[:lower:]' '[:upper:]')
 BKUPTIME=$(date +%Y%d%m-%H%M)
 
 BACKUP=$(yad --form --width=420 --text-align=center --center --title="Email Backup" --text-align=center \
@@ -98,9 +98,9 @@ fi
 
 EMAILRESTORE(){
 MYPATH=$HOME/dev/patmenu2
-CONFIG=$XDG_CONFIG_HOME/pat/config.json
+CONFIG=$HOME/.config/pat/config.json
 WHO=$(whoami)
-CALL=$(cat $XDG_CONFIG_HOME/pat/config.json | grep -m 1 mycall | sed 's/\"mycall\": \"//' | sed 's/\",//' | sed -e 's/^\s*//' | tr '[:lower:]' '[:upper:]')
+CALL=$(cat $HOME/.config/pat/config.json | grep -m 1 mycall | sed 's/\"mycall\": \"//' | sed 's/\",//' | sed -e 's/^\s*//' | tr '[:lower:]' '[:upper:]')
 
 RESTORE=$(yad --form --width=420 --text-align=center --center --title="Email Restore" --text-align=center \
 --image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
