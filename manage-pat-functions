@@ -5,7 +5,7 @@ LOGO=$MYPATH/pmlogo.png
 
 DELETEALIAS(){
 
-PATCONFIG=$XDG_CONFIG_HOME/pat/config.json
+PATCONFIG=$HOME/.config/pat/config.json
 OUTFILE=/run/user/$UID/currentlist.txt
 TEMP=/run/user/$UID/patconfig.txt
 WHO=$(whoami)
@@ -63,7 +63,7 @@ exit
 }
 
 LOGIN(){
-CONFIG=$XDG_CONFIG_HOME/pat/config.json
+CONFIG=$HOME/.config/pat/config.json
 WHO=$(whoami)
 
 
@@ -119,7 +119,7 @@ fi
 }
 
 GPSGRID(){
-CONFIG=$XDG_CONFIG_HOME/pat/config.json
+CONFIG=$HOME/.config/pat/config.json
 
 if ! hash ruby2.3 2>/dev/null; then
 echo "Ruby Not found on system"
@@ -180,11 +180,11 @@ fi
 }
 
 RESTORECONFIG(){
-CONFIG=$XDG_CONFIG_HOME/pat/config.json
+CONFIG=$HOME/.config/pat/config.json
 OUTFILE=/run/user/$UID/config.list
 WHO=$(whoami)
 
-ls $XDG_CONFIG_HOME/pat/ | grep .bkup > $OUTFILE
+ls $$HOME/.config/pat/ | grep .bkup > $OUTFILE
 
 INFO=$(PARSER='OFS="\n" {print $1}'
 
@@ -204,7 +204,7 @@ $MAIN
 exit
 fi
 FILE=$(echo $INFO | awk -F "|" '{print $1}')
-cp $XDG_CONFIG_HOME/pat/$FILE $CONFIG
+cp $HOME/.config/pat/$FILE $CONFIG
 sudo -A killall pat
 sudo -A systemctl start pat@$WHO
 yad --form --width=420 --text-align=center --center --title="Config Restore" --text-align=center \
@@ -216,7 +216,7 @@ $MAIN
 }
 
 BKUPCONFIG(){
-CONFIG=$XDG_CONFIG_HOME/pat/config.json
+CONFIG=$HOME/.config/pat/config.json
 WHO=$(whoami)
 DATE=$(date +%d%b%Y-%H%M)
 
@@ -234,7 +234,7 @@ exit
 elif [ $BUT = 2 ]; then
 echo "Backing up file"
 BKUPCONFIG=config.$DATE.bkup
-cp $CONFIG $XDG_CONFIG_HOME/pat/$BKUPCONFIG
+cp $CONFIG $HOME/.config/pat/$BKUPCONFIG
 yad --form --width=420 --text-align=center --center --title="Config Backup" --text-align=center \
 --image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
 --text="<b>Config File Backup</b> by KM4ACK\r\r<b>Backup COMPLETE</b>" \
@@ -244,7 +244,7 @@ $MAIN
 }
 
 SPEED(){
-CONFIG=$XDG_CONFIG_HOME/pat/config.json
+CONFIG=$HOME/.config/pat/config.json
 CURRENT=$(cat $CONFIG | grep -i max | sed 's/"Max":\ //' | tr -d "[:blank:]")
 WHO=$(whoami)
 NEW=$(yad --form --width=320 --text-align=center --center --title="Speed" --text-align=center \
@@ -275,7 +275,7 @@ exit
 
 SETPTT(){
 
-CONFIG=$XDG_CONFIG_HOME/pat/config.json
+CONFIG=$HOME/.config/pat/config.json
 WHO=$(whoami)
 
 CURRENT=$(cat $CONFIG | grep ptt_ctrl | tail -1 | sed 's/"ptt_ctrl":\ //' | sed 's/,//' | tr -d "[:blank:]")
@@ -326,7 +326,7 @@ exit
 MANUALGPS() {
 
 WHO=$(whoami)
-CONFIG=$XDG_CONFIG_HOME/pat/config.json
+CONFIG=$HOME/.config/pat/config.json
 
 GRID=$(yad --form --width=400 --text-align=center --center --title="Set Grid" --text-align=center \
 --image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
@@ -478,7 +478,7 @@ PATV=$(pat version | awk '{print $2}' | sed 's/v0.//' | awk -F "." '{print $1}')
 	if [ $PATV -le 11 ]; then
 	PATPATH=$HOME/.wl2k/
 	else
-	PATPATH=$XDG_CONFIG_HOME/pat/
+	PATPATH=$HOME/.config/pat/
 	fi
 fi
 
@@ -555,7 +555,7 @@ $MAIN & exit
 
 PEER(){
 TEMP_DIR=/run/user/$UID
-CONFIG=$XDG_CONFIG_HOME/pat/config.json
+CONFIG=$HOME/.config/pat/config.json
 TEMP_CONFIG=$TEMP_DIR/temp-config.txt
 WHO=`whoami`
 
