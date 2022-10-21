@@ -109,7 +109,7 @@ fi
 
 echo "starting VARA HF"
 /usr/local/bin/wine $HOME/.wine/drive_c/VARA/VARA.exe > /dev/null 2>&1 &
-sleep 7 #give vara time to start
+sleep 10 #give vara time to start
 
 #verify vara has started
 PIDVARA=$(ps aux | grep -i box86 | grep VARA.exe)
