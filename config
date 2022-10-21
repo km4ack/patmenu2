@@ -1,15 +1,15 @@
 #Config file for Pat Menu
 #20200429 KM4ACK
-MYCALLSIGN=KM4ACK
+MYCALLSIGN=N0CALL
 MAP=usa
-RIGCONTROL=yes
-ARDOP="/home/km4ack/ardop/./piardopc 8515 plughw:1,0 plughw:1,0"
+RIGCONTROL=no
+ARDOP="/usr/local/bin/ardopc64 8515 plughw:3,0 plughw:3,0"
 ARDOPGUI="/home/km4ack/ardop/./piARDOP_GUI"
 DIREWOLF="direwolf -p"
 KISS="sudo /usr/sbin/kissattach /tmp/kisstnc"
 AXP=wl2k
 RIG="/usr/local/bin/rigctl -m 4"
-MODEHF="PKTUSB 3000"
+MODEHF=USB
 MODE2M=FM
 PORT=8080
 LOG=/home/km4ack/Documents/mylog.txt
