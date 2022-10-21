@@ -1,8 +1,9 @@
-release=2.10.1
+release=2.11.1
 
 Changelog
-2.10.1	take VARA out of BETA status
+2.11.1	take VARA out of BETA status
 	fix VARA modem start and stop detection
+2.11.0	add auto start modem
 2.10.0	add VARA to getardoplist script
 	add VARA to getardoplist-cron script
 	add Pat Autoconnect VARA script
