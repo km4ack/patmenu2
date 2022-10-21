@@ -33,7 +33,7 @@ FLRIG=$(echo $RIG | grep "\-m 4")
 fi
 
 #Check if modem is already running
-MODEMCHECK=$(ps aux | grep -i box86 | grep -i varafm)
+MODEMCHECK=$(ps aux | grep -i .wine | grep -i vara)
 	if [ ! -z "$MODEMCHECK" ]; then
 	yad --title="FAILED" --width=400 --height=100 \
 	--image $LOGO --window-icon=$LOGO --image-on-top --text-align=center \
@@ -109,10 +109,10 @@ fi
 
 echo "starting VARA HF"
 /usr/local/bin/wine $HOME/.wine/drive_c/VARA/VARA.exe > /dev/null 2>&1 &
-sleep 7 #give vara time to start
+sleep 10 #give vara time to start
 
 #verify vara has started
-PIDVARA=$(ps aux | grep -i box86 | grep VARA.exe)
+PIDVARA=$(ps aux | grep -i .wine | grep -i vara)
 if [ -z "$PIDVARA" ]
 then
 yad --title="FAILED" --width=400 --height=100 \
