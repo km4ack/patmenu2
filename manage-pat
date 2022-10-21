@@ -4,7 +4,22 @@ export MYPATH=$HOME/patmenu2
 LOGO=$MYPATH/pmlogo.png
 source $MYPATH/manage-pat-functions
 MAIN=$MYPATH/patmenu
+CUR=$(cat $MYPATH/.autostart.conf | awk -F "/" '{print $NF}' | sed 's/"//')
 
+if [ -z "$CUR" ]; then
+CUR=None
+else
+	#set pretty name for display
+	if [ $CUR = 'start-vara-hf' ]; then
+	CUR=VARA-HF
+	elif [ $CUR = 'start-vara-fm' ]; then
+	CUR=VARA-FM
+	elif [ $CUR = 'start-pat-ardop' ]; then
+	CUR=ARDOP
+	elif [ $CUR = 'start-pat2m' ]; then
+	CUR=Packet
+	fi
+fi
 
 yad --form --width=420 --text-align=center --center --title="Manage Pat" --text-align=center \
 --image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
@@ -16,6 +31,7 @@ yad --form --width=420 --text-align=center --center --title="Manage Pat" --text-
 --field="Set ARDOP PTT":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/manage-pat-functions; SETPTT"' \
 --field="Set Listen Mode":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/manage-pat-functions; LISTEN"' \
 --field="Add P2P Alias":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/manage-pat-functions; PEER"' \
+--field="Auto Start Modem - <b>$CUR</b>":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/manage-pat-functions; AUTOMODEM"' \
 --field="Delete Alias":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/manage-pat-functions; DELETEALIAS"' \
 --field="Backup Pat Config":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/manage-pat-functions; BKUPCONFIG"' \
 --field="Restore Pat Config":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/manage-pat-functions; RESTORECONFIG"' \
@@ -27,5 +43,3 @@ if [ $BUT = 1 ]; then
 $MAIN &
 exit
 fi
-
-echo $?

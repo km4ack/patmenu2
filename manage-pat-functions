@@ -598,6 +598,119 @@ $MAIN
 fi
 }
 
+AUTOMODEM(){
+CONF=$HOME/patmenu2/.autostart.conf
+HTTP_ADDR=$(grep http_addr $HOME/.config/pat/config.json | sed 's/.*": "//;s/:.*//')
 
+#pat server check
+if [ "$HTTP_ADDR" = '127.0.0.1' ]; then
+yad --form --width=420 --text-align=center --center --title="Auto Modem Start" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="The Pat mailbox server is currently set to only accept connections from the Pi itself. \
+Typically if using the auto modem start feature, you will be accessing the Pat mailbox from \
+another device. Would you like to configure the system to accept connections over the network?" \
+--button="Keep Current Settings":1 \
+--button="Allow Network Connections":2
+BUT=$?
+	if [ $BUT = 2 ]; then
+	cp $HOME/.config/pat/config.json $HOME/.config/pat/config.json.bkup
+	sed -i 's/127.0.0.1/0.0.0.0/' $HOME/.config/pat/config.json
+	sudo systemctl restart pat@`whoami`
+	fi
+fi
+
+source $CONF
+
+#Figure out which modem (if any) is set to auto start already and give it a pretty name.
+CUR=$(echo $AUTO_CMD | awk -F "/" '{print $NF}')
+if [ -z $CUR ]; then
+echo
+else
+	if [ $CUR = 'start-vara-hf' ]; then
+	CUR=VARA-HF
+	elif [ $CUR = 'start-vara-fm' ]; then
+	CUR=VARA-FM
+	elif [ $CUR = 'start-pat-ardop' ]; then
+	CUR=ARDOP
+	elif [ $CUR = 'start-pat2m' ]; then
+	CUR=Packet
+	fi
+fi
+
+#check to see if we already have a autostart in place. Give user
+#a chance to delete before adding a new one. Can only have one
+#modem starting at a time.
+if [ -f $CONF ]; then
+yad --form --width=420 --text-align=center --center --title="Auto Modem Start" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Existing Auto Start Found - $CUR</b>\rYou must delete the existing auto start before creating a new one. \
+Only one modem at a time can be set to auto start at boot." \
+--button="Delete Current":1 \
+--button="Keep Current":2
+BUT=$?
+	if [ $BUT = 1 ]; then
+	crontab -l > /run/user/$UID/tempcron.txt
+	rm $CONF
+	sed -i '/patmenu2\/start/d' /run/user/$UID/tempcron.txt
+	crontab /run/user/$UID/tempcron.txt
+	elif [ $BUT = 2 ]; then
+	$MAIN &
+	exit
+	elif [ $BUT = 252 ]; then
+	exit
+	fi
+fi
+
+AUTO=$(yad --form --width=420 --text-align=center --center --title="Auto Modem Start" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="<b>Auto Modem Start</b> by KM4ACK" \
+--field="Auto Start Modem on Boot":CB "NONE|VARA|VARA-FM|ARDOP|Packet")
+BUT=$?
+
+AUTO=$(echo $AUTO | awk -F "|" '{print $1}')
+
+#give user chance to exit/cancel
+if [ $BUT = 252 ]; then
+exit
+elif [ $BUT = 1 ]; then
+$MAIN &
+exit
+fi
+
+#set command per user selection
+if [ "$AUTO" = 'VARA' ]; then
+echo "VARA Selected"
+AUTO_CMD="sleep 15 && export DISPLAY=:0 && $HOME/patmenu2/start-vara-hf"
+elif [ "$AUTO" = 'VARA-FM' ]; then
+echo "VARA FM Selected"
+AUTO_CMD="sleep 15 && export DISPLAY=:0 && $HOME/patmenu2/start-vara-fm"
+elif [ "$AUTO" = 'ARDOP' ]; then
+echo "ARDOP Selected"
+AUTO_CMD="sleep 15 && export DISPLAY=:0 && $HOME/patmenu2/start-pat-ardop"
+elif [ "$AUTO" = 'Packet' ]; then
+echo "Packet Selected"
+AUTO_CMD="sleep 15 && export DISPLAY=:0 && $HOME/patmenu2/start-pat2m"
+elif [ "$AUTO" = 'NONE' ]; then
+$MAIN &
+exit
+fi
+
+#send the command to the conf file
+echo "AUTO_CMD=\"$AUTO_CMD\"" > $CONF
+
+#add auto start to current cron job
+crontab -l > /run/user/$UID/tempcron.txt
+echo "@reboot $AUTO_CMD" >> /run/user/$UID/tempcron.txt
+crontab /run/user/$UID/tempcron.txt
+
+#give user feedback
+yad --form --width=420 --text-align=center --center --title="Auto Modem Start" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="$AUTO will auto start at boot\r\r<b>IMPORTANT NOTE!</b>\rThe sound card MUST be plugged in \
+before booting the Pi or the auto start feature will FAIL." \
+--button=gtk-ok
+$MAIN &
+exit
+}
 
 
