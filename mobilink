@@ -49,7 +49,7 @@ BUT=$?
 	if [ "$BUT" = '2' ] || [ "$BUT" = '252' ]; then
 	exit
 	elif [ "$BUT" = '1' ]; then
-	lxterminal -e $HOME/patmenu2/mobi-pair
+	gnome-terminal -e $HOME/patmenu2/mobi-pair
 	exit
 	fi
 
