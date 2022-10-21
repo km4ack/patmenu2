@@ -82,7 +82,7 @@ sudo -A touch /run/user/$UID/sutest 2>&1 </dev/null
     fi
 
 else
-export SUDO_ASKPASS=/run/user/$UID/pmpw
+export SUDO_ASKPASS=/run/user/$UID/.pmpw
 fi
 ############################
 
