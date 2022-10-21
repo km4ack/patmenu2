@@ -5,7 +5,7 @@
 MYPATH=$HOME/patmenu2
 LOGO=$MYPATH/pmlogo.png
 MAIN=$MYPATH/./catalog
-PATCONFIG=$XDG_CONFIG_HOME/pat/config.json
+PATCONFIG=$HOME/.config/pat/config.json
 
 #get callsign from pat config file
 CALLSIGN=$(cat $PATCONFIG | grep -m 1 mycall | sed 's/\"mycall\": \"//' | sed 's/\",//' | sed -e 's/^\s*//' | tr '[:lower:]' '[:upper:]')
