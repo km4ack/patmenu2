@@ -27,7 +27,7 @@ FLRIG=$(echo $RIG | grep "\-m 4")
 fi
 
 #Check if modem is already running
-MODEMCHECK=$(pidof piardopc)
+MODEMCHECK=$(pidof ardopc64)
 if [ -z "$MODEMCHECK" ]; then
 echo
 else
@@ -103,12 +103,12 @@ fi
 $ARDOPGUI </dev/null &>/dev/null &			
 
 #start modem
-lxterminal --geometry=55x10 -e $ARDOP </dev/null &>/dev/null &
+gnome-terminal --geometry=55x10 -e $ARDOP </dev/null &>/dev/null &
 sleep 2
 
 
 #verify that piardopc is running
-PIDPIC=$(pidof piardopc)
+PIDPIC=$(pidof ardopc64)
 if [ -z "$PIDPIC" ]
 then
 yad --title="FAILED" --width=400 --height=100 \
