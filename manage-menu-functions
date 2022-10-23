@@ -73,10 +73,7 @@ echo "#Config file for Pat Menu" > $CONFIGTMP
 echo "#20200429 KM4ACK" >> $CONFIGTMP
 echo "MYCALLSIGN=$MYCALLSIGN" >> $CONFIGTMP
 echo "MAP=$MAP" >> $CONFIGTMP
-#patch for keeping config clean of looking for rig settings
-if [ $RIGCONTROL == 'yes' ]; then
-	echo "RIGCONTROL=$RIGCONTROL" >> $CONFIGTMP
-fi
+echo "RIGCONTROL=$RIGCONTROL" >> $CONFIGTMP
 echo "ARDOP=\"$ARDOP\"" >> $CONFIGTMP
 echo "ARDOPGUI=\"$ARDOPGUI\"" >> $CONFIGTMP
 echo "DIREWOLF=\"$DIREWOLF\"" >> $CONFIGTMP
