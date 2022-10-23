@@ -18,9 +18,10 @@ else
 	#Check if FLRIG is running if user has it set in config file
 	echo "rig control is on"
 	FLRIG=$(pidof flrig)
-	if $(pidof flrig); then
-		./flrig
-		exit
+	if [ -z $FLRIG ]; then
+		#needs to be open
+		echo launching flrig for you
+		flrig
 	fi
 fi
 
