@@ -12,9 +12,8 @@ then
 
 yad --title="NO RIG CONTROL" --width=400 --height=100 \
     --image $LOGO --window-icon=$LOGO --image-on-top --text-align=center \
-    --center --form --text="\r\r\r\rRig Control is needed for auto pat.\rPlease configure rig control and try again. \
-    \rRig control can be configured using\r<b>Manage Pat Menu</b>"
-    --button=gtk-ok
+    --center --form --text="\r\r\r\rRig Control is needed for auto pat.\rPlease configure rig control and try again.\
+	\rRig control can be configured using\r<b>Manage Pat Menu</b>" --button=gtk-ok
 $MAIN &
 exit
 fi
