@@ -24,7 +24,7 @@ if [ "$RIGCONTROL" = 'yes' ]; then
 	echo "rig control is on"
 	FLRIG=$(echo $RIG | grep "\-m 4")
 		if [ -z "$FLRIG" ]; then
-			echo
+			echo "" > /dev/null
 		else
 			FLRIG=$(pidof flrig)
 				if [ -z "$FLRIG" ]; then
