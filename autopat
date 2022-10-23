@@ -28,10 +28,10 @@ if [ "$RIGCONTROL" = 'yes' ]; then
 		else
 		FLRIG=$(pidof flrig)
 		if [ -z "$FLRIG" ]; then
-		yad --title="FAILED" --width=400 --height=100 \
-			--image $LOGO --window-icon=$LOGO --image-on-top --text-align=center 
+			yad --title="FAILED" --width=400 --height=100 --image $LOGO --window-icon=$LOGO --image-on-top --text-align=center \
 			--center --form --text="Please start FLRIG and try again" --button=gtk-ok
-		exit
+			
+			exit
 		fi
 		fi
 fi
