@@ -103,7 +103,7 @@ fi
 $ARDOPGUI </dev/null &>/dev/null &			
 
 #start modem
-gnome-terminal --geometry=55x10 -e $ARDOP </dev/null &>/dev/null &
+gnome-terminal --geometry=55x10 -- $ARDOP </dev/null &>/dev/null &
 sleep 2
 
 
