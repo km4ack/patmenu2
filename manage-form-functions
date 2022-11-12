@@ -5,7 +5,7 @@ LOGO=$MYPATH/pmlogo.png
 DOWNLOAD(){
 #yad --center --timeout=3 --timeout-indicator=top --no-buttons --text="Downloading Forms - Please wait" \
 #--image $LOGO --window-icon=$LOGO --image-on-top &
-lxterminal -e /usr/bin/pat updateforms
+/usr/bin/pat updateforms
 yad --center --timeout=3 --timeout-indicator=top --no-buttons --text="Forms Download Complete" \
 --image $LOGO --window-icon=$LOGO --image-on-top
 exit &
