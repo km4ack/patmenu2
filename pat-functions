@@ -66,9 +66,9 @@ fi
 
 #set correct comamnd for modem
 if [ "$MODEM" = 'ARDOP' ]; then
-lxterminal -e $MYPATH/autopat $MAX $BAND $MIN
+x-terminal-emulator -- $MYPATH/autopat $MAX $BAND $MIN
 elif [ "$MODEM" = 'VARA' ]; then
-lxterminal -e $MYPATH/autopat-vara $MAX $BAND $MIN
+x-terminal-emulator -- $MYPATH/autopat-vara $MAX $BAND $MIN
 fi
 
 $MAIN
