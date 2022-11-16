@@ -14,31 +14,29 @@ MAIN=$MYPATH/patmenu
 source $MYPATH/config
 
 #verify we have rig control
-if [ $RIGCONTROL == 'no' ]
-then
+if [ $RIGCONTROL == 'no' ]; then
+	yad --title="NO RIG CONTROL" --width=400 --height=100 \
+	    --image $LOGO --window-icon=$LOGO --image-on-top --text-align=center \
+	    --center --form --text="\r\r\r\rRig Control is needed for auto pat.\rPlease configure rig control and try again." \
+	    --button=gtk-ok
 
-yad --title="NO RIG CONTROL" --width=400 --height=100 \
-    --image $LOGO --window-icon=$LOGO --image-on-top --text-align=center \
-    --center --form --text="\r\r\r\rRig Control is needed for auto pat.\rPlease configure rig control and try again." \
-    --button=gtk-ok
-
-exit
+	exit
 fi
 
 #Check if FLRIG is running if user has it set in config file
 if [ "$RIGCONTROL" = 'yes' ]; then
-FLRIG=$(echo $RIG | grep "\-m 4")
+	FLRIG=$(echo $RIG | grep "\-m 4")
 	if [ -z "$FLRIG" ]; then
-	echo
-	else
-	FLRIG=$(pidof flrig)
-		if [ -z "$FLRIG" ]; then
-		yad --title="FAILED" --width=400 --height=100 \
-    		--image $LOGO --window-icon=$LOGO --image-on-top --text-align=center \
-   		--center --form --text="Please start FLRIG and try again" \
-    		--button=gtk-ok
-		exit
-		fi
+		echo
+		else
+		FLRIG=$(pidof flrig)
+			if [ -z "$FLRIG" ]; then
+				yad --title="FAILED" --width=400 --height=100 \
+		    		--image $LOGO --window-icon=$LOGO --image-on-top --text-align=center \
+		   		--center --form --text="Please start FLRIG and try again" \
+		    		--button=gtk-ok
+				exit
+			fi
 	fi
 fi
 
@@ -52,27 +50,25 @@ touch $LOG
 DATE=$(date)
 
 STARTRIG () {
-#start rigctld & restart pat
-PIDCTL=$(pidof rigctld)
-WHO=$(whoami)
-	if [ -z "$PIDCTL" ]
-	then
-	CONTROL=$(echo $RIG | sed 's/rigctl/rigctld/')
-	$CONTROL &
-	sudo -A systemctl restart pat@$WHO
-	fi
+	#start rigctld & restart pat
+	PIDCTL=$(pidof rigctld)
+	WHO=$(whoami)
+		if [ -z "$PIDCTL" ]; then
+			CONTROL=$(echo $RIG | sed 's/rigctl/rigctld/')
+			$CONTROL &
+			sudo -A systemctl restart pat@$WHO
+		fi
 }
 
 STARTRIG
 
-if [ -z "$PIDCTL" ]
-then
-STARTRIG
+if [ -z "$PIDCTL" ]; then
+	STARTRIG
 fi
 
 SETRIG () {
-#Set Mode for rigcontrol
-$RIG M $MODEHF
+	#Set Mode for rigcontrol
+	$RIG M $MODEHF
 }
 SETRIG 
 
@@ -90,69 +86,65 @@ exit 0
 }
 
 #check if distance is empty and give direction
-if [ -z "$1" ]
-then
-directions
+if [ -z "$1" ]; then
+	directions
 fi
 
 #check if band is empty and give direction
-if [ -z "$2" ]
-then
-directions
+if [ -z "$2" ]; then
+	directions
 fi
 
 #Check for min distance
-if [ -z "$3" ]
-then
-MIN=0
+if [ -z "$3" ]; then
+	MIN=0
 else
-MIN=$3
+	MIN=$3
 fi
 
 #take $2 as band to use
-if [ $2 = "20" ]
-then
-FILE=$VARALIST"20mvaralist.txt"
-elif [ $2 = "30" ]
-then 
-FILE=$VARALIST"30mvaralist.txt"
-elif [ $2 = "40" ]
-then
-FILE=$VARALIST"40mvaralist.txt"
-elif [ $2 = "80" ]
-then
-FILE=$VARALIST"80mvaralist.txt"
+if [ $2 = "20" ]; then
+	FILE=$VARALIST"20mvaralist.txt"
+elif [ $2 = "30" ]; then
+	FILE=$VARALIST"30mvaralist.txt"
+elif [ $2 = "40" ]; then
+	FILE=$VARALIST"40mvaralist.txt"
+elif [ $2 = "80" ]; then
+	FILE=$VARALIST"80mvaralist.txt"
 fi
 
 #Verify we have a list to work with
 test -f $FILE
 FILERESULT=$(echo $?)
-if [ $FILERESULT = "1" ]
-then
-echo "FILE DOESN'T EXIST."
-yad --title="NO LIST" --width=400 --height=100 \
-    --image $LOGO --window-icon=$LOGO --image-on-top --text-align=center \
-    --center --form --text="\r\r\rNo list has been downloaded. Auto Pat has no data to work with. Please download the gateway list \
-    and try again" \
-    --button="Download List":2 \
-    --button="Cancel":1
-BUT=$?
-	if [ $BUT = 1 ]; then
-	exit
-	elif [ $BUT = 2 ]; then
-	$MYPATH/getardoplist
-	$MAIN &
-	exit
-	fi
+if [ $FILERESULT = "1" ]; then
+	echo "FILE DOESN'T EXIST."
+	yad --title="NO LIST" --width=400 --height=100 \
+	    --image $LOGO --window-icon=$LOGO --image-on-top --text-align=center \
+	    --center --form --text="\r\r\rNo list has been downloaded. Auto Pat has no data to work with. Please download the gateway list \
+	    and try again" \
+	    --button="Download List":2 \
+	    --button="Cancel":1
+	BUT=$?
+		if [ $BUT = 1 ]; then
+			exit
+		elif [ $BUT = 2 ]; then
+			$MYPATH/getardoplist
+			$MAIN &
+			exit
+		fi
 fi
 
-if [ $AMRRON = "no" ]
-then
-#start varaHF modem
-echo "Starting VARA-HF modem"
-/usr/local/bin/wine $HOME/.wine/drive_c/VARA/VARA.exe > /dev/null 2>&1 &
-echo "standby while the modem starts....."
-sleep 10 #give vara time to start	
+if [ $AMRRON = "no" ]; then
+	#start varaHF modem
+	echo "Starting VARA-HF modem"
+	/usr/bin/wine $HOME/.wine/drive_c/VARA/VARA.exe > /dev/null 2>&1 &
+	echo "standby while the modem starts....."
+	sleep 10 #give vara time to start
+else
+	echo "Starting VARA-HF modem"
+	/usr/bin/wine $HOME/.wine/drive_c/VARA/VARA.exe > /dev/null 2>&1 &
+	echo "standby while the modem starts....."
+	sleep 10 #give vara time to start	
 fi
 
 #Pat Connection Function
@@ -160,26 +152,24 @@ connect () {
 pat connect $CALL
 #Check if connection was successful
 RESULTS=$(echo $?)
-if [ $RESULTS = "0" ]
-then
-echo "A connection was made"
-echo $DATE" "$CALL" Success with autopat" >> $LOG
-CALL=$(echo "$CALL" | sed 's/&/ /')
+if [ $RESULTS = "0" ]; then
+	echo "A connection was made"
+	echo $DATE" "$CALL" Success with autopat" >> $LOG
+	CALL=$(echo "$CALL" | sed 's/&/ /')
 
-yad --title="SUCCESS" --width=300 --height=100 \
-    --image $LOGO --window-icon=$LOGO --image-on-top \
-    --center --form --text="<b>Successfully connected!</b>\r$CALL\r\rSee mylog in documents\rdirectory for more details." \
-    --button=gtk-ok
+	yad --title="SUCCESS" --width=300 --height=100 \
+	    --image $LOGO --window-icon=$LOGO --image-on-top \
+	    --center --form --text="<b>Successfully connected!</b>\r$CALL\r\rSee mylog in documents\rdirectory for more details." \
+	    --button=gtk-ok
 
-if [ $AMRRON = "no" ]
-then
-sudo -A killall direwolf piardopc kissattach piARDOP_GUI rigctld > /dev/null 2>&1
-VARA=$(ps aux | grep wine | grep VARA | head -1 | awk '{print $2}')
-kill -9 $VARA > /dev/null 2>&1
-VARA=$(ps aux | grep wine | grep VARA | head -1 | awk '{print $2}')
-kill -9 $VARA > /dev/null 2>&1
-fi
-exit 0
+		if [ $AMRRON = "no" ]; then
+			sudo -A killall direwolf piardopc kissattach piARDOP_GUI rigctld > /dev/null 2>&1
+			VARA=$(ps aux | grep wine | grep VARA | head -1 | awk '{print $2}')
+			kill -9 $VARA > /dev/null 2>&1
+			VARA=$(ps aux | grep wine | grep VARA | head -1 | awk '{print $2}')
+			kill -9 $VARA > /dev/null 2>&1
+		fi
+	exit 0
 fi
 }
 
@@ -192,12 +182,12 @@ cat $FILE | tail -n +5 | grep '[^[:blank:]]' > $HOME/tempardop/tempardop.txt
 #otherwise the URL is wrong
 while read -r line
 do
-CHECK=$(echo $line | awk '{print $6}')
-if [ "$CHECK" = 500 ] || [ "$CHECK" = 2750 ]; then
-echo $line >> $HOME/tempardop/temp.txt
-else
-echo $line | sed 's/VARA/VARA 500/' >> $HOME/tempardop/temp.txt
-fi
+	CHECK=$(echo $line | awk '{print $6}')
+	if [ "$CHECK" = 500 ] || [ "$CHECK" = 2750 ]; then
+		echo $line >> $HOME/tempardop/temp.txt
+		else
+		echo $line | sed 's/VARA/VARA 500/' >> $HOME/tempardop/temp.txt
+	fi
 done < $HOME/tempardop/tempardop.txt
 cp $HOME/tempardop/temp.txt $HOME/tempardop/tempardop.txt
 
@@ -215,11 +205,10 @@ echo "Will Attempt to Connect to This Station"
 while read LINE
     do DISTANCE=$(echo $LINE | awk '{ print $1 }')
 	CALL=$(echo $LINE | awk '{ print $2 }')
-	if [ $DISTANCE -lt "$1" ] && [ $DISTANCE -gt "$MIN" ]
-	then
-	echo "Distance="$DISTANCE " Call="$CALL
-	#call the connect funtion
-	connect						
+	if [ $DISTANCE -lt "$1" ] && [ $DISTANCE -gt "$MIN" ]; then
+		echo "Distance="$DISTANCE " Call="$CALL
+		#call the connect funtion
+		connect						
 	fi
 done < $HOME/tempardop/sorted.txt
 
@@ -227,14 +216,13 @@ done < $HOME/tempardop/sorted.txt
 #remove temp directory & files
 rm -rf $HOME/tempardop
 
-if [ $AMRRON = "no" ]
-then
-sudo -A killall direwolf piardopc kissattach piARDOP_GUI rigctld > /dev/null 2>&1
-sudo -A rfcomm release /dev/rfcomm0 > /dev/null 2>&1
-VARA=$(ps aux | grep wine | grep VARA | head -1 | awk '{print $2}')
-kill -9 $VARA > /dev/null 2>&1
-VARA=$(ps aux | grep wine | grep VARA | head -1 | awk '{print $2}')
-kill -9 $VARA > /dev/null 2>&1
+if [ $AMRRON = "no" ]; then
+	sudo -A killall direwolf piardopc kissattach piARDOP_GUI rigctld > /dev/null 2>&1
+	sudo -A rfcomm release /dev/rfcomm0 > /dev/null 2>&1
+	VARA=$(ps aux | grep wine | grep VARA | head -1 | awk '{print $2}')
+	kill -9 $VARA > /dev/null 2>&1
+	VARA=$(ps aux | grep wine | grep VARA | head -1 | awk '{print $2}')
+	kill -9 $VARA > /dev/null 2>&1
 
 fi
 
