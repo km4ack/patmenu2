@@ -121,7 +121,7 @@ fi
 GPSGRID(){
 CONFIG=$HOME/.config/pat/config.json
 
-if ! hash ruby2.3 2>/dev/null; then
+if ! hash ruby>/dev/null; then
 echo "Ruby Not found on system"
 yad --form --width=300 --text-align=center --center --title="Ruby not Found" --text-align=center \
 --image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
@@ -135,7 +135,7 @@ BUT=$?
 	elif [ $BUT = 2 ]; then
 	INSTALLRUBY(){
 	sudo -A apt-get update
-	sudo -A apt-get install -y ruby2.3
+	sudo -A apt-get install -y ruby2.7
 	sudo -A gem install gpsd_client
 	sudo -A gem install maidenhead
 	}

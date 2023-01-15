@@ -23,6 +23,28 @@ MYVARA=$HOME/patmenu2/vara-list/
 #my log file
 LOG=$HOME/Documents/mylog.txt
 
+JQ_INSTALLED=$(which jq)
+
+if [ -z "$JQ_INSTALLED" ]; then
+yad --form --width=300 --text-align=center --center --title="JQ not Found" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="JQ is needed to parse grid location but not found installed on your system. Would you like to install it now?" \
+--button="Install JQ":2 \
+--button="Cancel":1
+BUT=$?
+	if [ $BUT = 1 ]; then
+	$MAIN &
+	exit
+	elif [ $BUT = 2 ]; then
+	INSTALLJQ(){
+	sudo apt-get update
+	sudo apt-get install -y jq
+	}
+	INSTALLJQ | yad --center --progress --pulsate --auto-close --no-buttons --text-align=center \
+--text="Installing JQ. This will take several minutes\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the install."
+	fi
+fi
+
 GRIDCK=$(jq .locator $HOME/.config/pat/config.json)
 if [ ${#GRIDCK} -lt 3 ]
 then
