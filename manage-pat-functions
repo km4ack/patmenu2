@@ -135,7 +135,7 @@ BUT=$?
 	elif [ $BUT = 2 ]; then
 	INSTALLRUBY(){
 	sudo -A apt-get update
-	sudo -A apt-get install -y ruby2.7
+	sudo -A apt-get install -y ruby3
 	sudo -A gem install gpsd_client
 	sudo -A gem install maidenhead
 	}
