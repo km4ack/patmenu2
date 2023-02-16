@@ -2,6 +2,7 @@ release=2.11.0
 
 Changelog
 2.11.0	add auto start modem
+	fix false failure when starting vara modems
 2.10.0	add VARA to getardoplist script
 	add VARA to getardoplist-cron script
 	add Pat Autoconnect VARA script
