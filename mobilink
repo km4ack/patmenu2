@@ -2,7 +2,7 @@
 
 #script to connect mobilinkd TNC for ax25 
 #20200602
-#20220304 last edit KM4ACK
+#20230304 last edit KM4ACK
 ################################################################
 #                                                              #
 #	#   #	#       #     #      #        #####  #   #     #
@@ -75,26 +75,28 @@ Another notice will appear once a connection to the device is established." &
 #scan for bluetooth device and write to file
 hcitool scan > $TMPFILE
 
-#Decide if its a TNC 2 or 3
+#Decide if its a TNC 2, 3, or 4
 TNC2=$(grep -i TNC2 $TMPFILE)
 TNC3=$(grep -i TNC3 $TMPFILE)
-if [ -z "$TNC2" ]
-then 
-MAC=$(grep -i mobi $TMPFILE | awk '{ print $1 }')
-TNC=3
-elif [ -z "$TNC3" ]
-then
+TNC4=$(grep -i TNC4 $TMPFILE)
+if [ -n "$TNC2" ]; then 
 MAC=$(grep -i mobi $TMPFILE | awk '{ print $1 }')
 TNC=2
+elif [ -n "$TNC3" ]; then
+MAC=$(grep -i mobi $TMPFILE | awk '{ print $1 }')
+TNC=3
+elif [ -n "$TNC4" ]; then
+MAC=$(grep -i mobi $TMPFILE | awk '{ print $1 }')
+TNC=4
 fi
 
 #set correct connection commmand
-if [ $TNC = "2" ]
-then
+if [ $TNC = "2" ]; then
 CONNECT="sudo -A rfcomm bind /dev/rfcomm0 $MAC"
-elif [ $TNC = "3" ]
-then
+elif [ $TNC = "3" ]; then
 CONNECT="sudo -A rfcomm bind /dev/rfcomm0 $MAC 6"
+elif [ $TNC = "4" ]; then
+CONNECT="sudo -A rfcomm bind /dev/rfcomm0 $MAC"
 fi
 
 #See if device was found and connect if found
