@@ -1,8 +1,8 @@
-release=2.12.0
+release=2.11.0
 
 Changelog
-2.12.0	add support for mobilinkd TNC 4
-2.11.0	add auto start modem
+2.11.0	add support for mobilinkd TNC 4
+	add auto start modem
 	fix false failure when starting vara modems
 2.10.0	add VARA to getardoplist script
 	add VARA to getardoplist-cron script
