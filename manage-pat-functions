@@ -435,9 +435,9 @@ WantedBy=multi-user.target
 EOF
 #add listen modes set by user
 sed -i "s|Exec.*|ExecStart=/usr/bin/pat -l $TELNET$ARDOP$AX25$VARAFM$VARAHF http|" $TEMP
-sudo cp $TEMP /lib/systemd/system/pat@.service
-sudo systemctl daemon-reload
-sudo systemctl restart pat@$WHO
+sudo -A cp $TEMP /lib/systemd/system/pat@.service
+sudo -A systemctl daemon-reload
+sudo -A systemctl restart pat@$WHO
 yad --form --width=320 --text-align=center --center --title="Listening" --text-align=center \
 --image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
 --text="<b>Listen mode set to $TELNET$ARDOP$AX25$VARAFM$VARAHF</b>" \
@@ -460,9 +460,9 @@ Restart=on-failure
 [Install]
 WantedBy=multi-user.target
 EOF
-sudo cp $TEMP /lib/systemd/system/pat@.service
-sudo systemctl daemon-reload
-sudo systemctl restart pat@$WHO
+sudo -A cp $TEMP /lib/systemd/system/pat@.service
+sudo -A systemctl daemon-reload
+sudo -A systemctl restart pat@$WHO
 fi
 yad --form --width=320 --text-align=center --center --title="Listening" --text-align=center \
 --image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
