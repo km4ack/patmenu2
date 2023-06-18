@@ -362,6 +362,7 @@ yad --form --width=400 --text-align=center --center --title="Grid Update" --text
 $MAIN
 }
 
+
 LISTEN(){
 #This funtion sets the listen modes for Pat Winlink
 WHO=$(whoami)
@@ -378,6 +379,8 @@ LISTEN=$(yad --center --list --checklist --width=600 --height=300 --separator="|
 false "TELNET" "Connection over Internet or Mesh" \
 false "AX25" "Packet Connections 2M-440" \
 false "ARDOP" "HF Connections using ARDOP Modem" \
+false "VARAHF" "HF Connections using VARA Modem" \
+false "VARAFM" "FM Connections using VARA Modem" \
 --button="Main Menu":1 \
 --button="Set Listen Mode":2 \
 --button="Stop Listening":3)
@@ -394,6 +397,8 @@ echo $LISTEN > $TEMP
 TELNET=$(grep TELNET $TEMP)
 ARDOP=$(grep ARDOP $TEMP)
 AX25=$(grep AX25 $TEMP)
+VARAHF=$(grep VARAHF $TEMP)
+VARAFM=$(grep VARAFM $TEMP)
 #Set telnet variable
 	if [ -n "$TELNET" ]; then
 	TELNET="telnet,"
@@ -405,6 +410,14 @@ AX25=$(grep AX25 $TEMP)
 #set ax25 variable
 	if [ -n "$AX25" ]; then
 	AX25="ax25,"
+	fi
+#set varafm variable
+	if [ -n "$VARAFM" ]; then
+	VARAFM="varafm,"
+	fi
+#set varahf variable
+	if [ -n "$VARAHF" ]; then
+	VARAHF="varahf,"
 	fi
 cat <<EOF > $TEMP
 [Unit]
@@ -421,13 +434,13 @@ Restart=on-failure
 WantedBy=multi-user.target
 EOF
 #add listen modes set by user
-sed -i "s|Exec.*|ExecStart=/usr/bin/pat -l $TELNET$ARDOP$AX25 http|" $TEMP
-sudo -A cp $TEMP /lib/systemd/system/pat@.service
-sudo -A systemctl daemon-reload
-sudo -A systemctl restart pat@$WHO
+sed -i "s|Exec.*|ExecStart=/usr/bin/pat -l $TELNET$ARDOP$AX25$VARAFM$VARAHF http|" $TEMP
+sudo cp $TEMP /lib/systemd/system/pat@.service
+sudo systemctl daemon-reload
+sudo systemctl restart pat@$WHO
 yad --form --width=320 --text-align=center --center --title="Listening" --text-align=center \
 --image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
---text="<b>Listen mode set to $TELNET$ARDOP$AX25</b>" \
+--text="<b>Listen mode set to $TELNET$ARDOP$AX25$VARAFM$VARAHF</b>" \
 --button=gtk-ok
 $MAIN &
 exit
@@ -447,9 +460,9 @@ Restart=on-failure
 [Install]
 WantedBy=multi-user.target
 EOF
-sudo -A cp $TEMP /lib/systemd/system/pat@.service
-sudo -A systemctl daemon-reload
-sudo -A systemctl restart pat@$WHO
+sudo cp $TEMP /lib/systemd/system/pat@.service
+sudo systemctl daemon-reload
+sudo systemctl restart pat@$WHO
 fi
 yad --form --width=320 --text-align=center --center --title="Listening" --text-align=center \
 --image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
