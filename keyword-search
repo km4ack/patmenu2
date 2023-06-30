@@ -1,0 +1,213 @@
+#!/bin/bash
+
+#get list of position reports that include specific keyword
+#and allow user to send winlink message to chosen stations
+#km4ack 29JUNE2023
+
+MAIN(){
+	eval `pat env`
+
+	MAILBOX=${PAT_MAILBOX_PATH}/${PAT_MYCALL}/in
+	TEMP=/run/user/$UID/temp.search.list
+	MYTEMP=/run/user/$UID/temp.out.file.txt
+	OUTFILE=/run/user/$UID/search.out.file
+	export MYPATH=$HOME/patmenu2
+	LOGO=$MYPATH/pmlogo.png
+	MAIN=$MYPATH/./patmenu
+	#####################################################################
+	#Default Keyword. User can change as needed.
+	KW=Green
+	#####################################################################
+
+	#search inbox for WL2K_Nearby file to work with
+	for file in ${MAILBOX}/*; do
+		NEARBY=$(grep WL2K_NEARBY $file)
+		if [ -n "$NEARBY" ]; then
+			NCK_FILE=${file}
+			NCK="WL2K_Nearby"
+			break
+		fi
+	done
+
+	#search inbox for WL2K_Mobile file to work with
+	for file in ${MAILBOX}/*; do
+		MOBILE=$(grep WL2K_MOBILE $file)
+		if [ -n "$MOBILE" ]; then
+			MCK_FILE=${file}
+			MCK="WL2K_Mobile"
+			break
+		fi
+	done
+
+	#Check if a list was found to work with
+	if [ -z "$MCK" ] && [ -z "$NCK" ]; then
+		NCK="No List Found. Pls Download"
+	fi
+
+	WL2K_LIST=$(yad --form --width=420 --text-align=center --center --title="Available Lists" \
+	--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+	--text="List(s) found in inbox" \
+	--field="List to Search":CB "$NCK|$MCK")
+	BUT=$?
+
+	if [ ${BUT} = 1 ]; then
+		$MAIN & exit
+	elif [ ${BUT} = 252 ]; then
+		exit
+	fi
+
+	CK=$(echo $WL2K_LIST | awk -F "|" '{print $1}')
+
+	if [ "$CK" = 'WL2K_Nearby' ]; then
+		LIST=${NCK_FILE}
+	elif [ "$CK" = 'WL2K_Mobile' ]; then
+		LIST=${MCK_FILE}
+	elif [ "$CK" = 'No List Found. Pls Download' ]; then
+		$MAIN & exit
+	fi
+
+	DEFAULT_KW=${KW}
+	KW=$(yad --form --width=420 --text-align=center --center --title="Keyword" --text-align=center \
+	--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+	--text="Current keyword to search for\r is <b>$KW</b>" \
+	--field="Keyword to Search For" "" \
+	--button="Search":2 \
+	--button="Cancel":1)
+	BUT=$?
+
+	if [ ${BUT} = 1 ]; then
+		$MAIN & exit
+	elif [ ${BUT} = 252 ]; then
+		exit
+	fi
+
+	KW=$(echo ${KW} | awk -F "|" '{print $1}')
+
+	#set default keyword if nothing new is entered
+	if [ -z ${KW} ]; then
+		KW=${DEFAULT_KW}
+	fi
+
+	#remove temp files if exist
+	if [ -f ${TEMP} ]; then
+		rm ${TEMP}
+	fi
+
+	if [ -f ${OUTFILE} ]; then
+		rm ${OUTFILE}
+	fi
+
+	#search file for keyword
+	while read -r line; do
+		CK=$(echo ${line} | grep -i "${KW}")
+			if [ -n "${CK}" ]; then
+				echo $line >> ${TEMP}
+			fi
+	done < $LIST
+
+	#verify keyword is found
+	if [ ! -f ${TEMP} ]; then
+	yad --form --width=500 --text-align=center --center --title="ERROR" --text-align=center \
+	--image ${LOGO} --window-icon=${LOGO} --image-on-top --separator="|" --item-separator="|" \
+	--text="<b>Nothing Found</b>\rwith the keyword you chose. Try again" \
+	--button=gtk-ok
+		MAIN
+	fi
+
+
+	#get list of emails that match keyword
+	while read -r line; do
+		COMMENT=$(echo $line | awk '{print $1=$2=$3=$4=$5=$6=$7=$8=""; print $0}' | sed 's/ /_/g' | sed 's/________//')
+		CALL=$(echo $line | awk '{print $1}')
+		DATE=$(echo $line | awk '{print $7}')
+		TIME=$(echo $line | awk '{print $8}')
+		LINE=$(echo "${CALL} ${DATE} ${TIME} ${COMMENT}")
+		echo $LINE >> ${OUTFILE}
+	done < $TEMP
+
+	#present results to user
+	INFO=$(PARSER='OFS="\n" {print $1, $2, $3, $4}'
+	tail -125 ${OUTFILE} | awk "$PARSER" | \
+	yad --title="Search Results" --width=1100 --height=500 \
+	    --image $LOGO --window-icon=$LOGO --image-on-top --multiple \
+	    --center --list --text="Search Results for <b>${KW}</b>" \
+	    --column "Call Sign" --column "Date Posted" --column "Time Posted" \
+	    --column Comment \
+	    --button="Cancel":1 \
+	    --button="Compose Email(s)":2 > ${MYTEMP})
+	BUT=$?
+
+	if [ ${BUT} = 1 ]; then
+		MAIN
+	elif [ ${BUT} = 252 ]; then
+		exit
+	fi
+
+	#verify something was chosen by user
+	CK=$(cat ${MYTEMP})
+	if [ -z "$CK" ]; then
+	yad --form --width=500 --text-align=center --center --title="ERROR" --text-align=center \
+	--image ${LOGO} --window-icon=${LOGO} --image-on-top --separator="|" --item-separator="|" \
+	--text="<b>Nothing Selected</b>\rCan't continue" \
+	--button=gtk-ok
+		MAIN
+	fi
+
+	COMPOSE(){
+		#allow user to compose email
+		EMAIL=$(yad --form --width=600 --height=600 --text-align=center --center --title="Compose Email" --text-align=center \
+		--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+		--text="<b>Compose Email</b>" \
+		--field="Subject" "" \
+		--field="Body of Email::TXT" "${BODY}" \
+		--field "Send as One Email (CC Everyone)":chk \
+		--button="Post Email(s)":2 \
+		--button="Cancel":1)
+		BUT=$?
+
+		if [ ${BUT} = 1 ]; then
+			MAIN
+		elif [ ${BUT} = 252 ]; then
+			exit
+		fi
+
+		SUBJECT=$(echo ${EMAIL} | awk -F "|" '{print $1}')
+		BODY=$(echo ${EMAIL} | awk -F "|" '{print $2}')
+		TYPE=$(echo ${EMAIL} | awk -F "|" '{print $3}')
+
+		#verify subject not empty
+		if [ -z "$SUBJECT" ]; then
+		yad --form --width=500 --text-align=center --center --title="ERROR" --text-align=center \
+		--image ${LOGO} --window-icon=${LOGO} --image-on-top --separator="|" --item-separator="|" \
+		--text="<b>Subject Can't be Empty</b>\rTry again" \
+		--button=gtk-ok
+			COMPOSE
+		fi
+	}
+	COMPOSE
+	#post email(s) to outbox
+	if [ "$TYPE" = 'FALSE' ]; then
+		while read -r line; do
+			CALL=$(echo $line | awk -F "|" '{print $1}')
+			echo ${BODY} | pat compose ${CALL} -s "${SUBJECT}"
+		done < ${MYTEMP}
+	else
+		while read -r line; do
+			CALL=$(echo $line | awk -F "|" '{print $1}')
+			CALL_LIST=$(echo "$CALL $CALL_LIST")
+		done < ${MYTEMP}
+		echo ${BODY} | pat compose TEST -s "${SUBJECT}" -c "${CALL_LIST}"
+	fi
+
+	rm ${MYTEMP}
+
+	yad --form --width=500 --text-align=center --center --title="SUCCESS" --text-align=center \
+	--image ${LOGO} --window-icon=${LOGO} --image-on-top --separator="|" --item-separator="|" \
+	--text="<b>Email(s) Posted to Outboxd</b>\rMake a Winlink Connection to Send Email(s)" \
+	--button=gtk-close
+		exit 1
+}
+MAIN
+
+
+
