@@ -4,6 +4,7 @@ Changelog
 DEV	add support for x86 platform
 	add support for Mobilinkd TNC 4
 	add support for VARA listener
+	add keyword search for position reports
 2.10.0	add VARA to getardoplist script
 	add VARA to getardoplist-cron script
 	add Pat Autoconnect VARA script
