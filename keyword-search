@@ -119,19 +119,21 @@ MAIN(){
 	while read -r line; do
 		COMMENT=$(echo $line | awk '{print $1=$2=$3=$4=$5=$6=$7=$8=""; print $0}' | sed 's/ /_/g' | sed 's/________//')
 		CALL=$(echo $line | awk '{print $1}')
+		DIST=$(echo $line | awk '{print $2}')
+		DEG=$(echo $line | awk '{print $4}')
 		DATE=$(echo $line | awk '{print $7}')
 		TIME=$(echo $line | awk '{print $8}')
-		LINE=$(echo "${CALL} ${DATE} ${TIME} ${COMMENT}")
+		LINE=$(echo "${CALL} ${DIST} ${DEG} ${DATE} ${TIME} ${COMMENT}")
 		echo $LINE >> ${OUTFILE}
 	done < $TEMP
 
 	#present results to user
-	INFO=$(PARSER='OFS="\n" {print $1, $2, $3, $4}'
+	INFO=$(PARSER='OFS="\n" {print $1, $2, $3, $4, $5, $6}'
 	tail -125 ${OUTFILE} | awk "$PARSER" | \
 	yad --title="Search Results" --width=1100 --height=500 \
 	    --image $LOGO --window-icon=$LOGO --image-on-top --multiple \
 	    --center --list --text="Search Results for <b>${KW}</b>" \
-	    --column "Call Sign" --column "Date Posted" --column "Time Posted" \
+	    --column "Call Sign" --column "Distance (nm)" --column "Direction" --column "Date Posted" --column "Time Posted" \
 	    --column Comment \
 	    --button="Cancel":1 \
 	    --button="Compose Email(s)":2 > ${MYTEMP})
