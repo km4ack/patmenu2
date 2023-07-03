@@ -11,53 +11,124 @@ CONFIG=$HOME/.config/pat/config.json
 PATCALL=$(grep mycall $HOME/.config/pat/config.json | head -1 | sed 's/"mycall": "//;s/",//;s/ //g')
 LIST=$HOME/.local/share/pat/mailbox/$PATCALL/in
 MAILBOX=$HOME/.local/share/pat/mailbox/$PATCALL/in
+TEMP=/run/user/$UID/temp.search.list
 
+###############################################
+#ask for file to use
+###############################################
 
+#search inbox for WL2K_Nearby file to work with
+for file in ${MAILBOX}/*; do
+	NEARBY=$(grep WL2K_NEARBY $file)
+	if [ -n "$NEARBY" ]; then
+		NCK_FILE=${file}
+		NCK="WL2K_Nearby"
+		break
+	fi
+done
+
+#search inbox for WL2K_Mobile file to work with
+for file in ${MAILBOX}/*; do
+	MOBILE=$(grep WL2K_MOBILE $file)
+	if [ -n "$MOBILE" ]; then
+		MCK_FILE=${file}
+		MCK="WL2K_Mobile"
+		break
+	fi
+done
+
+#Check if a list was found to work with
+if [ -z "$MCK" ] && [ -z "$NCK" ]; then
+	NCK="No List Found. Pls Download"
+fi
+
+WL2K_LIST=$(yad --form --width=420 --text-align=center --center --title="Available Lists" \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="List(s) found in inbox" \
+--field="List to Use":CB "$NCK|$MCK")
+BUT=$?
+
+if [ ${BUT} = 1 ]; then
+	$MAIN & exit
+elif [ ${BUT} = 252 ]; then
+	exit
+fi
+
+CK=$(echo $WL2K_LIST | awk -F "|" '{print $1}')
+
+if [ "$CK" = 'WL2K_Nearby' ]; then
+	LIST=${NCK_FILE}
+elif [ "$CK" = 'WL2K_Mobile' ]; then
+	LIST=${MCK_FILE}
+elif [ "$CK" = 'No List Found. Pls Download' ]; then
+	$MAIN & exit
+fi
+
+###############################################
+#get keyword
+###############################################
+KW=$(yad --form --width=420 --text-align=center --center --title="Keyword" --text-align=center \
+--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--text="Enter a Keyword or use\r <b>\leave blank</b>\rto convert every station" \
+--field="Keyword to Search For" "" \
+--button="Search":2 \
+--button="Cancel":1)
+BUT=$?
+
+if [ ${BUT} = 1 ]; then
+	$MAIN & exit
+elif [ ${BUT} = 252 ]; then
+	exit
+fi
+
+KW=$(echo ${KW} | awk -F "|" '{print $1}')
+
+#remove temp files if exist
+if [ -f ${TEMP} ]; then
+	rm ${TEMP}
+fi
+
+#search file for keyword
+if [ -z "$KW" ]; then
+	cp ${LIST} /run/user/$UID/no.keyword.list
+	#remove everything but the data we need at the top of the file
+	sed -i '1,19d' /run/user/$UID/no.keyword.list
+	while read -r line; do
+		echo $line >> ${TEMP}
+	done < /run/user/$UID/no.keyword.list
+else
+	while read -r line; do
+		CK=$(echo ${line} | grep -i "${KW}")
+			if [ -n "${CK}" ]; then
+				echo $line >> ${TEMP}
+			fi
+	done < $LIST
+fi
+
+#verify keyword is found
+if [ ! -f ${TEMP} ]; then
+	yad --form --width=500 --text-align=center --center --title="ERROR" --text-align=center \
+	--image ${LOGO} --window-icon=${LOGO} --image-on-top --separator="|" --item-separator="|" \
+	--text="<b>Nothing Found</b>\rwith the keyword you chose. Try again" \
+	--button=gtk-ok
+	$MAIN
+fi
+
+###############################################
+#begin output
+###############################################
 
 #remove exiting file if it exist
 if [ -f $HOME/Desktop/gateways.pos ]; then
-rm $HOME/Desktop/gateways.pos
+	rm $HOME/Desktop/gateways.pos
 fi
 
 #give user feedback
 yad --center --timeout=2 --timeout-indicator=top --no-buttons \
 --text="<b>Processing File</b>" &
 
-#Look for the WL2K_NEARBY email
-COUNT=0
-#var=$((var+1))
-for file in $MAILBOX/*
-do
-    NEARBY_LIST=$(grep WL2K_NEARBY $file)
-    if [ -n "$NEARBY_LIST" ]; then
-    COUNT=$((COUNT+1))
-        if [ $COUNT -gt 1 ]; then
-        #Warn user about multiple WL2K_NEARBY Reports in inbox
-        yad --form --width=500 --text-align=center --center --title="WL2K to ARPS Object" --text-align=center \
-        --image ${LOGO} --window-icon=${LOGO} --image-on-top --separator="|" --item-separator="|" \
-        --text="<b>Multiples Found</b>\rBe sure only one WL2K_NEARBY report\ris in your inbox. Multiples will cause erroneous data." \
-        --button=gtk-ok
-        $MAIN &
-        exit
-        fi
-    FILE=$file
-    fi
-done
-
 #create a copy to work with
-cp $FILE /run/user/$UID/tempgatelist
-
-#check that we have a file. warn user if not
-if [ $? = 1 ]; then
-yad --form --width=500 --text-align=center --center --title="WL2K to ARPS Object" --text-align=center \
---image ${LOGO} --window-icon=${LOGO} --image-on-top --separator="|" --item-separator="|" \
---text="<b>FAILED</b>\rNo Nearby (WL2K_NEARBY) File Found in Inbox"
-$MAIN & 
-exit
-fi
-
-#remove everything but the data we need at the top of the file
-sed -i '1,17d' /run/user/$UID/tempgatelist
+cp ${TEMP} /run/user/$UID/tempgatelist
 
 ###########NOTE#############
 #APRS symbol lookup table can be found at 
@@ -75,7 +146,7 @@ while read -r line; do
     COMMENT=$(echo $line | awk '{$1=$2=$3=$4=$5=$6=$7=$8=""; print $0}' | sed -e 's/^[ \t]*//')
     TIME=$(date -u +%H%M%S)
 
-#    echo ";$CALL*$TIME""h""$LAT/$LONG-$COMMENT" >> ~/Desktop/gateways.pos                (Produces a house on the map)
+    #echo ";$CALL*$TIME""h""$LAT/$LONG-$COMMENT" >> ~/Desktop/gateways.pos                (Produces a house on the map)
     echo ";$CALL*$TIME""h""$LAT\\$LONG""a""$COMMENT" >> ~/Desktop/gateways.pos           #(Produces a red diamond on the map)
 done < /run/user/$UID/tempgatelist
 
