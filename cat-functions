@@ -250,7 +250,7 @@ POST=$(yad --form --width=420 --text-align=center --center --title="Position" --
 --field="Enter Call Below <b>ONLY</b> for Single Station Requests":LBL \
 --field="Call Sign-SSID" \
 --field="Comment for Post Position" \
---button="Search Positions":3 \
+--button="Search Position Reports":3 \
 --button="Main Menu":1 \
 --button="Continue":2)
 
