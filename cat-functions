@@ -78,7 +78,7 @@ WEATHER(){
 
 	if [ "$WEATHER" = 'GPS Weather' ]; then
 		TMPFILE=/run/user/$UID/gps-data.txt
-		gpxlogger > $TMPFILE &
+		gpxlogger -e sockets > $TMPFILE &
 		CGPSPID=$(echo $!)
 		sleep 2
 		kill $CGPSPID
