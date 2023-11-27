@@ -15,6 +15,7 @@ yad --form --width=420 --text-align=center --center --title="Pat Catalog" --text
 --text="<b>Pat Catalog</b> by KM4ACK" \
 --field="Gateway List":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/cat-functions; GATEWAY"' \
 --field="Weather Reports":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/cat-functions; WEATHER"' \
+--field="Radar Request":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/cat-functions; RADAR"' \
 --field="Position Reports":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/cat-functions; POSITION"' \
 --field="Propagation Reports":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/cat-functions; PROPAGATION"' \
 --field="News Reports":fbtn 'bash -c "kill -USR1 $YAD_PID; source $MYPATH/cat-functions; NEWS"' \
