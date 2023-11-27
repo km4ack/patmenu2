@@ -1,7 +1,9 @@
 release=DEV
 
 Changelog
-DEV	add support for x86 platform
+DEV	clean up cat-functions script
+	add support for radar requests
+	add support for x86 platform
 	add support for Mobilinkd TNC 4
 	add support for VARA listener
 	add keyword search & compose email for position reports
