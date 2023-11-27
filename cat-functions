@@ -13,228 +13,187 @@ CALLSIGN=$(cat $PATCONFIG | grep -m 1 mycall | sed 's/\"mycall\": \"//' | sed 's
 
 #COMPOSE EMAIL Function
 COMPOSE () {
-
-#Count body characters
-BODYCOUNT=${#BODY}
-NEWCOUNT=$(expr $BODYCOUNT + 1)
-
-#set date
-TODAY=$(date '+%Y/%m/%d %H:%M')
-TODAY1=$(date)
-
-#generate 12 random number
-NEW_UUID=$(cat /dev/urandom | tr -dc 'A-Z0-9' | fold -w 12 | head -n 1)
-
-#add .b2f to end of random number for new file name
-NEW_FILE=$HOME/.local/share/pat/mailbox/$CALLSIGN/out/$NEW_UUID".b2f"
-
-#create new file
-touch $NEW_FILE
-
-#add file contents
-echo "Mid: "$NEW_UUID >> $NEW_FILE
-echo "Body: "$NEWCOUNT >> $NEW_FILE
-echo "Content-Transfer-Encoding: 8bit" >> $NEW_FILE
-echo "Content-Type: text/plain; charset=ISO-8859-1" >> $NEW_FILE
-echo "Date: "$TODAY >> $NEW_FILE
-echo "From: "$CALLSIGN >> $NEW_FILE
-echo "Mbo: "$CALLSIGN >> $NEW_FILE
-echo "Subject: "$SUBJECT >> $NEW_FILE
-echo "To: "$TO >> $NEW_FILE
-echo "Type: Private" >> $NEW_FILE
-echo "" >> $NEW_FILE
-echo $BODY >> $NEW_FILE
-#give user some feedback
-echo "Your request has been posted to the outbox of Pat Winlink"
-echo "Please go to Pat and initiate a connection to send the request"
-yad --no-buttons --timeout=5 --center --timeout-indicator=top --title="POSTED" --text-align=center --width="300" height="300" \
---text="Message Posted\rTo Outbox\r\rPlease go to Winlink and\rmake a connection\rto complete the\rrequest."
-$MAIN
-exit
+	echo "${BODY}" | pat compose ${TO} -s "$SUBJECT"
+	#give user some feedback
+	echo "Your request has been posted to the outbox of Pat Winlink"
+	echo "Please go to Pat and initiate a connection to send the request"
+	yad --no-buttons --timeout=5 --center --timeout-indicator=top --title="POSTED" --text-align=center --width="300" height="300" \
+	--text="Message Posted\rTo Outbox\r\rPlease go to Winlink and\rmake a connection\rto complete the\rrequest."
+	$MAIN
+	exit
 }
 
 
 
 GATEWAY(){
-GATE=$(yad --form --width=420 --text-align=center --center --title="Pat Catalog" --text-align=center \
---image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
---text="<b>Pat Catalog</b> by KM4ACK" \
---field="Gateway List":CB "ARDOP|PACKET")
-BUT=$?
+	GATE=$(yad --form --width=420 --text-align=center --center --title="Pat Catalog" --text-align=center \
+	--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+	--text="<b>Pat Catalog</b> by KM4ACK" \
+	--field="Gateway List":CB "ARDOP|PACKET")
+	BUT=$?
 
-if [ $BUT = 252 ]; then
-exit
-fi
+	if [ $BUT = 252 ]; then
+	exit
+	fi
 
-GATE=$(echo $GATE | awk -F "|" '{print $1}')
+	GATE=$(echo $GATE | awk -F "|" '{print $1}')
 
-if [ -z $GATE ]; then
-$MAIN &
-exit
-fi
+	if [ -z $GATE ]; then
+	$MAIN &
+	exit
+	fi
 
-if [ "$GATE" = ARDOP ]; then
-echo ARDOP
-	TO="INQUIRY"
-	SUBJECT="REQUEST"
-	BODY="PUB_ARDOP"
-	COMPOSE
-elif [ "$GATE" = PACKET ]; then
-echo PACKET
-	TO="INQUIRY"
-	SUBJECT="REQUEST"
-	BODY="PUB_PACKET"
-	COMPOSE
-fi
+	if [ "$GATE" = ARDOP ]; then
+	echo ARDOP
+		TO="INQUIRY"
+		SUBJECT="REQUEST"
+		BODY="PUB_ARDOP"
+		COMPOSE
+	elif [ "$GATE" = PACKET ]; then
+	echo PACKET
+		TO="INQUIRY"
+		SUBJECT="REQUEST"
+		BODY="PUB_PACKET"
+		COMPOSE
+	fi
 }
 
 WEATHER(){
-WEATHER=$(yad --form --width=420 --text-align=center --center --title="Pat Catalog" --text-align=center \
---image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
---text="<b>Pat Catalog</b> by KM4ACK" \
---field="Weather Report":CB "GPS Weather|City Weather|GRIB Files")
-BUT=$?
-if [ $BUT = 252 ]; then
-exit
-fi
+	WEATHER=$(yad --form --width=420 --text-align=center --center --title="Pat Catalog" --text-align=center \
+	--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+	--text="<b>Pat Catalog</b> by KM4ACK" \
+	--field="Weather Report":CB "GPS Weather|City Weather|GRIB Files")
+	BUT=$?
+	if [ $BUT = 252 ]; then
+		exit
+	fi
 
-WEATHER=$(echo $WEATHER | awk -F "|" '{print $1}')
+	WEATHER=$(echo $WEATHER | awk -F "|" '{print $1}')
 
-if [ -z "$WEATHER" ]; then
-$MAIN &
-exit
-fi
+	if [ -z "$WEATHER" ]; then
+		$MAIN &
+		exit
+	fi
 
-if [ "$WEATHER" = 'GPS Weather' ]; then
-TMPFILE=/run/user/$UID/gps-data.txt
-gpxlogger > $TMPFILE &
-CGPSPID=$(echo $!)
-sleep 2
-kill $CGPSPID
+	if [ "$WEATHER" = 'GPS Weather' ]; then
+		TMPFILE=/run/user/$UID/gps-data.txt
+		gpxlogger > $TMPFILE &
+		CGPSPID=$(echo $!)
+		sleep 2
+		kill $CGPSPID
 
-DATA=$(grep lat= $TMPFILE | head -1)
-LAT=$(echo $DATA | awk '{print $2}' | sed 's/"//g;s/lat=//')
-LONG=$(echo $DATA | awk '{print $3}' | sed 's/"//g;s/lon=//;s/>//')
+		DATA=$(grep lat= $TMPFILE | head -1)
+		LAT=$(echo $DATA | awk '{print $2}' | sed 's/"//g;s/lat=//')
+		LONG=$(echo $DATA | awk '{print $3}' | sed 's/"//g;s/lon=//;s/>//')
 
-	TO="SMTP:query@saildocs.com"
-	SUBJECT="<No Subject>"
-	BODY="https://forecast.weather.gov/MapClick.php?lat="$LAT"&lon="$LONG"&unit=0&lg=english&FcstType=text&TextType=1"
-	COMPOSE
-elif [ "$WEATHER" = 'City Weather' ]; then
-FILE=$MYPATH/weather.txt
+		TO="SMTP:query@saildocs.com"
+		SUBJECT="<No Subject>"
+		BODY="https://forecast.weather.gov/MapClick.php?lat="$LAT"&lon="$LONG"&unit=0&lg=english&FcstType=text&TextType=1"
+		COMPOSE
+	elif [ "$WEATHER" = 'City Weather' ]; then
+		FILE=$MYPATH/weather.txt
+		PARSER='OFS="\n" {print $1, $2, $3}'
+		CITY=$(tail -76 $FILE | awk "$PARSER" | \
+		yad --title="Search Results" --width=500 --height=500 \
+		    --image $LOGO --window-icon=$LOGO --image-on-top \
+		    --center --checklist --list \
+		    --column Pick --column ID --column Area \
+		    --button="Choose":2)  
 
+		CITY=$(echo $CITY | awk -F "|" '{print $2}')
 
-PARSER='OFS="\n" {print $1, $2, $3}'
+		if [ -z "$CITY" ]; then
+			$MAIN &
+			exit
+		fi
 
-CITY=$(tail -76 $FILE | awk "$PARSER" | \
-yad --title="Search Results" --width=500 --height=500 \
-    --image $LOGO --window-icon=$LOGO --image-on-top \
-    --center --checklist --list \
-    --column Pick --column ID --column Area \
-    --button="Choose":2)  
+		TO="INQUIRY"
+		SUBJECT="REQUEST"
+		BODY=$CITY
+		COMPOSE
+	elif [ "$WEATHER" = 'GRIB Files' ]; then
+		echo "Need GRIB Files"
+		FILE=/run/user/$UID
+		QUESTION(){
+			DEGREE=$(yad --center --wrap --width=350 --title="Auto Download" --text-align=center \
+			--text="How many degrees would you like" \
+			--form --separator="|" --item-separator="|" \
+			--image $LOGO --window-icon=$LOGO --image-on-top \
+			--field="Degrees":CB "2|6|10" \
+			--button="Cancel:1" \
+			--button="Continue:2")
+			BUT=$?
+			if [ $BUT = 1 ] || [ -z "$BUT" ]; then
+				$MAIN &
+				exit
+			elif [ $BUT = 252 ]; then
+				exit 
+			fi
 
-CITY=$(echo $CITY | awk -F "|" '{print $2}')
+			ANS=$(echo $DEGREE | awk -F "|" '{print $1}')
+			echo $ANS
 
-if [ -z "$CITY" ]
-then
-$MAIN &
-exit
-fi
+			if [ $ANS = "10" ]; then
+				AREA=5
+				echo "aree=5"
+			elif [ $ANS = "6" ]; then
+				AREA=3
+			elif [ $ANS = "2" ]; then
+				AREA=1
+			fi
 
-TO="INQUIRY"
-SUBJECT="REQUEST"
-BODY=$CITY
-COMPOSE
-elif [ "$WEATHER" = 'GRIB Files' ]; then
-echo "Need GRIB Files"
+			GPS=$(gpspipe -r -n 10 | grep G\.GGA)
 
-FILE=/run/user/$UID
-QUESTION () {
+			LAT=$(echo $GPS | awk -F "," '{printf "%.0f \n", $3 }' | cut -c1-2)
+			LATD=$(echo $GPS | awk -F "," '{print $4}')
+			LON=$(echo $GPS | awk -F "," '{printf "%.0f \n", $5 }' | cut -c1-2)
+			LOND=$(echo $GPS | awk -F "," '{print $6}')
 
-DEGREE=$(yad --center --wrap --width=350 --title="Auto Download" --text-align=center \
---text="How many degrees would you like" \
---form --separator="|" --item-separator="|" \
---image $LOGO --window-icon=$LOGO --image-on-top \
---field="Degrees":CB "2|6|10" \
---button="Cancel:1" \
---button="Continue:2")
-BUT=$?
-if [ $BUT = 1 ] || [ -z "$BUT" ]; then
-$MAIN &
-exit
-elif [ $BUT = 252 ]; then
-exit 
-fi
+			#do some math
+			let NEWLATADD=$LAT+$AREA
+			let NEWLONADD=$LON+$AREA
+			let NEWLATSUB=$LAT-$AREA
+			let NEWLONSUB=$LON-$AREA
 
-ANS=$(echo $DEGREE | awk -F "|" '{print $1}')
-echo $ANS
+			GRIBFILE=$FILE/gribtemp
+				GRIBDATA () {
+					yad --height=600 --width=400 --center --list --checklist --column=Request --column=Product --separator="," \
+					--text "Select the data to request." --title="GRIB DATA REQUEST" \
+					--button="Exit:1" --button="Request Selected:2" < $MYPATH/griblist > $GRIBFILE
 
-if [ $ANS = "10" ]
-then
-AREA=5
-echo "aree=5"
-elif [ $ANS = "6" ]
-then
-AREA=3
-elif [ $ANS = "2" ]
-then
-AREA=1
-fi
+					BUTTON=$?
 
-GPS=$(gpspipe -r -n 10 | grep G\.GGA)
+					if [ $BUTTON = "252" ]; then
+						exit
+					elif [ $BUTTON = "1" ]; then
+						$MAIN &
+						exit 
+					fi
 
-LAT=$(echo $GPS | awk -F "," '{printf "%.0f \n", $3 }' | cut -c1-2)
-LATD=$(echo $GPS | awk -F "," '{print $4}')
-LON=$(echo $GPS | awk -F "," '{printf "%.0f \n", $5 }' | cut -c1-2)
-LOND=$(echo $GPS | awk -F "," '{print $6}')
+					#echo "button = "$BUTTON
 
-#do some math
-let NEWLATADD=$LAT+$AREA
-let NEWLONADD=$LON+$AREA
-let NEWLATSUB=$LAT-$AREA
-let NEWLONSUB=$LON-$AREA
+				};export -f GRIBDATA
 
-GRIBFILE=$FILE/gribtemp
-GRIBDATA () {
-yad --height=600 --width=400 --center --list --checklist --column=Request --column=Product --separator="," \
---text "Select the data to request." --title="GRIB DATA REQUEST" \
---button="Exit:1" --button="Request Selected:2" < $MYPATH/griblist > $GRIBFILE
+			GRIBDATA
 
-BUTTON=$?
+			sed -i 's/TRUE,//' $GRIBFILE
 
-if [ $BUTTON = "252" ]
-then
-exit
-elif [ $BUTTON = "1" ]
-then
-$MAIN &
-exit 
-fi
+			var=$(cat $GRIBFILE)
+			var1=$(echo $var | sed 's/ //g' | sed 's/,*$//')
+			rm $GRIBFILE
 
-#echo "button = "$BUTTON
+			#example of correct format
+			# send gfs:40N,60N,140W,120W|2,2|24,48,72|PRESS,WIND
 
-};export -f GRIBDATA
+			TO=query@saildocs.com
+			SUBJECT=REQUEST
+			BODY=$(echo "send gfs:"$NEWLATSUB$LATD","$NEWLATADD$LATD","$NEWLONADD$LOND","$NEWLONSUB$LOND"|2,2|24,48,72|"$var1)
+			COMPOSE			
+		}
+	QUESTION
 
-GRIBDATA
-
-sed -i 's/TRUE,//' $GRIBFILE
-
-var=$(cat $GRIBFILE)
-var1=$(echo $var | sed 's/ //g' | sed 's/,*$//')
-rm $GRIBFILE
-
-#example of correct format
-# send gfs:40N,60N,140W,120W|2,2|24,48,72|PRESS,WIND
-
-TO=query@saildocs.com
-SUBJECT=REQUEST
-BODY=$(echo "send gfs:"$NEWLATSUB$LATD","$NEWLATADD$LATD","$NEWLONADD$LOND","$NEWLONSUB$LOND"|2,2|24,48,72|"$var1)
-COMPOSE
-}
-QUESTION
-
-exit
-fi
+	exit
+	fi
 exit
 }
 
@@ -243,153 +202,179 @@ exit
 
 
 POSITION(){
-POST=$(yad --form --width=420 --text-align=center --center --title="Position" --text-align=center \
---image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
---text="<b>Position Reports</b> by KM4ACK" \
---field="Choose":CB "Post Position|Single Station Request|All Nearby Stations|100 Mobile Stations" \
---field="Enter Call Below <b>ONLY</b> for Single Station Requests":LBL \
---field="Call Sign-SSID" \
---field="Comment for Post Position" \
---button="Main Menu":1 \
---button="Continue":2)
+	POST=$(yad --form --width=420 --text-align=center --center --title="Position" --text-align=center \
+	--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+	--text="<b>Position Reports</b> by KM4ACK" \
+	--field="Choose":CB "Post Position|Single Station Request|All Nearby Stations|100 Mobile Stations" \
+	--field="Enter Call Below <b>ONLY</b> for Single Station Requests":LBL \
+	--field="Call Sign-SSID" \
+	--field="Comment for Post Position" \
+	--button="Main Menu":1 \
+	--button="Continue":2)
 
-QUIT=$?
+	QUIT=$?
 
-if [ $QUIT = 1 ]; then
-$MAIN &
-exit
-elif [ $QUIT = 252 ]; then
-exit
-fi
+	if [ $QUIT = 1 ]; then
+		$MAIN &
+		exit
+	elif [ $QUIT = 252 ]; then
+		exit
+	fi
 
-REPORT=$(echo $POST | awk -F "|" '{print $1}')
+	REPORT=$(echo $POST | awk -F "|" '{print $1}')
 
-if [ "$REPORT" = "Post Position" ]; then
-echo "posting position"
-COMMENT=$(echo $POST | awk -F "|" '{print $4}')
-pat position -c "$COMMENT" | yad --center --pulsate --progress --auto-close --text="Getting GPS Data" --no-buttons &
-yad --center --timeout=3 --timeout-indicator=top --no-buttons \
---text="Position posted to\rPat Winlink Outbox"
-$MAIN &
-exit
-elif [ "$REPORT" = "Single Station Request" ]; then
-CALL=$(echo $POST | awk -F "|" '{print $3}')
-        TO="QTH"
-	SUBJECT="POSITION REQUEST"
-	BODY=$CALL
-	COMPOSE
-elif [ "$REPORT" = "All Nearby Stations" ]; then
-        TO="INQUIRY"
-	SUBJECT="REQUEST"
-	BODY="WL2K_NEARBY"
-	COMPOSE
-elif [ "$REPORT" = "100 Mobile Stations" ]; then
-        TO="INQUIRY"
-	SUBJECT="REQUEST"
-	BODY="WL2K_MOBILES"
-	COMPOSE
-fi
-
-
+	if [ "$REPORT" = "Post Position" ]; then
+		echo "posting position"
+		COMMENT=$(echo $POST | awk -F "|" '{print $4}')
+		pat position -c "$COMMENT" | yad --center --pulsate --progress --auto-close --text="Getting GPS Data" --no-buttons &
+		yad --center --timeout=3 --timeout-indicator=top --no-buttons \
+		--text="Position posted to\rPat Winlink Outbox"
+		$MAIN &
+		exit
+	elif [ "$REPORT" = "Single Station Request" ]; then
+		CALL=$(echo $POST | awk -F "|" '{print $3}')
+		TO="QTH"
+		SUBJECT="POSITION REQUEST"
+		BODY=$CALL
+		COMPOSE
+	elif [ "$REPORT" = "All Nearby Stations" ]; then
+		TO="INQUIRY"
+		SUBJECT="REQUEST"
+		BODY="WL2K_NEARBY"
+		COMPOSE
+	elif [ "$REPORT" = "100 Mobile Stations" ]; then
+		TO="INQUIRY"
+		SUBJECT="REQUEST"
+		BODY="WL2K_MOBILES"
+		COMPOSE
+	fi
 }
 
 PROPAGATION(){
-PROP=$(yad --form --width=420 --text-align=center --center --title="Propagation" --text-align=center \
---image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
---text="<b>Propagation Reports</b> by KM4ACK" \
---field="Choose Report":CB "3 Day Propagation Report|Daily WWV Report" \
---button="Main Menu":1 \
---button="Continue":2)
-QUIT=$?
-REPORT=$(echo $PROP | awk -F "|" '{print $1}')
+	PROP=$(yad --form --width=420 --text-align=center --center --title="Propagation" --text-align=center \
+	--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+	--text="<b>Propagation Reports</b> by KM4ACK" \
+	--field="Choose Report":CB "3 Day Propagation Report|Daily WWV Report" \
+	--button="Main Menu":1 \
+	--button="Continue":2)
+	QUIT=$?
+	REPORT=$(echo $PROP | awk -F "|" '{print $1}')
 
-if [ $QUIT = 1 ]; then
-$MAIN &
-exit
-elif [ $QUIT = 252 ]; then
-exit
-fi
+	if [ $QUIT = 1 ]; then
+		$MAIN &
+		exit
+	elif [ $QUIT = 252 ]; then
+		exit
+	fi
 
-if [ "$REPORT" = "3 Day Propagation Report" ]; then
-        TO="INQUIRY"
-	SUBJECT="REQUEST"
-	BODY="PROP_3DAY"
-	COMPOSE
-elif [ "$REPORT" = "Daily WWV Report" ]; then
-        TO="INQUIRY"
-	SUBJECT="REQUEST"
-	BODY="PROP_WWV"
-	COMPOSE
-fi
+	if [ "$REPORT" = "3 Day Propagation Report" ]; then
+		TO="INQUIRY"
+		SUBJECT="REQUEST"
+		BODY="PROP_3DAY"
+		COMPOSE
+	elif [ "$REPORT" = "Daily WWV Report" ]; then
+		TO="INQUIRY"
+		SUBJECT="REQUEST"
+		BODY="PROP_WWV"
+		COMPOSE
+	fi
 }
 
 
 NEWS(){
-NEWS=$(yad --form --width=420 --text-align=center --center --title="News Reports" --text-align=center \
---image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
---text="<b>News Reports</b> by KM4ACK\r\rNews reports provided by Reuters" \
---field="Choose News Report":CB "Daily|Market|Money|US News" \
---button="Main Menu":1 \
---button="Continue":2)
-QUIT=$?
-NEWS=$(echo $NEWS | awk -F "|" '{print $1}')
+	NEWS=$(yad --form --width=420 --text-align=center --center --title="News Reports" --text-align=center \
+	--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+	--text="<b>News Reports</b> by KM4ACK\r\rNews reports provided by Reuters" \
+	--field="Choose News Report":CB "Daily|Market|Money|US News" \
+	--button="Main Menu":1 \
+	--button="Continue":2)
+	QUIT=$?
+	NEWS=$(echo $NEWS | awk -F "|" '{print $1}')
 
-if [ $QUIT = 1 ]; then
-$MAIN &
-exit
-elif [ $QUIT = 252 ]; then
-exit
-fi
+	if [ $QUIT = 1 ]; then
+		$MAIN &
+		exit
+	elif [ $QUIT = 252 ]; then
+		exit
+	fi
 
-if [ "$NEWS" = "Daily" ]; then
-	TO="SMTP:query@saildocs.com"
-	SUBJECT="subject"
-	BODY="send Reuters-Daily-News"
-	COMPOSE
-elif [ "$NEWS" = "Market" ]; then
-	TO="SMTP:query@saildocs.com"
-	SUBJECT="subject"
-	BODY="send Reuters-Market"
-	COMPOSE
-elif [ "$NEWS" = "Money" ]; then
-	TO="SMTP:query@saildocs.com"
-	SUBJECT="subject"
-	BODY="send Reuters-Money"
-	COMPOSE
-elif [ "$NEWS" = "US News" ]; then
-	TO="SMTP:query@saildocs.com"
-	SUBJECT="subject"
-	BODY="send Reuters-US-News"
-	COMPOSE
-fi
+	if [ "$NEWS" = "Daily" ]; then
+		TO="SMTP:query@saildocs.com"
+		SUBJECT="subject"
+		BODY="send Reuters-Daily-News"
+		COMPOSE
+	elif [ "$NEWS" = "Market" ]; then
+		TO="SMTP:query@saildocs.com"
+		SUBJECT="subject"
+		BODY="send Reuters-Market"
+		COMPOSE
+	elif [ "$NEWS" = "Money" ]; then
+		TO="SMTP:query@saildocs.com"
+		SUBJECT="subject"
+		BODY="send Reuters-Money"
+		COMPOSE
+	elif [ "$NEWS" = "US News" ]; then
+		TO="SMTP:query@saildocs.com"
+		SUBJECT="subject"
+		BODY="send Reuters-US-News"
+		COMPOSE
+	fi
 }
 
+RADAR(){
+	RADAR=$(yad --form --width=420 --text-align=center --center --title="Radar Reports" --text-align=center \
+	--image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+	--text="<b>Radar Requests</b>" \
+	--field="Choose Radar":CB "Southern Miss Valley|Pacific Northwest|North Rockies|Upper Miss Valley|Central Great Lakes|Northeast|\
+Pacific Southwest|Southern Rockies|Southern Plains|Southeast|National|Alaska|Hawaii|Guam|Puerto Rico" \
+	--button="Main Menu":1 \
+	--button="Continue":2)
+	QUIT=$?
+	RADAR=$(echo $RADAR | awk -F "|" '{print $1}')
+	TO=INQUIRY
+	SUBJECT=REQUEST
 
+	if [ $QUIT = 1 ]; then
+		$MAIN &
+		exit
+	elif [ $QUIT = 252 ]; then
+		exit
+	fi
+	case $RADAR in
+		"Southern Miss Valley")
+			BODY=US.RAD.SMVAL;;
+		"Pacific Northwest")
+			BODY=US.RAD.PNW;;
+		"North Rockies")
+			BODY=US.RAD.NROC;;
+		"Upper Miss Valley")
+			BODY=US.RAD.UMVAL;;
+		"Central Great Lakes")
+			BODY=US.RAD.GRLAK;;
+		"Northeast")
+			BODY=US.RAD.NEAST;;
+		"Pacific Southwest")
+			BODY=PACSW;;
+		"Southern Rockies")
+			BODY=US.RAD.SROC;;
+		"Southern Plains")
+			BODY=US.RAD.SPLA;;
+		"Southeast")
+			BODY=SEAST;;
+		"National")
+			BODY=US.RAD.CONUS;;
+		"Alaska")
+			BODY=US.RAD.ALASK;;
+		"Hawaii")
+			BODY=US.RAD.HAWAI;;
+		"Guam")
+			BODY=US.RAD.GUAM;;
+		"Puerto Rico")
+			BODY=US.RAD.PR;;
+	esac
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+COMPOSE
+}
 
 
 
