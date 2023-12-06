@@ -354,13 +354,13 @@ Pacific Southwest|Southern Rockies|Southern Plains|Southeast|National|Alaska|Haw
 		"Northeast")
 			BODY=US.RAD.NEAST;;
 		"Pacific Southwest")
-			BODY=PACSW;;
+			BODY=US.RAD.PACSW;;
 		"Southern Rockies")
 			BODY=US.RAD.SROC;;
 		"Southern Plains")
 			BODY=US.RAD.SPLA;;
 		"Southeast")
-			BODY=SEAST;;
+			BODY=US.RAD.SEAST;;
 		"National")
 			BODY=US.RAD.CONUS;;
 		"Alaska")
