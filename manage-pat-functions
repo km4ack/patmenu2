@@ -121,35 +121,33 @@ fi
 GPSGRID(){
 CONFIG=$HOME/.config/pat/config.json
 
-if ! hash ruby2.3 2>/dev/null; then
-echo "Ruby Not found on system"
-yad --form --width=300 --text-align=center --center --title="Ruby not Found" --text-align=center \
+if ! hash python3>/dev/null; then
+echo "Python3 Not found on system"
+yad --form --width=300 --text-align=center --center --title="Python3 not Found" --text-align=center \
 --image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
---text="Ruby is needed to read GPS data but not found installed on your system. Would you like to install it now?" \
---button="Install Ruby":2 \
+--text="Python3 is needed to read GPS data but not found installed on your system. Would you like to install it now?" \
+--button="Install Python3":2 \
 --button="Cancel":1
 BUT=$?
 	if [ $BUT = 1 ]; then
 	$MAIN &
 	exit
 	elif [ $BUT = 2 ]; then
-	INSTALLRUBY(){
+	INSTALLPYTHON(){
 	sudo -A apt-get update
-	sudo -A apt-get install -y ruby2.3
-	sudo -A gem install gpsd_client
-	sudo -A gem install maidenhead
+	sudo -A apt-get install -y python3
 	}
-	INSTALLRUBY | yad --center --progress --pulsate --auto-close --no-buttons --text-align=center \
---text="Installing Ruby. This will take several minutes\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the install."
+	INSTALLPYTHON | yad --center --progress --pulsate --auto-close --no-buttons --text-align=center \
+--text="Installing Python 3. This will take several minutes\r<b>DO NOT CLOSE THIS WINDOW</b>\rDoing so will abort the install."
 	fi
 fi
 
 yad --center --timeout=5 --timeout-indicator=top \
 --auto-close --no-buttons --text="Getting grid from GPS" &
 
-NEWGRID=$($MYPATH/getgrid | cut -b 1-6)
+NEWGRID=$(python3 $MYPATH/getgrid.py | cut -b 1-7)
 
-if [ "$NEWGRID" = 'JJ00aa' ]; then
+if [ "$NEWGRID" = 'NOFIX' ]; then
 NEWGRID="GPS READ ERROR or NO LOCK"
 yad --form --width=400 --text-align=center --center --title="GPS ERROR" --text-align=center \
 --image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \

@@ -16,6 +16,14 @@ fi
 if ! hash jq 2>/dev/null; then
 sudo -A apt install -y jq
 fi
+if ! hash python3 2>/dev/null; then
+sudo -A apt install -y python3
+fi
+if ! hash python3-pip 2>/dev/null; then
+sudo -A apt install -y python3-pip
+fi
+
+pip3 install -r $MYPATH/requirements.txt
 
 if [ -f $HOME/patmenu/config ]; then
 #get patmenu config file and copy to patmenu2
