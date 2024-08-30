@@ -1,7 +1,9 @@
 release=DEV
 
 Changelog
-DEV	fix gps weather for x86 - https://github.com/km4ack/patmenu2/issues/86
+DEV
+  change ardopc64 to ardopcf in start-ardop
+  fix gps weather for x86 - https://github.com/km4ack/patmenu2/issues/86
 	clean up cat-functions script
 	add support for radar requests
 	add support for x86 platform
