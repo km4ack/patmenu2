@@ -54,7 +54,3 @@ sudo cp /run/user/$UID/patmenu.desktop /usr/share/applications/patmenu.desktop
 
 #download RMS List
 $MYPATH/getardoplist
-
-#remove this script
-rm $MYPATH/setup
-
