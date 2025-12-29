@@ -16,6 +16,9 @@ fi
 if ! hash jq 2>/dev/null; then
 sudo apt install -y jq
 fi
+if ! hash wwl 2>/dev/null; then
+  sudo apt install -y wwl
+fi
 
 if [ -f $HOME/patmenu/config ]; then
 #get patmenu config file and copy to patmenu2
