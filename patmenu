@@ -4,30 +4,34 @@
 #20200427 KM4ACK
 #side note: written during covid-19 outbreak of 2020
 
+# some OS don't set this var
+if [ -z "$XDG_CONFIG_HOME" ]; then
+  export XDG_CONFIG_HOME="$HOME/.config"
+fi
 
 export MYPATH=$HOME/patmenu2
-LOGO=$MYPATH/pmlogo.png
-MAIN=$MYPATH/./patmenu
-VERSION=$(cat $MYPATH/changelog | grep release | head -1 | sed 's/release=//')
+LOGO="$MYPATH/pmlogo.png"
+MAIN="$MYPATH/./patmenu"
+VERSION="$(grep release "$MYPATH"/changelog | head -1 | sed 's/release=//')"
 
-source $MYPATH/config
+source "$MYPATH/config"
 
 #verify pat is at least v0.12.0
-PAT_VER=`pat version | awk '{print $2}' | awk -F "." '{print $2}'`
+PAT_VER=$(pat version | awk '{print $2}' | awk -F "." '{print $2}')
 
-if [ $PAT_VER -lt 12 ]; then
+if [ "$PAT_VER" -lt 12 ]; then
 #give user notice
 yad --form --width=420 --text-align=center --center --title="Pat out of Date" --text-align=center \
---image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--image "$LOGO" --window-icon="$LOGO" --image-on-top --separator="|" --item-separator="|" \
 --text="Pat Menu only supports Pat Winlink\rversion 0.12.0 or later\r<b>Please update Pat Winlink</b>" \
 --button=gtk-ok
 exit
 fi
 
-if [ $WARN = 'yes' ] && [ ! -f /run/user/$UID/patwarn.txt ]; then
+if [[ $WARN = 'yes' ]] && [[ ! -f /run/user/$UID/patwarn.txt ]]; then
 #give user warning message
 yad --form --width=420 --text-align=center --center --title="WARNING!!" --text-align=center \
---image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--image "$LOGO" --window-icon="$LOGO" --image-on-top --separator="|" --item-separator="|" \
 --text="<b>${WARNMSG}</b>" \
 --button=gtk-ok
 touch /run/user/$UID/patwarn.txt
@@ -42,15 +46,15 @@ yad --title="N0CALL" --width=400 --height=100 \
 fi
 
 #get name of current config file
-source $MYPATH/.currentconf
-CONFIG=$(echo $CONF | sed 's/.config//')
-CURRENT_GRID=$(grep locator $XDG_CONFIG_HOME/pat/config.json | sed 's/"locator": "//;s/ //g;s/",//')
-if [ -z $CONFIG ]; then
+source "$MYPATH/.currentconf"
+CONFIG=$(echo "$CONF" | sed 's/.config//')
+CURRENT_GRID="$(grep locator "$XDG_CONFIG_HOME"/pat/config.json | sed 's/"locator": "//;s/ //g;s/",//')"
+if [ -z "$CONFIG" ]; then
 CONFIG=default
 fi
 
 yad --form --width=420 --text-align=center --center --title="Pat Menu" --text-align=center \
---image $LOGO --window-icon=$LOGO --image-on-top --separator="|" --item-separator="|" \
+--image "$LOGO" --window-icon="$LOGO" --image-on-top --separator="|" --item-separator="|" \
 --text="<b>Pat Menu</b> by KM4ACK\rv$VERSION" \
 --field="Start/Stop Modem":fbtn 'bash -c "kill -USR1 $YAD_PID; $MYPATH/modems"' \
 --field="Find Winlink Gateways":fbtn 'bash -c "kill -USR1 $YAD_PID; $MYPATH/find2"' \

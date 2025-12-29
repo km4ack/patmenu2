@@ -16,6 +16,9 @@ fi
 if ! hash jq 2>/dev/null; then
 sudo apt install -y jq
 fi
+if ! hash wwl 2>/dev/null; then
+  sudo apt install -y wwl
+fi
 
 if [ -f $HOME/patmenu/config ]; then
 #get patmenu config file and copy to patmenu2
@@ -54,7 +57,3 @@ sudo cp /run/user/$UID/patmenu.desktop /usr/share/applications/patmenu.desktop
 
 #download RMS List
 $MYPATH/getardoplist
-
-#remove this script
-rm $MYPATH/setup
-
